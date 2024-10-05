@@ -15,7 +15,7 @@ import 'logger_util.dart';
 import 'objectbox.dart';
 import 'ui/landingpage.dart';
 import 'color_schemes.g.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+// import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/l10n.dart';
 
@@ -50,29 +50,7 @@ Future<void> main() async {
     String dsn = Settings.getValue<bool>(SettingKeys.useSentry.name, defaultValue: true)! ? '<SENTRY_KEY>' : '';
 
     bool noSentry = dsn.isEmpty || dsn.length == 12;
-    if (noSentry) {
       runApp(MyApp());
-    } else {
-      await SentryFlutter.init(
-        (options) {
-          options.dsn = dsn;
-          // Set tracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-          // We recommend adjusting this value in production.
-          options.tracesSampleRate = 1.0;
-          options.profilesSampleRate = 1.0;
-          options.enableUserInteractionTracing = true;
-          options.enableAutoNativeBreadcrumbs = true;
-          options.enableAutoSessionTracking = true;
-          options.attachViewHierarchy = true;
-          options.enableAutoPerformanceTracing = true;
-          options.enableUserInteractionBreadcrumbs = true;
-          options.enableTracing = true;
-          options.attachScreenshot = true;
-          options.addIntegration(LoggingIntegration());
-        },
-        appRunner: () => runApp(SentryUserInteractionWidget(child: MyApp())),
-      );
-    }
   });
 }
 
@@ -181,7 +159,7 @@ class _MyAppState extends State<MyApp> {
         //   ),
 
         home: const LandingPage(title: 'despresso'),
-        navigatorObservers: [SentryNavigatorObserver()],
+        // navigatorObservers: [SentryNavigatorObserver()],
       ),
     );
   }
