@@ -47,6 +47,9 @@ class ScreensaverService extends ChangeNotifier {
           case EspressoMachineState.sleep:
             break;
           case EspressoMachineState.water:
+          case EspressoMachineState.airPurge:
+          case EspressoMachineState.clean:
+          case EspressoMachineState.descale:
           case EspressoMachineState.steam:
           case EspressoMachineState.flush:
           case EspressoMachineState.espresso:
@@ -93,12 +96,7 @@ class ScreensaverService extends ChangeNotifier {
         case EspressoMachineState.disconnected:
         case EspressoMachineState.sleep:
           return false;
-        case EspressoMachineState.espresso:
-        case EspressoMachineState.flush:
-        case EspressoMachineState.idle:
-        case EspressoMachineState.refill:
-        case EspressoMachineState.steam:
-        case EspressoMachineState.water:
+        default:
           break;
       }
     }
@@ -107,7 +105,13 @@ class ScreensaverService extends ChangeNotifier {
   }
 
   Future<void> setWakelock() async {
-    var isLocked = await WakelockPlus.enabled;
+    var isLocked = false;
+    try {
+      isLocked = await WakelockPlus.enabled;
+    } catch (e) {
+      log.severe("Failed to get wakelock status: $e");
+      return;
+    }
     var shouldBeLocked = shouldBeWakelocked();
 
     try {
