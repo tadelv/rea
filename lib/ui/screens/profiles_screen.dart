@@ -324,7 +324,7 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   ElevatedButton.icon(
-                                    icon: const Icon(Icons.add),
+                                    icon: const Icon(Icons.arrow_upward),
                                     onPressed: () async {
                                       String result;
                                       try {
@@ -338,6 +338,19 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                                     },
                                     label: const Text(
                                       "Save to Decent",
+                                    ),
+                                  ),
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () async {
+																			Navigator.push(
+																				context,
+																				MaterialPageRoute(builder: (context) =>
+																				AdvancedProfilesEditScreen(De1ShotProfile.createNew())),
+																			);
+                                    },
+                                    label: const Text(
+                                      "Create new Profile",
                                     ),
                                   )
                                 ],

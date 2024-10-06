@@ -837,7 +837,7 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen> 
               children: [
                 Row(
                   children: [
-                    SizedBox(width: 90, child: Text("Limiting:", style: Theme.of(context).textTheme.labelMedium)),
+                    SizedBox(width: 90, child: Text("Target:", style: Theme.of(context).textTheme.labelMedium)),
                     ToggleButtons(
                       isSelected: [isPressure, !isPressure],
                       onPressed: (index) {

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:json_annotation/json_annotation.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 
 part "de1shotclasses.g.dart";
 
@@ -34,6 +35,37 @@ class De1ShotProfile {
   List<De1ShotExtFrameClass> shotExframes;
 
   factory De1ShotProfile.fromJson(Map<String, dynamic> json) => _$De1ShotProfileFromJson(json);
+
+	factory De1ShotProfile.createNew() {
+		var header = De1ShotHeaderClass();
+		header.title = "New Profile";
+		header.type = "advanced";
+		header.lang = "en";
+		header.author = "Author";
+
+		header.numberOfFrames = 1;
+		header.beverageType = "espresso";
+
+		var frame = De1ShotFrameClass();
+		frame.name = "Start";
+		frame.setVal = 9.0;
+		frame.temp = 93.0;
+		frame.frameLen = 35.0;
+		frame.pump = "pressure";
+		frame.sensor = "water";
+		frame.transition = "fast";
+
+		var newProfile = De1ShotProfile(
+			header, 
+			[
+				frame,
+			], 
+			[]
+		);
+
+		newProfile.id = Uuid().v4();
+		return newProfile;
+	}
 
   String get title => shotHeader.title;
 
