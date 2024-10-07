@@ -90,6 +90,25 @@ class De1ShotProfile {
 
     return shotFrames.first;
   }
+
+  De1ShotExtFrameClass getExtFrame(De1ShotFrameClass frame) {
+    final log = Logger('getExtFrame');
+		// Make sure we have a valid frame
+		if (shotFrames.isEmpty || !shotFrames.contains(frame)) {
+			log.severe("No frames in profile or frame not in profile");
+			return De1ShotExtFrameClass();
+		}
+		// find extFrame that corresponds to this frame or create a new one
+    De1ShotExtFrameClass extFrame = shotExframes
+        .firstWhere((element) => element.frameToWrite == frame.extFrameToWrite,
+            orElse: () => De1ShotExtFrameClass()
+              ..limiterRange = 0.6
+              ..frameToWrite = frame.extFrameToWrite);
+    if (!shotExframes.contains(extFrame)) {
+      shotExframes.add(extFrame);
+    }
+    return extFrame;
+  }
 }
 
 @JsonSerializable()
@@ -278,6 +297,8 @@ class De1ShotFrameClass // proc spec_shotframe
   @Uint8ListConverter()
   Uint8List bytes = Uint8List(8);
 
+	int get extFrameToWrite => frameToWrite + De1ShotExtFrameClass.extFrameOffset;
+
   De1ShotFrameClass();
 
   static int ctrlF = 0x01; // Are we in Pressure or Flow priority mode?
@@ -437,11 +458,14 @@ class De1ShotFrameClass // proc spec_shotframe
     }
     return "Frame:$name $frameToWrite Flag:$flag/0x${flag.toRadixString(16)} $flagStr Value:$setVal Temp:$temp FrameLen:$frameLen TriggerVal:$triggerVal MaxVol:$maxVol B:$sb";
   }
+
 }
 
 @JsonSerializable()
 class De1ShotExtFrameClass // extended frames
 {
+
+	static const int extFrameOffset = 32;
   int frameToWrite = 0;
   double limiterValue = 0.0;
   double limiterRange = 0.0;
