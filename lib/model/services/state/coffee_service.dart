@@ -348,6 +348,8 @@ class CoffeeService extends ChangeNotifier {
     int id = recipeBox.put(recipe);
     settings.targetEspressoWeight = recipe.adjustedWeight;
     settings.targetTempCorrection = recipe.adjustedTemp;
+		// recalculate temp and update de1 if needed
+		setSelectedRecipe(id);
     notifyListeners();
     _controllerRecipe.add(getRecipes());
     return id;

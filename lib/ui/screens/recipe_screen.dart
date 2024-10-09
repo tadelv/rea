@@ -12,6 +12,7 @@ import 'package:despresso/ui/screens/coffee_selection.dart';
 import 'package:despresso/ui/screens/profiles_screen.dart';
 import 'package:despresso/ui/screens/recipe_edit.dart';
 import 'package:despresso/ui/widgets/profile_graph.dart';
+import 'package:despresso/utils/debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:intl/intl.dart';
@@ -81,8 +82,9 @@ class RecipeScreenState extends State<RecipeScreen> {
                   builder: (context, snapshot) {
                     return ListView.builder(
                       padding: const EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) =>
-                          snapshot.hasData ? buildItem(context, snapshot.data![index]) : const Text("empty"),
+                      itemBuilder: (context, index) => snapshot.hasData
+                          ? buildItem(context, snapshot.data![index])
+                          : const Text("empty"),
                       itemCount: snapshot.data?.length ?? 0,
                     );
                   }),
@@ -109,7 +111,8 @@ class RecipeScreenState extends State<RecipeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
-              child: RecipeDescription(profileService: profileService, coffeeService: coffeeService),
+              child: RecipeDescription(
+                  profileService: profileService, coffeeService: coffeeService),
             ),
           ),
         ),
@@ -167,7 +170,9 @@ class RecipeScreenState extends State<RecipeScreen> {
       },
       child: ListTile(
         trailing: IconButton(
-          icon: data.isFavorite ? const Icon(color: Colors.orange, Icons.star) : const Icon(Icons.star_border_outlined),
+          icon: data.isFavorite
+              ? const Icon(color: Colors.orange, Icons.star)
+              : const Icon(Icons.star_border_outlined),
           tooltip: 'Favorite',
           onPressed: () {
             coffeeService.recipeFavoriteToggle(data);
@@ -219,7 +224,8 @@ class RecipeDescription extends StatelessWidget {
           child: Row(
             children: [
               Text(S.of(context).screenRecipehotWater),
-              Text("${(coffeeService.currentRecipe?.useWater ?? false) ? "" : S.of(context).no}"),
+              Text(
+                  "${(coffeeService.currentRecipe?.useWater ?? false) ? "" : S.of(context).no}"),
               Text((coffeeService.currentRecipe?.useWater ?? false)
                   ? " ${coffeeService.currentRecipe?.weightWater} g"
                   : ""),
@@ -232,7 +238,8 @@ class RecipeDescription extends StatelessWidget {
             child: Row(
               children: [
                 Text(S.of(context).screenRecipeStopOnWeight),
-                Text("${(coffeeService.currentRecipe?.disableStopOnWeight ?? false) ? S.of(context).no : ""}"),
+                Text(
+                    "${(coffeeService.currentRecipe?.disableStopOnWeight ?? false) ? S.of(context).no : ""}"),
               ],
             ),
           ),
@@ -241,7 +248,9 @@ class RecipeDescription extends StatelessWidget {
           child: Row(
             children: [
               Text(S.of(context).screenRecipesteamMilk),
-              Text((coffeeService.currentRecipe?.useSteam ?? false) ? "" : S.of(context).no),
+              Text((coffeeService.currentRecipe?.useSteam ?? false)
+                  ? ""
+                  : S.of(context).no),
               Text((coffeeService.currentRecipe?.useSteam ?? false)
                   ? " ${coffeeService.currentRecipe?.weightMilk} g"
                   : ""),
@@ -258,7 +267,8 @@ class RecipeDescription extends StatelessWidget {
           AspectRatio(
             aspectRatio: 1.3,
             child: ProfileGraphWidget(
-                key: Key(profileService.currentProfile?.id ?? UniqueKey().toString()),
+                key: Key(profileService.currentProfile?.id ??
+                    UniqueKey().toString()),
                 selectedProfile: profileService.currentProfile!),
           ),
         Padding(
@@ -305,6 +315,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
 
   late ScreensaverService _screensaver;
 
+  final _overrideDebouncer = Debouncer(milliseconds: 500);
+
   @override
   void initState() {
     super.initState();
@@ -345,7 +357,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         name:
                             "${widget.profileService.currentProfile?.title ?? "no profile selected"}/${widget.coffeeService.currentCoffee?.name ?? "No bean selected"}",
                         coffeeId: widget.coffeeService.selectedCoffeeId,
-                        profileId: widget.profileService.currentProfile?.id ?? "Default");
+                        profileId: widget.profileService.currentProfile?.id ??
+                            "Default");
                     _screensaver.pause();
                     await Navigator.push(
                       context,
@@ -367,11 +380,13 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                               )),
                     );
                     _screensaver.resume();
-                    widget.coffeeService.setSelectedRecipe(widget.coffeeService.currentRecipe!.id);
+                    widget.coffeeService.setSelectedRecipe(
+                        widget.coffeeService.currentRecipe!.id);
 
                     break;
                   case SelectedMenu.copy:
-                    var id = await widget.coffeeService.copyRecipeFromId(widget.coffeeService.currentRecipe!.id);
+                    var id = await widget.coffeeService.copyRecipeFromId(
+                        widget.coffeeService.currentRecipe!.id);
                     if (id > 0) {
                       _screensaver.pause();
                       // ignore: use_build_context_synchronously
@@ -392,7 +407,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                 //   selectedMenu = item;
                 // });
               },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<SelectedMenu>>[
+              itemBuilder: (BuildContext context) =>
+                  <PopupMenuEntry<SelectedMenu>>[
                 const PopupMenuItem<SelectedMenu>(
                   value: SelectedMenu.edit,
                   child: Text('Edit'),
@@ -440,20 +456,24 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(child: Text(S.of(context).screenRecipeSelectedProfile)),
+                          Expanded(
+                              child: Text(
+                                  S.of(context).screenRecipeSelectedProfile)),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    minimumSize: const Size.fromHeight(40), // NEW
+                                    minimumSize:
+                                        const Size.fromHeight(40), // NEW
                                   ),
                                   onPressed: () async {
                                     var result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => const ProfilesScreen(
+                                          builder: (context) =>
+                                              const ProfilesScreen(
                                                 saveToRecipe: false,
                                               )),
                                     );
@@ -461,10 +481,14 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     if (result == null) {
                                       return;
                                     }
-                                    widget.coffeeService.setSelectedRecipeProfile(result!.id);
-                                    widget.coffeeService.setSelectedRecipe(widget.coffeeService.currentRecipe!.id);
+                                    widget.coffeeService
+                                        .setSelectedRecipeProfile(result!.id);
+                                    widget.coffeeService.setSelectedRecipe(
+                                        widget.coffeeService.currentRecipe!.id);
                                   },
-                                  child: Text(widget.profileService.currentProfile?.title ?? "No Profile selected"),
+                                  child: Text(widget.profileService
+                                          .currentProfile?.title ??
+                                      "No Profile selected"),
                                 ),
                               ],
                             ),
@@ -490,12 +514,15 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Expanded(child: Text(S.of(context).screenRecipeInitialTemp)),
+                            Expanded(
+                                child: Text(
+                                    S.of(context).screenRecipeInitialTemp)),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text("${firstFrame?.temp.toStringAsFixed(1)} °C"),
+                                  Text(
+                                      "${firstFrame?.temp.toStringAsFixed(1)} °C"),
                                 ],
                               ),
                             ),
@@ -505,23 +532,30 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(child: Text(S.of(context).screenRecipeSelectedBean)),
+                          Expanded(
+                              child:
+                                  Text(S.of(context).screenRecipeSelectedBean)),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    minimumSize: const Size.fromHeight(40), // NEW
+                                    minimumSize:
+                                        const Size.fromHeight(40), // NEW
                                   ),
                                   onPressed: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => const CoffeeSelectionTab(saveToRecipe: true)),
+                                          builder: (context) =>
+                                              const CoffeeSelectionTab(
+                                                  saveToRecipe: true)),
                                     );
                                   },
-                                  child: Text(widget.coffeeService.currentCoffee?.name ?? "No Bean selected"),
+                                  child: Text(widget
+                                          .coffeeService.currentCoffee?.name ??
+                                      "No Bean selected"),
                                 ),
                               ],
                             ),
@@ -534,14 +568,18 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(child: Text(S.of(context).screenRecipeGrindSettings)),
+                          Expanded(
+                              child: Text(
+                                  S.of(context).screenRecipeGrindSettings)),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 SpinBox(
-                                  keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                          signed: true, decimal: true),
                                   textInputAction: TextInputAction.done,
                                   onChanged: (value) {
                                     var r = widget.coffeeService.currentRecipe;
@@ -551,7 +589,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     }
                                   },
                                   max: 120.0,
-                                  value: widget.coffeeService.currentRecipe?.grinderSettings ?? 0.0,
+                                  value: widget.coffeeService.currentRecipe
+                                          ?.grinderSettings ??
+                                      0.0,
                                   decimals: 1,
                                   step: 0.1,
                                   decoration: const InputDecoration(
@@ -560,7 +600,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     enabledBorder: InputBorder.none,
                                     errorBorder: InputBorder.none,
                                     disabledBorder: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
+                                    contentPadding: EdgeInsets.only(
+                                        left: 5, bottom: 24, top: 24, right: 5),
                                   ),
                                 ),
                               ],
@@ -571,7 +612,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(child: Text(S.of(context).screenRecipeRatio)),
+                          Expanded(
+                              child: Text(S.of(context).screenRecipeRatio)),
                           Expanded(
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -594,24 +636,33 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(child: Text(S.of(context).screenRecipeWeightinBeansG)),
+                          Expanded(
+                              child: Text(
+                                  S.of(context).screenRecipeWeightinBeansG)),
                           Expanded(
                             child: Column(
                               children: [
                                 SpinBox(
-                                  keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                          signed: true, decimal: true),
                                   textInputAction: TextInputAction.done,
                                   onChanged: (value) {
                                     var r = widget.coffeeService.currentRecipe;
                                     if (r != null) {
                                       r.grinderDoseWeight = value;
-                                      r.adjustedWeight = value * (r.ratio2 / r.ratio1);
+                                      r.adjustedWeight =
+                                          value * (r.ratio2 / r.ratio1);
                                       widget.coffeeService.updateRecipe(r);
-                                      widget.settingsService.targetEspressoWeight = r.adjustedWeight;
+                                      widget.settingsService
+                                              .targetEspressoWeight =
+                                          r.adjustedWeight;
                                     }
                                   },
                                   max: 120.0,
-                                  value: widget.coffeeService.currentRecipe?.grinderDoseWeight ?? 0.0,
+                                  value: widget.coffeeService.currentRecipe
+                                          ?.grinderDoseWeight ??
+                                      0.0,
                                   decimals: 1,
                                   step: 0.1,
                                   decoration: const InputDecoration(
@@ -620,7 +671,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     enabledBorder: InputBorder.none,
                                     errorBorder: InputBorder.none,
                                     disabledBorder: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
+                                    contentPadding: EdgeInsets.only(
+                                        left: 5, bottom: 24, top: 24, right: 5),
                                   ),
                                 ),
                               ],
@@ -628,28 +680,37 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           ),
                         ],
                       ),
-                      if (widget.coffeeService.currentRecipe?.disableStopOnWeight == false)
+                      if (widget.coffeeService.currentRecipe
+                              ?.disableStopOnWeight ==
+                          false)
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Expanded(child: Text(S.of(context).screenRecipeStopOnWeightG)),
+                            Expanded(
+                                child: Text(
+                                    S.of(context).screenRecipeStopOnWeightG)),
                             Expanded(
                               child: Column(
                                 children: [
                                   SpinBox(
-                                    keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            signed: true, decimal: true),
                                     textInputAction: TextInputAction.done,
                                     onChanged: (value) {
-                                      var r = widget.coffeeService.currentRecipe;
+                                      var r =
+                                          widget.coffeeService.currentRecipe;
                                       if (r != null) {
                                         r.adjustedWeight = value;
                                         widget.coffeeService.updateRecipe(r);
-                                        widget.settingsService.targetEspressoWeight = value;
+                                        widget.settingsService
+                                            .targetEspressoWeight = value;
                                       }
                                     },
                                     min: 0.0,
                                     max: 300.0,
-                                    value: widget.settingsService.targetEspressoWeight,
+                                    value: widget
+                                        .settingsService.targetEspressoWeight,
                                     decimals: 1,
                                     step: 0.1,
                                     decoration: const InputDecoration(
@@ -658,7 +719,11 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                       enabledBorder: InputBorder.none,
                                       errorBorder: InputBorder.none,
                                       disabledBorder: InputBorder.none,
-                                      contentPadding: EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
+                                      contentPadding: EdgeInsets.only(
+                                          left: 5,
+                                          bottom: 24,
+                                          top: 24,
+                                          right: 5),
                                     ),
                                   ),
                                 ],
@@ -669,23 +734,31 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(child: Text(S.of(context).screenRecipeAdjustTempC)),
+                          Expanded(
+                              child:
+                                  Text(S.of(context).screenRecipeAdjustTempC)),
                           Expanded(
                             child: Column(
                               children: [
                                 SpinBox(
-                                  keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                          signed: true, decimal: true),
                                   textInputAction: TextInputAction.done,
                                   onChanged: (value) {
                                     var r = widget.coffeeService.currentRecipe;
                                     if (r != null) {
                                       r.adjustedTemp = value;
-                                      widget.coffeeService.updateRecipe(r);
+                                      _overrideDebouncer.run(() {
+                                        widget.coffeeService.updateRecipe(r);
+                                      });
                                     }
                                   },
                                   min: -5.0,
                                   max: 5.0,
-                                  value: widget.settingsService.targetTempCorrection.toDouble(),
+                                  value: widget
+                                      .settingsService.targetTempCorrection
+                                      .toDouble(),
                                   decimals: 1,
                                   step: 0.1,
                                   decoration: const InputDecoration(
@@ -694,7 +767,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     enabledBorder: InputBorder.none,
                                     errorBorder: InputBorder.none,
                                     disabledBorder: InputBorder.none,
-                                    contentPadding: EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
+                                    contentPadding: EdgeInsets.only(
+                                        left: 5, bottom: 24, top: 24, right: 5),
                                   ),
                                 ),
                               ],
@@ -728,13 +802,16 @@ class _RecipeDetailsState extends State<RecipeDetails> {
             child: Column(
               children: [
                 SpinBox(
-                  keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                      signed: true, decimal: true),
                   textInputAction: TextInputAction.done,
                   onChanged: (value) {
                     var r = widget.coffeeService.currentRecipe;
                     if (r != null) {
                       r.ratio1 = value;
+											_overrideDebouncer.run(() {
                       widget.coffeeService.updateRecipe(r);
+											});
                     }
                   },
                   min: 1,
@@ -748,18 +825,22 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     enabledBorder: InputBorder.none,
                     errorBorder: InputBorder.none,
                     disabledBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
+                    contentPadding:
+                        EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
                   ),
                 ),
                 const Text(":"),
                 SpinBox(
-                  keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                      signed: true, decimal: true),
                   textInputAction: TextInputAction.done,
                   onChanged: (value) {
                     var r = widget.coffeeService.currentRecipe;
                     if (r != null) {
                       r.ratio2 = value;
+											_overrideDebouncer.run(() {
                       widget.coffeeService.updateRecipe(r);
+											});
                     }
                   },
                   min: 1,
@@ -773,7 +854,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     enabledBorder: InputBorder.none,
                     errorBorder: InputBorder.none,
                     disabledBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
+                    contentPadding:
+                        EdgeInsets.only(left: 5, bottom: 24, top: 24, right: 5),
                   ),
                 ),
               ],

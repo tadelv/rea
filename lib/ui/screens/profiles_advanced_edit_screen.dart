@@ -6,6 +6,7 @@ import 'package:despresso/ui/widgets/editable_text.dart';
 import 'package:despresso/ui/widgets/profile_graph.dart';
 import 'package:despresso/ui/widgets/selectable_steps.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:logging/logging.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
@@ -75,7 +76,7 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
       log.info("Profile-Ext: $element");
     }
 
-    _tabController = TabController(length: 5, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: 0);
   }
 
   @override
@@ -132,12 +133,134 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
           children: [
             Expanded(
               flex: 1,
-              child: IntrinsicHeight(
-                child: ProfileGraphWidget(
-                  selectedProfile: _profile,
-                  selectedPhase: _selectedStepIndex,
-                ),
-              ),
+              child: Row(children: [
+                Expanded(
+                    flex: 1,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              initialValue:
+                                  _profile.shotHeader.targetWeight.toString(),
+                              decoration: InputDecoration(
+                                  labelText: "Desired weight", suffixText: "g"),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))
+                              ], // Only numbers can be entered
+                              onChanged: (value) {
+                                _profile.shotHeader.targetWeight =
+                                    double.parse(value);
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Value is required";
+                                }
+                                double v = double.parse(value);
+                                return v > 0 // && v <= _profile.shotFrames.length
+                                    ? null
+                                    : "Weight should be greater than zero";
+                              },
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                            ),
+                            TextFormField(
+                              initialValue:
+                                  _profile.shotHeader.targetVolume.toString(),
+                              decoration: InputDecoration(
+                                  labelText: "Desired volume",
+                                  suffixText: "ml"),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d*'))
+                              ], // Only numbers can be entered
+                              onChanged: (value) {
+                                _profile.shotHeader.targetVolume =
+                                    double.parse(value);
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Value is required";
+                                }
+                                double v = double.parse(value);
+                                return v > 0 // && v <= _profile.shotFrames.length
+                                    ? null
+                                    : "Water volume must be greater than zero";
+                              },
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                            ),
+                            TextFormField(
+                              initialValue:
+                                  (_profile.shotHeader.numberOfPreinfuseFrames +
+                                          1)
+                                      .toString(),
+                              decoration: InputDecoration(
+                                  labelText:
+                                      "Start measuring water volume from:",
+                                  prefixText: "step #"),
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ], // Only numbers can be entered
+                              onSaved: (value) {
+                                if (value == null) {
+                                  return;
+                                }
+                                _profile.shotHeader.numberOfPreinfuseFrames =
+                                    int.parse(value) - 1;
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Value is required";
+                                }
+                                int v = int.parse(value);
+                                return v > 0 && v <= _profile.shotFrames.length
+                                    ? null
+                                    : "Invalid frame number";
+                              },
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                            ),
+                            // TODO: figure where to put this
+                            //TextFormField(
+                            //  initialValue:
+                            //      (_profile.shotHeader.tankTemperature)
+                            //          .toString(),
+                            //  decoration: InputDecoration(
+                            //      labelText: "Preheat water tank to", suffixText: "°C"),
+                            //  keyboardType: TextInputType.number,
+                            //  inputFormatters: [
+                            //    FilteringTextInputFormatter.digitsOnly
+                            //  ], // Only numbers can be entered
+                            //  onSaved: (value) {
+                            //    if (value == null) {
+                            //      return;
+                            //    }
+                            //    _profile.shotHeader.tankTemperature =
+                            //        double.parse(value);
+                            //  },
+                            //  validator: (value) {
+                            //    if (value == null || value.isEmpty) {
+                            //      return "Value is required";
+                            //    }
+                            //    double v = double.parse(value);
+                            //    return v >= 0 && v <= 40 // is 40 deg sensible?
+                            //        ? null
+                            //        : "Invalid temperature - set to zero to disable preheating";
+                            //  },
+                            //  autovalidateMode: AutovalidateMode.onUserInteraction,
+                            //),
+                          ],
+                        ))),
+                Expanded(
+                    flex: 3,
+                    child: ProfileGraphWidget(
+                      selectedProfile: _profile,
+                      selectedPhase: _selectedStepIndex,
+                    )),
+              ]),
             ),
             Expanded(
                 flex: 2,
@@ -416,7 +539,6 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
   void profileListener() {
     log.info('Profile updated');
   }
-
 
   void updateLimiterValue(De1ShotFrameClass frame, double value) {
     De1ShotExtFrameClass extFrame = _profile.getExtFrame(frame);
