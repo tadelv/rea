@@ -120,10 +120,20 @@ source_gen:combining_builder:
   generate_for:
     - lib/**/model/*.dart
 flutter_native_splash:
-  color: "#000000"
-  image: assets/logo.png
-  android: true
-  ios: true
+  color: "#c988be"
+  image: assets/splash.png
+  fullscreen: true
+  # android_gravity: fill
+  # ios_content_mode: fill
+
+  android_12:
+    color: "#c988be"
+    image: assets/splash.png
+    fullscreen: true
+    # android_gravity: fill
+    # ios_content_mode: fill
+
+  web: false
 # objectbox:
 #   # Writes objectbox-model.json and objectbox.g.dart to lib/custom (and test/custom).
 #   output_dir: objectbox
@@ -145,6 +155,8 @@ flutter:
     - assets/logo.png
     - assets/icon.png
     - assets/iconStore.png
+    - assets/splash.png
+    - assets/focus.png
     - assets/profiles/
     - assets/website/
     - assets/website/static/
@@ -176,8 +188,8 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 flutter_icons:
-  image_path: "assets/icon.png"
-  android: true
+  android: "launcher_icon"
+  image_path: "assets/splash.png"
   ios: true
 
 flutter_intl:
