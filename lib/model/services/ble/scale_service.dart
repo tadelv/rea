@@ -49,7 +49,10 @@ class ScaleService extends ChangeNotifier {
   final List<int> _battery = [0, 0];
   DateTime last = DateTime.now();
 
-  final List<ScaleState> _state = [ScaleState.disconnected, ScaleState.disconnected];
+  final List<ScaleState> _state = [
+    ScaleState.disconnected,
+    ScaleState.disconnected
+  ];
 
   bool tareInProgress = false;
   var _count = 0;
@@ -163,7 +166,10 @@ class ScaleService extends ChangeNotifier {
   }
 
   void setWeight(double weight, index) {
-    if (tareInProgress) return;
+    if (tareInProgress) {
+      log.info("Tare in progress");
+      return;
+    }
 
     var now = DateTime.now();
     var flow = 0.0;
@@ -183,8 +189,10 @@ class ScaleService extends ChangeNotifier {
     _weight[index] = weight;
     _flow[index] = flow;
     last = now;
-    if (index == 0) _controller0.add(WeightMeassurement(weight, flow, _state[index], index));
-    if (index == 1) _controller1.add(WeightMeassurement(weight, flow, _state[index], index));
+    if (index == 0)
+      _controller0.add(WeightMeassurement(weight, flow, _state[index], index));
+    if (index == 1)
+      _controller1.add(WeightMeassurement(weight, flow, _state[index], index));
 
     notifyListeners();
 
@@ -241,8 +249,12 @@ class ScaleService extends ChangeNotifier {
     }
     log.info('Scale State: $_state');
 
-    if (index == 0) _controller0.add(WeightMeassurement(_weight[index], _flow[index], _state[index], index));
-    if (index == 1) _controller1.add(WeightMeassurement(_weight[index], _flow[index], _state[index], index));
+    if (index == 0)
+      _controller0.add(WeightMeassurement(
+          _weight[index], _flow[index], _state[index], index));
+    if (index == 1)
+      _controller1.add(WeightMeassurement(
+          _weight[index], _flow[index], _state[index], index));
   }
 
   void connect() {
