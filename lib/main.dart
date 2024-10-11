@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
     return BetterFeedback(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'despresso',
+        title: 'REA',
         localizationsDelegates: const [
           S.delegate,
           GlobalMaterialLocalizations.delegate,
