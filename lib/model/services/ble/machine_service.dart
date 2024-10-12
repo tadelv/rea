@@ -18,6 +18,7 @@ import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/model/de1shotclasses.dart';
 import 'package:despresso/objectbox.dart';
 import 'package:flutter/material.dart';
+import 'package:synchronized/synchronized.dart';
 
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -601,19 +602,37 @@ class EspressoMachineService extends ChangeNotifier {
     // notifyListeners();
   }
 
+  De1ShotProfile? _activeProfile;
+  final Lock _lock = Lock();
+
   Future<String> uploadProfile(De1ShotProfile profileToBeUploaded) async {
+    return await _lock.synchronized(() => _uploadProfile(profileToBeUploaded));
+  }
+
+  Future<String> _uploadProfile(De1ShotProfile profileToBeUploaded) async {
     if (de1 == null) {
       return Future.error("No de1 connected");
     }
+		log.fine("Profile to be uploaded: ${profileToBeUploaded.shotFrames.first.temp}");
+		log.fine("Active profile: ${_activeProfile?.shotFrames.first.temp}");
+
+    if (_activeProfile?.id == profileToBeUploaded.id &&
+        _activeProfile?.shotFrames.first.temp ==
+            profileToBeUploaded.shotFrames.first.temp) {
+      log.fine("Profile ${profileToBeUploaded.id} already uploaded");
+      return "Profile already uploaded";
+    }
+
     De1ShotProfile profile = profileToBeUploaded.clone();
     for (De1ShotFrameClass fr in profile.shotFrames) {
       fr.temp += settingsService.targetTempCorrection;
     }
     De1ProfileMachineData profileData = De1ProfileMachineData(profile);
-    log.info("Uploading profile to machine $profile.name");
+    _activeProfile = profile;
+    log.info("Uploading profile to machine ${profile.title}");
 
     try {
-      log.info("Write Header: $profileData.headerData");
+      log.info("Write Header: ${profileData.headerData}");
       await de1!.writeWithResult(Endpoint.headerWrite, profileData.headerData);
     } catch (ex) {
       log.severe("Error writing header $profileData.headerData $ex");
@@ -632,7 +651,7 @@ class EspressoMachineService extends ChangeNotifier {
 
     for (Uint8List exFrameBytes in profileData.extFrameData) {
       try {
-					log.info("Write ExFrame: $exFrameBytes");
+        log.info("Write ExFrame: $exFrameBytes");
         await de1!.writeWithResult(Endpoint.frameWrite, exFrameBytes);
       } catch (ex) {
         log.severe("Error writing exframe $exFrameBytes $ex");
@@ -642,7 +661,7 @@ class EspressoMachineService extends ChangeNotifier {
 
     // stop at volume in the profile tail
     try {
-      log.fine("Write Tail: $profileData.tailData");
+      log.fine("Write Tail: ${profileData.tailData}");
       await de1!.writeWithResult(Endpoint.frameWrite, profileData.tailData);
     } catch (ex) {
       return "Error writing shot frame tail $profile.name";
@@ -661,7 +680,7 @@ class EspressoMachineService extends ChangeNotifier {
         return "Error writing shot settings";
       }
     }
-    return Future.value("");
+    return Future.value("${profile.title}");
   }
 
   Future<void> handleShotData() async {
@@ -719,6 +738,7 @@ class EspressoMachineService extends ChangeNotifier {
     }
     if (state.coffeeState == EspressoMachineState.espresso &&
         shot.frameNumber != _lastFrameNumber) {
+      log.info("Frame number changed ${shot.frameNumber} $_lastFrameNumber");
       if (profileService.currentProfile != null &&
           shot.frameNumber <=
               profileService.currentProfile!.shotFrames.length) {
@@ -1128,7 +1148,7 @@ class EspressoMachineService extends ChangeNotifier {
   }
 
   void moveToNextFrame() {
-    log.info("Skipping to next frame");
+    log.info("Skipping to next frame from: ${state.shot?.frameNumber}");
     de1?.requestState(De1StateEnum.skipToNext);
   }
 

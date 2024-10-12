@@ -4,6 +4,7 @@ import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:feedback_sentry/feedback_sentry.dart';
 import 'package:sentry_logging/sentry_logging.dart';
 import 'package:logging/logging.dart';
+import 'package:despresso/devices/decent_de1_simulated.dart';
 
 import 'package:despresso/service_locator.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,6 @@ Future<void> main() async {
 
     String dsn = Settings.getValue<bool>(SettingKeys.useSentry.name, defaultValue: true)! ? '<SENTRY_KEY>' : '';
 
-    bool noSentry = dsn.isEmpty || dsn.length == 12;
       runApp(MyApp());
   });
 }
