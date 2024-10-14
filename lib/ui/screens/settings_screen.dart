@@ -1236,15 +1236,6 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                       settingsService.notifyDelayed();
                     },
                   ),
-                  SwitchSettingsTile(
-                    leading: const Icon(Icons.thermostat),
-                    settingKey: SettingKeys.updateGroupTemp.name,
-                    defaultValue: settingsService.updateGroupTemp,
-                    title: "Update Group Temp when uploading profile",
-                    onChange: (value) {
-                      settingsService.notifyDelayed();
-                    },
-                  ),
                   SizedBox(
                       height: 100,
                       width: 100,

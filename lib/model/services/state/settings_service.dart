@@ -108,7 +108,6 @@ enum SettingKeys {
   currentVersion,
   alwaysAllowSkipping,
   uploadTailMethod,
-  updateGroupTemp,
 }
 
 enum UploadTailMethod {
@@ -592,11 +591,6 @@ class SettingsService extends ChangeNotifier {
     log.shout("Setting uploadTailMethod to ${value.name}");
     Settings.setValue<String>(SettingKeys.uploadTailMethod.name, value.name);
   }
-
-  bool get updateGroupTemp =>
-      Settings.getValue<bool>(SettingKeys.updateGroupTemp.name) ?? false;
-  set updateGroupTemp(bool value) =>
-      Settings.setValue<bool>(SettingKeys.updateGroupTemp.name, value);
 
   void notifyDelayed() {
     Future.delayed(

@@ -680,15 +680,6 @@ class EspressoMachineService extends ChangeNotifier {
       return "Error writing tail ${profile.title}";
     }
 
-    if (settingsService.updateGroupTemp) {
-      try {
-        await _updateTemperatureSettings(profile.shotFrames.first.temp);
-      } catch (ex) {
-        log.severe("Error writing group temp $ex");
-        return "Error writing group temp ${profile.title}";
-      }
-    }
-
     return Future.value("${profile.title}");
   }
 
@@ -696,16 +687,6 @@ class EspressoMachineService extends ChangeNotifier {
     // stop at volume in the profile tail
     log.fine("Write Tail: ${data}");
     await de1!.writeWithResult(Endpoint.frameWrite, data);
-  }
-
-  Future<void> _updateTemperatureSettings(double targetTemp) async {
-    // check if we need to send the new water temp
-    if (settingsService.targetGroupTemp != targetTemp) {
-      settingsService.targetGroupTemp = targetTemp.toInt();
-
-      log.fine("Write Shot Settings");
-      return await de1!.updateSettings();
-    }
   }
 
   Future<void> handleShotData() async {
