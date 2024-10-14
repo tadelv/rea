@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:despresso/model/services/state/notification_service.dart';
 import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
@@ -53,7 +52,7 @@ class VisualizerService extends ChangeNotifier {
 // will redirect the resource owner here once they've authorized the
 // client. The redirection will include the authorization code in the
 // query parameters.
-  final redirectUrl = 'com.mmmedia.despresso:/oauthredirect';
+  final redirectUrl = 'net.tadel.rea:/oauthredirect';
 
   /// A file in which the users credentials are stored persistently. If the server
   /// issues a refresh token allowing the client to refresh outdated credentials,
