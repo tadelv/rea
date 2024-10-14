@@ -613,12 +613,15 @@ class EspressoMachineService extends ChangeNotifier {
     if (de1 == null) {
       return Future.error("No de1 connected");
     }
-		log.fine("Profile to be uploaded: ${profileToBeUploaded.shotFrames.first.temp}");
-		log.fine("Active profile: ${_activeProfile?.shotFrames.first.temp}");
+    log.fine(
+        "Profile to be uploaded: ${profileToBeUploaded.shotFrames.first.temp}");
+    log.fine("Active profile: ${_activeProfile?.shotFrames.first.temp}");
 
-    if (_activeProfile?.id == profileToBeUploaded.id &&
-        _activeProfile?.shotFrames.first.temp ==
-            profileToBeUploaded.shotFrames.first.temp) {
+    bool isSameProfileId = _activeProfile?.id == profileToBeUploaded.id;
+    bool isSameTemp = _activeProfile?.shotFrames.first.temp ==
+        profileToBeUploaded.shotFrames.first.temp;
+
+    if (isSameProfileId && isSameTemp) {
       log.fine("Profile ${profileToBeUploaded.id} already uploaded");
       return "Profile already uploaded";
     }
@@ -627,8 +630,8 @@ class EspressoMachineService extends ChangeNotifier {
     for (De1ShotFrameClass fr in profile.shotFrames) {
       fr.temp += settingsService.targetTempCorrection;
     }
-    De1ProfileMachineData profileData = De1ProfileMachineData(profile);
     _activeProfile = profile;
+    De1ProfileMachineData profileData = De1ProfileMachineData(profile);
     log.info("Uploading profile to machine ${profile.title}");
 
     try {
@@ -659,28 +662,50 @@ class EspressoMachineService extends ChangeNotifier {
       }
     }
 
-    // stop at volume in the profile tail
     try {
-      log.fine("Write Tail: ${profileData.tailData}");
-      await de1!.writeWithResult(Endpoint.frameWrite, profileData.tailData);
+      log.fine("Check tail method ${settingsService.uploadTailMethod}");
+      switch (settingsService.uploadTailMethod) {
+        case UploadTailMethod.none:
+          break;
+        case UploadTailMethod.targetVolume:
+          await _uploadTail(profileData.tailData);
+          break;
+        case UploadTailMethod.empty:
+          Uint8List uint8List = Uint8List(8);
+          uint8List[0] = profileData.frameData.length.toUnsigned(8);
+          await _uploadTail(uint8List);
+      }
     } catch (ex) {
-      return "Error writing shot frame tail $profile.name";
+      log.severe("Error writing tail $ex");
+      return "Error writing tail ${profile.title}";
     }
 
-    // check if we need to send the new water temp
-    if (settingsService.targetGroupTemp != profile.shotFrames[0].temp) {
-      settingsService.targetGroupTemp =
-          (profile.shotFrames[0].temp + settingsService.targetTempCorrection)
-              .toInt();
-
+    if (settingsService.updateGroupTemp) {
       try {
-        log.fine("Write Shot Settings");
-        await de1!.updateSettings();
+        await _updateTemperatureSettings(profile.shotFrames.first.temp);
       } catch (ex) {
-        return "Error writing shot settings";
+        log.severe("Error writing group temp $ex");
+        return "Error writing group temp ${profile.title}";
       }
     }
+
     return Future.value("${profile.title}");
+  }
+
+  Future<void> _uploadTail(Uint8List data) async {
+    // stop at volume in the profile tail
+    log.fine("Write Tail: ${data}");
+    await de1!.writeWithResult(Endpoint.frameWrite, data);
+  }
+
+  Future<void> _updateTemperatureSettings(double targetTemp) async {
+    // check if we need to send the new water temp
+    if (settingsService.targetGroupTemp != targetTemp) {
+      settingsService.targetGroupTemp = targetTemp.toInt();
+
+      log.fine("Write Shot Settings");
+      return await de1!.updateSettings();
+    }
   }
 
   Future<void> handleShotData() async {
