@@ -295,11 +295,12 @@ class CoffeeService extends ChangeNotifier {
 // code to return members
   }
 
-  int addRecipe({required String name, required int coffeeId, required String profileId}) {
+  int addRecipe({required String name, required int coffeeId, required String profileId, required String profileName}) {
     var recipe = Recipe();
     recipe.name = name;
     recipe.coffee.targetId = coffeeId;
     recipe.profileId = profileId;
+		recipe.profileName = profileName;
     recipe.adjustedWeight = settings.targetEspressoWeight;
     var id = recipeBox.put(recipe);
 
@@ -375,10 +376,11 @@ class CoffeeService extends ChangeNotifier {
     return data;
   }
 
-  void setSelectedRecipeProfile(String profileId) {
+  void setSelectedRecipeProfile(String profileId, String profileName) {
     var res = currentRecipe;
     if (res != null) {
       res.profileId = profileId;
+			res.profileName = profileName;
       updateRecipe(res);
       notifyListeners();
     }

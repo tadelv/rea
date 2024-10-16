@@ -459,7 +459,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(9, 7693652674048295668),
       name: 'Recipe',
-      lastPropertyId: const obx_int.IdUid(28, 488663740228280711),
+      lastPropertyId: const obx_int.IdUid(29, 133802416448563203),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -593,6 +593,11 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(28, 488663740228280711),
             name: 'isShot',
             type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(29, 133802416448563203),
+            name: 'profileName',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -1115,7 +1120,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final profileIdOffset = fbb.writeString(object.profileId);
           final descriptionOffset = fbb.writeString(object.description);
           final grinderModelOffset = fbb.writeString(object.grinderModel);
-          fbb.startTable(29);
+          final profileNameOffset = fbb.writeString(object.profileName);
+          fbb.startTable(30);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.coffee.targetId);
           fbb.addFloat64(2, object.adjustedWeight);
@@ -1142,6 +1148,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(24, grinderModelOffset);
           fbb.addBool(26, object.disableStopOnWeight);
           fbb.addBool(27, object.isShot);
+          fbb.addOffset(28, profileNameOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -1198,7 +1205,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
             ..disableStopOnWeight =
                 const fb.BoolReader().vTableGet(buffer, rootOffset, 56, false)
             ..isShot =
-                const fb.BoolReader().vTableGet(buffer, rootOffset, 58, false);
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 58, false)
+            ..profileName = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 60, '');
           object.coffee.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
           object.coffee.attach(store);
@@ -1675,6 +1684,10 @@ class Recipe_ {
   /// see [Recipe.isShot]
   static final isShot =
       obx.QueryBooleanProperty<Recipe>(_entities[5].properties[25]);
+
+  /// see [Recipe.profileName]
+  static final profileName =
+      obx.QueryStringProperty<Recipe>(_entities[5].properties[26]);
 }
 
 /// [SettingsEntry] entity fields to define ObjectBox queries.

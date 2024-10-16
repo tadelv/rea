@@ -182,7 +182,7 @@ class RecipeScreenState extends State<RecipeScreen> {
           data.name,
         ),
         subtitle: Text(
-          "${data.profileId} ${data.coffee.target?.name ?? "no bean"}",
+          "${data.profileName} ${data.coffee.target?.name ?? "no bean"}",
         ),
         selected: coffeeService.selectedRecipeId == data.id,
         onTap: () {
@@ -358,7 +358,10 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                             "${widget.profileService.currentProfile?.title ?? "no profile selected"}/${widget.coffeeService.currentCoffee?.name ?? "No bean selected"}",
                         coffeeId: widget.coffeeService.selectedCoffeeId,
                         profileId: widget.profileService.currentProfile?.id ??
-                            "Default");
+                            "Default",
+                        profileName:
+                            widget.profileService.currentProfile?.title ??
+                                "Default");
                     _screensaver.pause();
                     await Navigator.push(
                       context,
@@ -482,7 +485,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                       return;
                                     }
                                     widget.coffeeService
-                                        .setSelectedRecipeProfile(result!.id);
+                                        .setSelectedRecipeProfile(
+                                            result!.id, result!.title);
                                     widget.coffeeService.setSelectedRecipe(
                                         widget.coffeeService.currentRecipe!.id);
                                   },
@@ -809,9 +813,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     var r = widget.coffeeService.currentRecipe;
                     if (r != null) {
                       r.ratio1 = value;
-											_overrideDebouncer.run(() {
-                      widget.coffeeService.updateRecipe(r);
-											});
+                      _overrideDebouncer.run(() {
+                        widget.coffeeService.updateRecipe(r);
+                      });
                     }
                   },
                   min: 1,
@@ -838,9 +842,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     var r = widget.coffeeService.currentRecipe;
                     if (r != null) {
                       r.ratio2 = value;
-											_overrideDebouncer.run(() {
-                      widget.coffeeService.updateRecipe(r);
-											});
+                      _overrideDebouncer.run(() {
+                        widget.coffeeService.updateRecipe(r);
+                      });
                     }
                   },
                   min: 1,

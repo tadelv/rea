@@ -207,6 +207,7 @@ class RecipeEditState extends State<RecipeEdit> {
                     ProfileSelect(
                       onChanged: (p0) {
                         _editedRecipe.profileId = p0.id;
+												_editedRecipe.profileName = p0.title;
                       },
                     ),
                   ],
