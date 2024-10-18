@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'objectbox.dart';
 import 'ui/landingpage.dart';
@@ -13,6 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:flutter/services.dart';
+import 'logger_util.dart';
 late ObjectBox objectbox;
 
 Future<void> initSettings() async {
@@ -21,9 +21,12 @@ Future<void> initSettings() async {
   );
 }
 
-Future<void> guiMain(Logger log) async {
+Future<void> guiMain() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  initLogger();
+
+  final log = Logger("main");
   objectbox = await ObjectBox.create();
   getIt.registerSingleton<ObjectBox>(objectbox, signalsReady: false);
   log.info("Starting app");
