@@ -29,11 +29,7 @@ Future<void> main() async {
   initLogger();
 
   final log = Logger("main");
-  // final appender = PrintAppender.setupLogging(stderrLevel: Level.SEVERE);
-  // final basePath = await getApplicationDocumentsDirectory();
-  // RotatingFileAppender(baseFilePath: "${basePath.path}/logs", keepRotateCount: 3);
 
-  WidgetsFlutterBinding.ensureInitialized();
   objectbox = await ObjectBox.create();
   getIt.registerSingleton<ObjectBox>(objectbox, signalsReady: false);
   log.info("Starting app");

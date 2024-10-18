@@ -61,7 +61,7 @@ android {
         versionCode 9
         versionName flutterVersionName
         manifestPlaceholders += [
-                'appAuthRedirectScheme': 'com.mmmedia.despresso'
+                'appAuthRedirectScheme': 'net.tadel.rea'
         ]
     }
     signingConfigs {

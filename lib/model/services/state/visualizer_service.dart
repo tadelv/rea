@@ -46,8 +46,8 @@ class VisualizerService extends ChangeNotifier {
 // OAuth2 API.
   final authorizationEndpoint = 'https://visualizer.coffee/oauth/authorize';
   final tokenEndpoint = 'https://visualizer.coffee/oauth/token';
-  final identifier = '<VIS_CLIENT>';
-  final secret = '<VIS_SECRET>';
+  final identifier = const String.fromEnvironment('VIS_ID');
+  final secret = const String.fromEnvironment('VIS_SECRET');
 // This is a URL on your application's server. The authorization server
 // will redirect the resource owner here once they've authorized the
 // client. The redirection will include the authorization code in the

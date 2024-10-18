@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import 'package:despresso/generated/l10n.dart';
 import 'package:despresso/model/services/state/notification_service.dart';
+import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/model/services/state/visualizer_service.dart';
 import 'package:despresso/model/shot.dart';
@@ -278,7 +279,7 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
               child: ListTile(
                 key: Key('list_item_${shots[index].id}'),
                 title: Text(
-                  shots[index].profileId,
+                  getIt<ProfileService>().profiles.firstWhereOrNull((e) => e.id == shots[index].profileId)?.title ?? shots[index].profileId,
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
