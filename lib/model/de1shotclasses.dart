@@ -88,6 +88,11 @@ class De1ShotProfile {
     return copy;
   }
 
+  @override
+  String toString() {
+    return "${shotHeader.toString()}\n${shotFrames.map((e) => e.toString()).join("\n")}";
+  }
+
   De1ShotFrameClass? firstFrame() {
     if (shotFrames.isEmpty) return null;
 
@@ -262,7 +267,11 @@ class De1ShotHeaderClass // proc spec_shotdescheader
 
   @override
   String toString() {
-    return "FrameNum:$numberOfFrames(PreFrames:$numberOfPreinfuseFrames) MinPres:$minimumPressure MaxFlow:$maximumFlow";
+    return """
+FrameNum:$numberOfFrames(PreFrames:$numberOfPreinfuseFrames) 
+MinPres:$minimumPressure MaxFlow:$maximumFlow, 
+TargetWeight: $targetWeight, Title: $title
+		""";
   }
 
   static bool decodeDe1ShotHeader(

@@ -208,10 +208,10 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
                                   return "Value is required";
                                 }
                                 double v = double.parse(value);
-                                return v >
+                                return v >=
                                         0 // && v <= _profile.shotFrames.length
                                     ? null
-                                    : "Water volume must be greater than zero";
+                                    : "Water volume must be greater than or equal to zero";
                               },
                               autovalidateMode:
                                   AutovalidateMode.onUserInteraction,

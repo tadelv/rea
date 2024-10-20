@@ -619,7 +619,7 @@ class EspressoMachineService extends ChangeNotifier {
 
     bool isSameProfileId = _activeProfile?.id == profileToBeUploaded.id;
     bool isSameTemp = _activeProfile?.shotFrames.first.temp ==
-        profileToBeUploaded.shotFrames.first.temp;
+        profileToBeUploaded.shotFrames.first.temp + settingsService.targetTempCorrection;
 
     if (isSameProfileId && isSameTemp) {
       log.fine("Profile ${profileToBeUploaded.id} already uploaded");
@@ -724,6 +724,7 @@ class EspressoMachineService extends ChangeNotifier {
     }
     if (!inShot && state.coffeeState == EspressoMachineState.espresso) {
       log.info('Not Idle and not in Shot');
+			log.info('Starting shot with: $_activeProfile');
       inShot = true;
       currentShot = Shot();
       currentShot.targetEspressoWeight = settingsService.targetEspressoWeight;
