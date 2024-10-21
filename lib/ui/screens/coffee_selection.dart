@@ -104,7 +104,7 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
                               alignment: Alignment.centerLeft,
                               value: _selectedCoffeeId,
                               items: coffees,
-															style: theme.TextStyles.tabPrimary,
+                              style: theme.TextStyles.tabPrimary,
                               onChanged: (value) {
                                 setState(() {
                                   _selectedCoffeeId = value!;
@@ -167,22 +167,19 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
         .build();
     var found = builder.find();
 
-    var coffees = found
-        .map(
-          (p) => DropdownMenuItem(
-              value: p.id,
-              child: Text(p.name, style: 
-							p.id == _selectedCoffeeId ?
-							theme.TextStyles.tabPrimary :
-							theme.TextStyles.tabSecondary)
-							,
-        )
-				)
-        .toList();
+    var coffees = found.map((p) {
+      final Roaster r = coffeeService.roasterBox.get(p.roaster.targetId)!;
+      return DropdownMenuItem(
+        value: p.id,
+        child: Text("${p.name} (${r.name})",
+            style: p.id == _selectedCoffeeId
+                ? theme.TextStyles.tabPrimary
+                : theme.TextStyles.tabSecondary),
+      );
+    }).toList();
     coffees.insert(0, DropdownMenuItem(value: 0, child: Text(newCoffee.name)));
     return coffees;
   }
-
 
   coffeeData() {
     if (_selectedCoffeeId == 0) return;
@@ -196,7 +193,8 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
       children: [
         KeyValueWidget(
             label: S.of(context).screenBeanSelectNameOfBean,
-            value: coffee.name + (roaster != null ? " by ${roaster.name}" : "")),
+            value:
+                coffee.name + (roaster != null ? " by ${roaster.name}" : "")),
         if (coffee.description.isNotEmpty)
           KeyValueWidget(
               label: S.of(context).screenBeanSelectDescriptionOfBean,
