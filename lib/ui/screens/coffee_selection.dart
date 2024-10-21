@@ -9,7 +9,6 @@ import 'package:despresso/model/coffee.dart';
 import 'package:despresso/model/services/state/coffee_service.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:despresso/ui/screens/coffee_edit.dart';
-import 'package:despresso/ui/screens/roaster_edit.dart';
 import 'package:flutter/material.dart';
 import 'package:despresso/ui/theme.dart' as theme;
 import 'package:reactive_flutter_rating_bar/reactive_flutter_rating_bar.dart';
@@ -29,25 +28,18 @@ enum EditModes { show, add, edit }
 class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
   final log = Logger('CoffeeSelectionTabState');
 
-  Roaster newRoaster = Roaster();
   Coffee newCoffee = Coffee();
-  int _selectedRoasterId = 0;
   int _selectedCoffeeId = 0;
   //String _selectedCoffee;
 
   late CoffeeService coffeeService;
   late EspressoMachineService machineService;
 
-  final EditModes _editRosterMode = EditModes.show;
   final EditModes _editCoffeeMode = EditModes.show;
 
-  List<DropdownMenuItem<int>> roasters = [];
   List<DropdownMenuItem<int>> coffees = [];
 
   CoffeeSelectionTabState() {
-    newRoaster.name = "<new roaster>";
-    newRoaster.id = 0;
-    _selectedRoasterId = 0;
     newCoffee.name = "<new Beans>";
     newCoffee.id = 0;
     _selectedCoffeeId = 0;
@@ -65,7 +57,8 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
   @override
   void dispose() {
     super.dispose();
-    if (widget.saveToRecipe) coffeeService.setSelectedRecipeCoffee(_selectedCoffeeId);
+    if (widget.saveToRecipe)
+      coffeeService.setSelectedRecipeCoffee(_selectedCoffeeId);
     coffeeService.removeListener(updateCoffee);
     log.info('Disposed coffeeselection');
   }
@@ -101,64 +94,9 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
                         children: [
                           SizedBox(
                               width: 150,
-                              child: Text(S.of(context).screenBeanSelectSelectRoaster, style: theme.TextStyles.h2)),
-                          Expanded(
-                            flex: 8,
-                            child: DropdownButton(
-                              isExpanded: true,
-                              alignment: Alignment.centerLeft,
-                              value: _selectedRoasterId,
-                              items: roasters,
-                              onChanged: (value) async {
-                                _selectedRoasterId = value!;
-                                if (value == 0) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const RoasterEdit(0)),
-                                  );
-                                } else {
-                                  coffeeService.setSelectedRoaster(_selectedRoasterId);
-                                }
-                                // setState(() {});
-                              },
-                            ),
-                          ),
-                          if (_editRosterMode == EditModes.show)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    // _editRosterMode = EditModes.edit;
-                                    // _editCoffeeMode = EditModes.show;
-                                    // _editedRoaster = roaster;
-                                    // form.value = _editedRoaster.toJson();
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => RoasterEdit(_selectedRoasterId)),
-                                    );
-                                  });
-                                },
-                                child: Text(S.of(context).edit),
-                              ),
-                            ),
-                        ],
-                      ),
-                      if (_selectedRoasterId > 0) roasterData(),
-                    ],
-                  ),
-                ),
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          SizedBox(
-                              width: 150,
-                              child: Text(S.of(context).screenBeanSelectSelectBeans, style: theme.TextStyles.h2)),
+                              child: Text(
+                                  S.of(context).screenBeanSelectSelectBeans,
+                                  style: theme.TextStyles.tabPrimary)),
                           Expanded(
                             flex: 8,
                             child: DropdownButton(
@@ -166,16 +104,20 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
                               alignment: Alignment.centerLeft,
                               value: _selectedCoffeeId,
                               items: coffees,
+															style: theme.TextStyles.tabPrimary,
                               onChanged: (value) {
                                 setState(() {
                                   _selectedCoffeeId = value!;
                                   if (value == 0) {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const CoffeeEdit(0)),
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const CoffeeEdit(0)),
                                     );
                                   } else {
-                                    coffeeService.setSelectedCoffee(_selectedCoffeeId);
+                                    coffeeService
+                                        .setSelectedCoffee(_selectedCoffeeId);
                                   }
                                 });
                               },
@@ -189,7 +131,9 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
                                   setState(() {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => CoffeeEdit(_selectedCoffeeId)),
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              CoffeeEdit(_selectedCoffeeId)),
                                     );
                                     // _editCoffeeMode = EditModes.edit;
                                     // _editRosterMode = EditModes.show;
@@ -214,25 +158,6 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
     );
   }
 
-  List<DropdownMenuItem<int>> loadRoasters() {
-    final builder = coffeeService.roasterBox.query().order(Roaster_.name).build();
-    var found = builder.find();
-
-    var roasters = found
-        .map((p) => DropdownMenuItem(
-              value: p.id,
-              child: Text(
-                p.name,
-                style: (p.coffees.firstWhereOrNull((element) => element.id == _selectedCoffeeId) != null)
-                    ? const TextStyle(color: Colors.amber)
-                    : const TextStyle(color: Colors.white60),
-              ),
-            ))
-        .toList();
-    roasters.insert(0, DropdownMenuItem(value: 0, child: Text(newRoaster.name)));
-    return roasters;
-  }
-
   List<DropdownMenuItem<int>> loadCoffees() {
     // Build and watch the query,
     // set triggerImmediately to emit the query immediately on listen.
@@ -246,51 +171,42 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
         .map(
           (p) => DropdownMenuItem(
               value: p.id,
-              child: Text(
-                p.name,
-                style: (p.roaster.targetId == _selectedRoasterId)
-                    ? const TextStyle(color: Colors.amber)
-                    : const TextStyle(color: Colors.white60),
-              )),
+              child: Text(p.name, style: 
+							p.id == _selectedCoffeeId ?
+							theme.TextStyles.tabPrimary :
+							theme.TextStyles.tabSecondary)
+							,
         )
+				)
         .toList();
     coffees.insert(0, DropdownMenuItem(value: 0, child: Text(newCoffee.name)));
     return coffees;
   }
 
-  roasterData() {
-    if (_selectedRoasterId == 0) return;
-
-    var roaster = coffeeService.roasterBox.get(_selectedRoasterId)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        KeyValueWidget(label: S.of(context).screenBeanSelectNameOfRoaster, value: roaster.name),
-        if (roaster.description.isNotEmpty)
-          KeyValueWidget(label: S.of(context).screenBeanSelectDescriptionOfRoaster, value: roaster.description),
-        if (roaster.homepage.isNotEmpty)
-          KeyValueWidget(label: S.of(context).screenBeanSelectHomepageOfRoaster, value: roaster.homepage),
-        if (roaster.address.isNotEmpty)
-          KeyValueWidget(label: S.of(context).screenBeanSelectAddressOfRoaster, value: roaster.address),
-      ],
-    );
-  }
 
   coffeeData() {
     if (_selectedCoffeeId == 0) return;
 
     var coffee = coffeeService.coffeeBox.get(_selectedCoffeeId)!;
+    var roaster = coffeeService.roasterBox.get(coffee.roaster.targetId);
     DateTime d1 = DateTime.now();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        KeyValueWidget(label: S.of(context).screenBeanSelectNameOfBean, value: coffee.name),
+        KeyValueWidget(
+            label: S.of(context).screenBeanSelectNameOfBean,
+            value: coffee.name + (roaster != null ? " by ${roaster.name}" : "")),
         if (coffee.description.isNotEmpty)
-          KeyValueWidget(label: S.of(context).screenBeanSelectDescriptionOfBean, value: coffee.description),
+          KeyValueWidget(
+              label: S.of(context).screenBeanSelectDescriptionOfBean,
+              value: coffee.description),
         const SizedBox(height: 10),
-        KeyValueWidget(label: S.of(context).screenBeanSelectTasting, value: coffee.taste),
-        KeyValueWidget(label: S.of(context).screenBeanSelectTypeOfBeans, value: coffee.type),
+        KeyValueWidget(
+            label: S.of(context).screenBeanSelectTasting, value: coffee.taste),
+        KeyValueWidget(
+            label: S.of(context).screenBeanSelectTypeOfBeans,
+            value: coffee.type),
         KeyValueWidget(
             label: S.of(context).screenBeanSelectRoastingDate,
             value:
@@ -352,7 +268,8 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(key, style: Theme.of(context).textTheme.labelLarge),
-          if (value != null) Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          if (value != null)
+            Text(value, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );
@@ -362,15 +279,11 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
     setState(
       () {
         _selectedCoffeeId = coffeeService.selectedCoffeeId;
-        _selectedRoasterId = coffeeService.selectedRoasterId;
-        roasters = loadRoasters();
         coffees = loadCoffees();
-        log.info("Loaded Roasters $roasters");
-        if (coffees.firstWhereOrNull((element) => element.value == _selectedCoffeeId) == null) {
+        if (coffees.firstWhereOrNull(
+                (element) => element.value == _selectedCoffeeId) ==
+            null) {
           _selectedCoffeeId = 0;
-        }
-        if (roasters.firstWhereOrNull((element) => element.value == _selectedRoasterId) == null) {
-          _selectedRoasterId = 0;
         }
       },
     );

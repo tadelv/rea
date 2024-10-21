@@ -230,9 +230,6 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
                                 FilteringTextInputFormatter.digitsOnly
                               ], // Only numbers can be entered
                               onChanged: (value) {
-                                if (value == null) {
-                                  return;
-                                }
                                 _profile.shotHeader.numberOfPreinfuseFrames =
                                     int.parse(value) - 1;
                               },
