@@ -215,74 +215,33 @@ class ShotGraphState extends State<ShotGraph> {
     }
     var flowChart1 = LineChart(
       LineChartData(
-        // minY: 0,
-        // maxY: 15,
-        // minX: data["pressure${overlayIds!.first}"]!.first.x,
-        // maxX: maxTime,
-        lineTouchData: const LineTouchData(enabled: false),
-        clipData: const FlClipData.all(),
-        gridData: const FlGridData(
-          show: true,
-          drawVerticalLine: true,
-        ),
-        lineBarsData: lineBarsData,
-        rangeAnnotations: RangeAnnotations(
-          verticalRangeAnnotations: [
-            ...ranges,
-          ],
-        ),
-        titlesData: FlTitlesData(
-          topTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+          // minY: 0,
+          // maxY: 15,
+          // minX: data["pressure${overlayIds!.first}"]!.first.x,
+          // maxX: maxTime,
+          lineTouchData: const LineTouchData(enabled: false),
+          clipData: const FlClipData.all(),
+          gridData: const FlGridData(
+            show: true,
+            drawVerticalLine: true,
           ),
-          rightTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
+          lineBarsData: lineBarsData,
+          rangeAnnotations: RangeAnnotations(
+            verticalRangeAnnotations: [
+              ...ranges,
+            ],
           ),
-          // ),
-          bottomTitles: !widget.showTemp && !widget.showWeight
-              ? AxisTitles(
-                  axisNameSize: 25,
-                  axisNameWidget: Text(
-                    S.of(context).graphTime,
-                    style: Theme.of(context).textTheme.labelSmall,
-                    // style: TextStyle(
-                    //     // fontSize: 15,
-                    //     ),
-                  ),
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: bottomTitleWidgets,
-                    reservedSize: 26,
-                  ),
-                )
-              : AxisTitles(
-                  axisNameSize: 25,
-                  sideTitles: SideTitles(
-                    showTitles: false,
-                    getTitlesWidget: bottomTitleWidgets,
-                    reservedSize: 26,
-                  ),
-                ),
-          show: true,
-          leftTitles: AxisTitles(
-            axisNameSize: 25,
-            axisNameWidget: Text(
-              S.of(context).graphFlowMlsPressureBar,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: leftTitleWidgets,
-              reservedSize: 56,
-            ),
-          ),
-        ),
-      ),
+          titlesData: FlTitlesData(
+              leftTitles: AxisTitles(),
+              topTitles: AxisTitles(),
+              rightTitles: AxisTitles(
+                sideTitles: SideTitles(
+                    showTitles: true, getTitlesWidget: bottomTitleWidgets, reservedSize: 26),
+              ))),
     );
     return Padding(
-      padding: const EdgeInsets.all(18.0),
-      child: SizedBox(height: 300, child: flowChart1)
-    );
+        padding: const EdgeInsets.all(18.0),
+        child: SizedBox(height: 300, child: flowChart1));
   }
 
   Widget _buildGraphSingleFlCharts(Map<String, List<FlSpot>> data,
