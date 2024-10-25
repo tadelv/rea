@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:despresso/model/services/state/coffee_service.dart';
 import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/shot.dart';
@@ -64,6 +65,7 @@ class ShotGraphState extends State<ShotGraph> {
     // ignore: avoid_unnecessary_containers
     return Container(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // TODO: remove overlay functionality?
           ...shotOverlay.map((e) => Column(children: [
@@ -85,19 +87,19 @@ class ShotGraphState extends State<ShotGraph> {
                           icon: const Icon(Icons.note_add),
                           label: Text(S.of(context).screenEspressoDiary))
                     ]),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                        'Recipe: ${e.recipe.target?.name}, ${e.doseWeight.toStringAsFixed(1)}g in ${e.pourWeight.toStringAsFixed(1)}g out in ${e.pourTime.toStringAsFixed(1)}s'),
-                    Text(
-                        '${e.coffee.target!.name} by ${e.coffee.target!.roaster.target!.name}')
-                  ],
-                ),
+                Row(children: [
+                  Text(
+                      'Recipe: ${e.recipe.target?.name}, ${e.doseWeight.toStringAsFixed(1)}g in ${e.pourWeight.toStringAsFixed(1)}g out in ${e.pourTime.toStringAsFixed(1)}s',
+                      textAlign: TextAlign.start),
+                ]),
+                Row(children: [
+                  Text(
+                      '${e.coffee.target!.name} by ${e.coffee.target!.roaster.target!.name}',
+                      textAlign: TextAlign.start),
+                ]),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // TODO: check if string empty
                       Text(
                           '${e.recipe.target!.grinderModel.isNotEmpty ? e.recipe.target?.grinderModel : "Grinder set"} @ ${e.recipe.target?.grinderSettings}'),
                       //Text('${getIt<ProfileService>().profiles.firstWhere((pr) => pr.id == e.recipe.target?.id)}')
@@ -109,7 +111,7 @@ class ShotGraphState extends State<ShotGraph> {
           ...shotOverlay.map((e) => SizedBox(
               height: 300,
               child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Shot notes:', textAlign: TextAlign.left),
@@ -176,16 +178,19 @@ class ShotGraphState extends State<ShotGraph> {
       int id, List<ShotState> shotstates) {
     return {
       "pressure$id": shotstates
-          .map((e) => FlSpot(e.sampleTimeCorrected, e.groupPressure))
+          .map((e) =>
+              FlSpot(e.sampleTimeCorrected, e.groupPressure.clamp(0, 13)))
           .toList(),
       "pressureSet$id": shotstates
-          .map((e) => FlSpot(e.sampleTimeCorrected, e.setGroupPressure))
+          .map((e) =>
+              FlSpot(e.sampleTimeCorrected, e.setGroupPressure.clamp(0, 13)))
           .toList(),
       "flow$id": shotstates
-          .map((e) => FlSpot(e.sampleTimeCorrected, e.groupFlow))
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.groupFlow.clamp(0, 13)))
           .toList(),
       "flowSet$id": shotstates
-          .map((e) => FlSpot(e.sampleTimeCorrected, e.setGroupFlow))
+          .map(
+              (e) => FlSpot(e.sampleTimeCorrected, e.setGroupFlow.clamp(0, 13)))
           .toList(),
       "temp$id": shotstates
           .map((e) => FlSpot(e.sampleTimeCorrected, e.headTemp))
@@ -200,10 +205,11 @@ class ShotGraphState extends State<ShotGraph> {
           .map((e) => FlSpot(e.sampleTimeCorrected, e.setMixTemp))
           .toList(),
       "weight$id": shotstates
-          .map((e) => FlSpot(e.sampleTimeCorrected, e.weight))
+          .map((e) => FlSpot(
+              e.sampleTimeCorrected, e.weight.clamp(0, double.maxFinite)))
           .toList(),
       "flowG$id": shotstates
-          .map((e) => FlSpot(e.sampleTimeCorrected, e.flowWeight))
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.flowWeight.clamp(0, double.maxFinite)))
           .toList(),
     };
   }
@@ -244,16 +250,32 @@ class ShotGraphState extends State<ShotGraph> {
           calcColor(theme.ThemeColors.flowColor, i), [5, 5]));
       lineBarsData.add(createChartLineDatapoints(data["flowG$id"]!, 2,
           calcColor(theme.ThemeColors.weightColor, i), null));
-      lineBarsData.add(createChartLineDatapoints(data["weight$id"]!, 2,
-          calcColor(theme.ThemeColors.weightColor, i), null));
-      lineBarsData.add(createChartLineDatapoints(data["temp$id"]!, 4,
-          calcColor(theme.ThemeColors.tempColor, i), null));
-      lineBarsData.add(createChartLineDatapoints(data["tempSet$id"]!, 2,
-          calcColor(theme.ThemeColors.tempColor, i), [5, 5]));
-      lineBarsData.add(createChartLineDatapoints(data["tempMix$id"]!, 4,
-          calcColor(theme.ThemeColors.tempColor2, i), null));
-      lineBarsData.add(createChartLineDatapoints(data["tempMixSet$id"]!, 2,
-          calcColor(theme.ThemeColors.tempColor2, i), [5, 5]));
+					bool largeWeight = data["weight$id"]!.map((a) => a.y).reduce(max) > 15;
+      lineBarsData.add(createChartLineDatapoints(
+          data["weight$id"]!.map((e) => FlSpot(e.x, (largeWeight ? e.y / 10 : e.y))).toList(),
+          2,
+          calcColor(theme.ThemeColors.weightColor, i),
+          null));
+      lineBarsData.add(createChartLineDatapoints(
+          data["temp$id"]!.map((e) => FlSpot(e.x, e.y / 10)).toList(),
+          4,
+          calcColor(theme.ThemeColors.tempColor, i),
+          null));
+      lineBarsData.add(createChartLineDatapoints(
+          data["tempSet$id"]!.map((e) => FlSpot(e.x, e.y / 10)).toList(),
+          2,
+          calcColor(theme.ThemeColors.tempColor, i),
+          [5, 5]));
+      lineBarsData.add(createChartLineDatapoints(
+          data["tempMix$id"]!.map((e) => FlSpot(e.x, e.y / 10)).toList(),
+          4,
+          calcColor(theme.ThemeColors.tempColor2, i),
+          null));
+      lineBarsData.add(createChartLineDatapoints(
+          data["tempMixSet$id"]!.map((e) => FlSpot(e.x, e.y / 10)).toList(),
+          2,
+          calcColor(theme.ThemeColors.tempColor2, i),
+          [5, 5]));
       i += 0.25;
     }
     var flowChart1 = LineChart(
@@ -281,7 +303,7 @@ class ShotGraphState extends State<ShotGraph> {
                 sideTitles: SideTitles(
                     showTitles: true,
                     getTitlesWidget: leftTitleWidgets1,
-                    reservedSize: 26),
+                    reservedSize: 32),
               ),
               bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
@@ -302,7 +324,14 @@ class ShotGraphState extends State<ShotGraph> {
       fontSize: 16,
     );
     Widget text;
-    switch (value.toInt() % 10 == 0) {
+    if (meta.max < 30) {
+      if (value.toInt() == value) {
+        return Text('${value.toInt()}', style: style);
+      } else {
+        return Container();
+      }
+    }
+    switch (value.toInt() % 10 == 0 && value == value.toInt()) {
       case true:
         text = Text('${value.toInt()}', style: style);
         break;
@@ -323,14 +352,10 @@ class ShotGraphState extends State<ShotGraph> {
       fontWeight: FontWeight.w300,
       fontSize: 14,
     );
-    String text;
-    switch (value.toInt() % 10 == 0) {
-      case true:
-        text = "${value.toInt()}";
-        break;
-      default:
-        return Container();
+    if (value.toInt() != value) {
+      return Container();
     }
+    String text = "$value";
 
     return Text(text, style: style, textAlign: TextAlign.center);
   }

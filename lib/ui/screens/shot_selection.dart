@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -11,13 +10,11 @@ import 'package:despresso/model/services/state/visualizer_service.dart';
 import 'package:despresso/model/shot.dart';
 import 'package:despresso/objectbox.dart';
 import 'package:despresso/objectbox.g.dart';
-import 'package:despresso/ui/widgets/legend_list.dart';
 import 'package:despresso/ui/widgets/progress_overlay.dart';
 import 'package:despresso/ui/widgets/shot_graph.dart';
 import 'package:logging/logging.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:flutter/material.dart';
-import 'package:despresso/ui/theme.dart' as theme;
 import 'package:intl/intl.dart';
 import 'package:reactive_flutter_rating_bar/reactive_flutter_rating_bar.dart';
 import 'package:share_plus/share_plus.dart';
@@ -37,8 +34,6 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
   late Box<Shot> shotBox;
 
   List<int> selectedShots = [];
-
-  bool _overlay = false;
 
   bool showPressure = true;
   bool showFlow = true;
@@ -90,8 +85,9 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
               label: const Text("Visualizer"),
               onPressed: () async {
                 if (selectedShots.isEmpty) {
-                  getIt<SnackbarService>()
-                      .notify(S.of(context).screenDiaryNoShotsToUploadSelected, SnackbarNotificationType.info);
+                  getIt<SnackbarService>().notify(
+                      S.of(context).screenDiaryNoShotsToUploadSelected,
+                      SnackbarNotificationType.info);
 
                   return;
                 }
@@ -104,16 +100,21 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                       _busyProgress += 1 / selectedShots.length;
                     });
                     var shot = shotBox.get(element);
-                    var id = await visualizerService.sendShotToVisualizer(shot!);
+                    var id =
+                        await visualizerService.sendShotToVisualizer(shot!);
                     shot.visualizerId = id;
                     shotBox.put(shot);
                   }
                   getIt<SnackbarService>()
                       // ignore: use_build_context_synchronously
-                      .notify(S.of(context).screenDiarySuccessUploadingYourShots, SnackbarNotificationType.info);
+                      .notify(
+                          S.of(context).screenDiarySuccessUploadingYourShots,
+                          SnackbarNotificationType.info);
                 } catch (e) {
                   getIt<SnackbarService>().notify(
-                      S.of(context).screenDiaryErrorUploadingShots + e.toString(), SnackbarNotificationType.severe);
+                      S.of(context).screenDiaryErrorUploadingShots +
+                          e.toString(),
+                      SnackbarNotificationType.severe);
 
                   log.severe("Error uploading shots $e");
                 }
@@ -148,24 +149,12 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
               child: selectedShots.isEmpty
                   ? Text(S.of(context).screenDiaryNothingSelected)
                   : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(S.of(context).screenDiaryOverlaymode),
-                            Switch(
-                              value: _overlay,
-                              onChanged: (value) {
-                                setState(() {
-                                  _overlay = value;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
                         Expanded(
                           child: ListView.builder(
                             shrinkWrap: true,
-                            itemCount: _overlay ? min(selectedShots.length, 1) : selectedShots.length,
+                            itemCount: 1,
                             itemBuilder: (context, index) {
                               return ClipRRect(
                                 borderRadius: const BorderRadius.only(
@@ -176,7 +165,7 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                                   title: ShotGraph(
                                       key: UniqueKey(),
                                       id: selectedShots[index],
-                                      overlayIds: _overlay ? selectedShots : null,
+                                      overlayIds: null,
                                       showFlow: showFlow,
                                       showPressure: showPressure,
                                       showWeight: showWeight,
@@ -235,7 +224,12 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
               child: ListTile(
                 key: Key('list_item_${shots[index].id}'),
                 title: Text(
-                  getIt<ProfileService>().profiles.firstWhereOrNull((e) => e.id == shots[index].profileId)?.title ?? shots[index].profileId,
+                  getIt<ProfileService>()
+                          .profiles
+                          .firstWhereOrNull(
+                              (e) => e.id == shots[index].profileId)
+                          ?.title ??
+                      shots[index].profileId,
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +274,7 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
   setSelection(int id) {
     var found = selectedShots.firstWhereOrNull((element) => element == id);
     if (found == null) {
-      selectedShots.add(id);
+      selectedShots = [id];
     } else {
       selectedShots.removeWhere((element) => element == id);
     }
