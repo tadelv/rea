@@ -186,50 +186,6 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                             },
                           ),
                         ),
-                        LegendsListWidget(
-                          legends: [
-                            Legend(
-                              S.of(context).pressure,
-                              theme.ThemeColors.pressureColor,
-                              value: showPressure,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showPressure = p0;
-                                });
-                              },
-                            ),
-                            Legend(
-                              S.of(context).flow,
-                              theme.ThemeColors.flowColor,
-                              value: showFlow,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showFlow = p0;
-                                });
-                              },
-                            ),
-                            Legend(
-                              S.of(context).weight,
-                              theme.ThemeColors.weightColor,
-                              value: showWeight,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showWeight = p0;
-                                });
-                              },
-                            ),
-                            Legend(
-                              S.of(context).temp,
-                              theme.ThemeColors.tempColor,
-                              value: showTemp,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showTemp = p0;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
                       ],
                     ),
             ),

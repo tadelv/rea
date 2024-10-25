@@ -1,3 +1,5 @@
+import 'package:despresso/model/services/state/coffee_service.dart';
+import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/shot.dart';
 import 'package:despresso/model/shotstate.dart';
 import 'package:despresso/objectbox.dart';
@@ -63,27 +65,67 @@ class ShotGraphState extends State<ShotGraph> {
     return Container(
       child: Column(
         children: [
-          ...shotOverlay.map(
-            (e) => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                      '${DateFormat.Hm().format(e!.date)} ${DateFormat.yMd().format(e.date)} ${e.pourWeight.toStringAsFixed(1)}g in ${e.pourTime.toStringAsFixed(1)}s'),
-                  TextButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ShotEdit(
-                                    e.id,
-                                  )),
-                        );
-                      },
-                      icon: const Icon(Icons.note_add),
-                      label: Text(S.of(context).screenEspressoDiary))
-                ]),
-          ),
+          // TODO: remove overlay functionality?
+          ...shotOverlay.map((e) => Column(children: [
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                          '${DateFormat.Hm().format(e!.date)} ${DateFormat.yMd().format(e.date)} ${e.pourWeight.toStringAsFixed(1)}g in ${e.pourTime.toStringAsFixed(1)}s'),
+                      TextButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ShotEdit(
+                                        e.id,
+                                      )),
+                            );
+                          },
+                          icon: const Icon(Icons.note_add),
+                          label: Text(S.of(context).screenEspressoDiary))
+                    ]),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                        'Recipe: ${e.recipe.target?.name}, ${e.doseWeight.toStringAsFixed(1)}g in ${e.pourWeight.toStringAsFixed(1)}g out in ${e.pourTime.toStringAsFixed(1)}s'),
+                    Text(
+                        '${e.coffee.target!.name} by ${e.coffee.target!.roaster.target!.name}')
+                  ],
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // TODO: check if string empty
+                      Text(
+                          '${e.recipe.target!.grinderModel.isNotEmpty ? e.recipe.target?.grinderModel : "Grinder set"} @ ${e.recipe.target?.grinderSettings}'),
+                      //Text('${getIt<ProfileService>().profiles.firstWhere((pr) => pr.id == e.recipe.target?.id)}')
+                      Text(
+                          'Profile: ${e.recipe.target!.profileName.isNotEmpty ? e.recipe.target?.profileName : "Unknown profile"}')
+                    ]),
+              ])),
           _buildGraphs()['combined'],
+          ...shotOverlay.map((e) => SizedBox(
+              height: 300,
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Shot notes:', textAlign: TextAlign.left),
+                    SizedBox(
+                        //height: 200,
+                        width: 1800,
+                        child: Text(e?.description ?? '')),
+                    TextButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          getIt<CoffeeService>()
+                              .setSelectedRecipe(e!.recipe.target?.id ?? 0);
+                        },
+                        icon: const Icon(Icons.replay),
+                        label: Text("Repeat recipe")),
+                  ])))
         ],
       ),
     );
@@ -174,7 +216,8 @@ class ShotGraphState extends State<ShotGraph> {
         show: false,
       ),
       barWidth: barWidth,
-      isCurved: false,
+      isCurved: true,
+      isStrokeJoinRound: true,
       color: col,
       dashArray: dash,
     );
@@ -228,7 +271,7 @@ class ShotGraphState extends State<ShotGraph> {
           lineBarsData: lineBarsData,
           rangeAnnotations: RangeAnnotations(
             verticalRangeAnnotations: [
-              ...ranges,
+              //...ranges,
             ],
           ),
           titlesData: FlTitlesData(
@@ -236,12 +279,60 @@ class ShotGraphState extends State<ShotGraph> {
               topTitles: AxisTitles(),
               rightTitles: AxisTitles(
                 sideTitles: SideTitles(
-                    showTitles: true, getTitlesWidget: bottomTitleWidgets, reservedSize: 26),
-              ))),
+                    showTitles: true,
+                    getTitlesWidget: leftTitleWidgets1,
+                    reservedSize: 26),
+              ),
+              bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 32,
+                interval: 1,
+                getTitlesWidget: bottomTitleWidgets1,
+              )))),
     );
     return Padding(
         padding: const EdgeInsets.all(18.0),
         child: SizedBox(height: 300, child: flowChart1));
+  }
+
+  Widget bottomTitleWidgets1(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontWeight: FontWeight.w400,
+      fontSize: 16,
+    );
+    Widget text;
+    switch (value.toInt() % 10 == 0) {
+      case true:
+        text = Text('${value.toInt()}', style: style);
+        break;
+      default:
+        text = const Text('');
+        break;
+    }
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 10,
+      child: text,
+    );
+  }
+
+  Widget leftTitleWidgets1(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontWeight: FontWeight.w300,
+      fontSize: 14,
+    );
+    String text;
+    switch (value.toInt() % 10 == 0) {
+      case true:
+        text = "${value.toInt()}";
+        break;
+      default:
+        return Container();
+    }
+
+    return Text(text, style: style, textAlign: TextAlign.center);
   }
 
   Widget _buildGraphSingleFlCharts(Map<String, List<FlSpot>> data,
