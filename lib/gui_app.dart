@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'objectbox.dart';
 import 'ui/landingpage.dart';
@@ -15,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'logger_util.dart';
 import 'dart:async';
 import 'package:despresso/devices/decent_de1_simulated.dart';
+
 late ObjectBox objectbox;
 
 Future<void> initSettings() async {
@@ -33,22 +36,20 @@ Future<void> guiMain() async {
   getIt.registerSingleton<ObjectBox>(objectbox, signalsReady: false);
   log.info("Starting app");
 
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky,
+      overlays: []);
 
   initSettings().then((_) async {
-    // if (Platform.isWindows) {
-    //   Timer(
-    //     const Duration(seconds: 1),
-    //     () => DE1Simulated(),
-    //   );
-    // }
+    if (const String.fromEnvironment("simulate") == "1") {
+      Timer(
+        const Duration(seconds: 1),
+        () => DE1Simulated(),
+      );
+    }
 
-
-      runApp(MyApp());
+    runApp(MyApp());
   });
-
 }
-
 
 class MyApp extends StatefulWidget {
   MyApp({super.key}) {
