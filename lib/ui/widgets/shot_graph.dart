@@ -114,19 +114,35 @@ class ShotGraphState extends State<ShotGraph> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Shot notes:', textAlign: TextAlign.left),
-                    SizedBox(
-                        //height: 200,
-                        width: 1800,
-                        child: Text(e?.description ?? '')),
-                    TextButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          getIt<CoffeeService>()
-                              .setSelectedRecipe(e!.recipe.target?.id ?? 0);
-                        },
-                        icon: const Icon(Icons.replay),
-                        label: Text("Repeat recipe")),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          const Text('Shot notes:', textAlign: TextAlign.left),
+                          TextButton.icon(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                getIt<CoffeeService>().setSelectedRecipe(
+                                    e!.recipe.target?.id ?? 0);
+                              },
+                              icon: const Icon(Icons.replay),
+                              label: Text("Repeat recipe")),
+                        ]),
+                    Flexible(
+                        flex: 2,
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+														mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Flexible(
+                                  flex: 2, child: Text(e?.description ?? '')),
+                              Flexible(
+                                  flex: 1,
+                                  child: Text(e!.shotstates
+                                      .map((state) => '${state.frameNumber}: ${state.pourTime}')
+                                      .toList()
+                                      .join("\n"))),
+                            ])),
+                    Container(height: 30)
                   ])))
         ],
       ),
@@ -209,7 +225,8 @@ class ShotGraphState extends State<ShotGraph> {
               e.sampleTimeCorrected, e.weight.clamp(0, double.maxFinite)))
           .toList(),
       "flowG$id": shotstates
-          .map((e) => FlSpot(e.sampleTimeCorrected, e.flowWeight.clamp(0, double.maxFinite)))
+          .map((e) => FlSpot(
+              e.sampleTimeCorrected, e.flowWeight.clamp(0, double.maxFinite)))
           .toList(),
     };
   }
@@ -250,9 +267,11 @@ class ShotGraphState extends State<ShotGraph> {
           calcColor(theme.ThemeColors.flowColor, i), [5, 5]));
       lineBarsData.add(createChartLineDatapoints(data["flowG$id"]!, 2,
           calcColor(theme.ThemeColors.weightColor, i), null));
-					bool largeWeight = data["weight$id"]!.map((a) => a.y).reduce(max) > 15;
+      bool largeWeight = data["weight$id"]!.map((a) => a.y).reduce(max) > 15;
       lineBarsData.add(createChartLineDatapoints(
-          data["weight$id"]!.map((e) => FlSpot(e.x, (largeWeight ? e.y / 10 : e.y))).toList(),
+          data["weight$id"]!
+              .map((e) => FlSpot(e.x, (largeWeight ? e.y / 10 : e.y)))
+              .toList(),
           2,
           calcColor(theme.ThemeColors.weightColor, i),
           null));
