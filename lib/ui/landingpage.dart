@@ -50,7 +50,8 @@ class LandingPage extends StatefulWidget {
   LandingPageState createState() => LandingPageState();
 }
 
-class LandingPageState extends State<LandingPage> with TickerProviderStateMixin {
+class LandingPageState extends State<LandingPage>
+    with TickerProviderStateMixin {
   final log = Logger('LandingPageState');
 
   bool available = false;
@@ -88,7 +89,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
     _settings = getIt<SettingsService>();
     // var l = _settings.steamHeaterOff ? 3 : 4;
     // if (_settings.showFlushScreen) l++;
-    _tabController = TabController(length: calcTabs(), vsync: this, initialIndex: 1);
+    _tabController =
+        TabController(length: calcTabs(), vsync: this, initialIndex: 1);
     machineService = getIt<EspressoMachineService>();
     coffeeService = getIt<CoffeeService>();
 
@@ -115,7 +117,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
     );
 
     var keyboardVisibilityController = KeyboardVisibilityController();
-    _keyboardSubscription = keyboardVisibilityController.onChange.listen((bool visible) {
+    _keyboardSubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
       if (visible == false) {
         Future.delayed(const Duration(milliseconds: 1100), () {
           log.info("Restore UIOverlays");
@@ -195,14 +198,7 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 4,
-        child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              _screensaver.handleTap();
-            },
-            child: scaffoldNewLayout(context)));
+    return DefaultTabController(length: 4, child: scaffoldNewLayout(context));
   }
 
   openWhatsNew() async {
@@ -296,7 +292,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ShotSelectionTab()),
+                  MaterialPageRoute(
+                      builder: (context) => const ShotSelectionTab()),
                 ).then((value) => _screensaver.resume());
               },
             ),
@@ -338,7 +335,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const DashboardScreen()),
                 ).then((value) {
                   _screensaver.resume();
                 });
@@ -353,7 +351,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AppSettingsScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const AppSettingsScreen()),
                 ).then((value) {
                   _screensaver.resume();
                   machineService.updateFlush();
@@ -369,7 +368,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MaintenanceScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const MaintenanceScreen()),
                 ).then((value) {
                   _screensaver.resume();
                   machineService.updateFlush();
@@ -401,7 +401,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
               title: Text(S.of(context).privacy),
               onTap: () async {
                 Navigator.pop(context);
-                final Uri url = Uri.parse("https://obiwan007.github.io/myagbs/");
+                final Uri url =
+                    Uri.parse("https://obiwan007.github.io/myagbs/");
                 if (await canLaunchUrl(url)) {
                   await launchUrl(url, mode: LaunchMode.externalApplication);
                 } else {
@@ -424,10 +425,13 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
                   case ConnectionState.done:
                     return AboutListTile(
                         icon: const Icon(Icons.info),
-                        applicationIcon: Image.asset("assets/iconStore.png", height: 80),
+                        applicationIcon:
+                            Image.asset("assets/iconStore.png", height: 80),
                         applicationName: 'despresso',
-                        applicationVersion: "Version ${snapshot.data!.version} (${snapshot.data!.buildNumber})",
-                        applicationLegalese: '\u{a9} 2024 MMMedia Markus Miertschink',
+                        applicationVersion:
+                            "Version ${snapshot.data!.version} (${snapshot.data!.buildNumber})",
+                        applicationLegalese:
+                            '\u{a9} 2024 MMMedia Markus Miertschink',
                         aboutBoxChildren: [
                           TextButton(
                               onPressed: () {
@@ -528,7 +532,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
       count--;
       log.info("No Flush");
     }
-    log.info("Number of Tabs $count ${_settings.useSteam} ${_settings.useWater} ${_settings.showFlushScreen}");
+    log.info(
+        "Number of Tabs $count ${_settings.useSteam} ${_settings.useWater} ${_settings.showFlushScreen}");
     return count;
   }
 
@@ -537,7 +542,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
 
     if (_tabController.length != newTabCount) {
       log.info("New tab size: $newTabCount");
-      _tabController = TabController(length: newTabCount, vsync: this, initialIndex: 0);
+      _tabController =
+          TabController(length: newTabCount, vsync: this, initialIndex: 0);
       setState(() {});
     }
   }
@@ -669,7 +675,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
   bool _onKey(KeyEvent event) {
     // final key = event.logicalKey.keyLabel;
     final keys = RawKeyboard.instance.keysPressed;
-    if (event is KeyDownEvent && keys.contains(LogicalKeyboardKey.controlLeft)) {
+    if (event is KeyDownEvent &&
+        keys.contains(LogicalKeyboardKey.controlLeft)) {
       if (event.logicalKey == LogicalKeyboardKey.keyB) {
         log.info("Brewing");
         machineService.setState(EspressoMachineState.espresso);

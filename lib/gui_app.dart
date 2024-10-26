@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:despresso/model/services/state/screen_saver.dart';
 import 'package:flutter/material.dart';
 import 'objectbox.dart';
 import 'ui/landingpage.dart';
@@ -62,6 +63,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late SettingsService _settings;
+  late ScreensaverService _screensaver;
 
   @override
   void initState() {
@@ -70,10 +72,26 @@ class _MyAppState extends State<MyApp> {
     _settings.addListener(() {
       setState(() {});
     });
+    _screensaver = getIt<ScreensaverService>();
   }
 
   @override
   Widget build(BuildContext context) {
+    return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          _screensaver.handleTap();
+        },
+        onTapDown: (deets) {
+          _screensaver.handleTap();
+        },
+        onTapCancel: () {
+          _screensaver.handleTap();
+        },
+        child: appRoot(context));
+  }
+
+  Widget appRoot(BuildContext context) {
     var schemaLight = lightColorSchemes[int.parse(_settings.screenThemeIndex)];
     var themeDark = darkColorSchemes[int.parse(_settings.screenThemeIndex)];
     return BetterFeedback(
@@ -88,17 +106,6 @@ class _MyAppState extends State<MyApp> {
         ],
         supportedLocales: S.delegate.supportedLocales,
         locale: _settings.locale == "auto" ? null : Locale(_settings.locale),
-        // localizationsDelegates: const [
-        //   AppLocalizations.delegate,
-        //   GlobalMaterialLocalizations.delegate,
-        //   GlobalWidgetsLocalizations.delegate,
-        //   GlobalCupertinoLocalizations.delegate,
-        // ],
-        // supportedLocales: const [
-        //   Locale('en'), // English
-        //   Locale('de'), // German
-        //   Locale('es'), // German
-        // ],
         theme: ThemeData.from(
           useMaterial3: true,
           colorScheme: schemaLight,
@@ -107,50 +114,12 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: true,
           colorScheme: themeDark,
         ),
-
-        // ThemeData(
-        //   useMaterial3: true,
-
-        //   colorScheme: lightColorScheme,
-        //   // textTheme: const TextTheme(
-        //   //   displayLarge: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-        //   //   titleLarge: TextStyle(fontSize: 36.0, fontStyle: FontStyle.normal),
-        //   //   bodyMedium: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
-        //   // ),
-        // ),
-        // darkTheme: ThemeData(
-        //   useMaterial3: true,
-        //   // colorScheme: ColorScheme.fromSeed(seedColor: Colors.red, brightness: Brightness.dark),
-        //   colorScheme: darkColorScheme,
-        //   // textTheme: const TextTheme(
-        //   //     // displayLarge: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-        //   //     // titleLarge: TextStyle(fontSize: 36.0, fontStyle: FontStyle.normal),
-        //   //     // bodyMedium: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
-        //   //     ),
-        // ),
         themeMode: _settings.screenThemeMode == 0
             ? ThemeMode.system
             : _settings.screenThemeMode == 1
                 ? ThemeMode.dark
                 : ThemeMode.light,
-
-        // theme: ThemeData(
-        //   useMaterial3: true,
-        //   brightness: Brightness.light,
-        // ),
-        // darkTheme: ThemeData(
-        //   useMaterial3: true,
-        //   brightness: Brightness.dark,
-        //   scaffoldBackgroundColor: theme.Colors.backgroundColor,
-        //   backgroundColor: theme.Colors.backgroundColor,
-        //   colorScheme: ColorScheme.fromSwatch(brightness: Brightness.dark).copyWith(
-        //     primary: theme.Colors.secondaryColor,
-        //     secondary: Colors.green,
-        //     // brightness: Brightness.dark,
-        //   ),
-
         home: const LandingPage(title: 'REA'),
-        // navigatorObservers: [SentryNavigatorObserver()],
       ),
     );
   }
