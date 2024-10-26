@@ -77,15 +77,9 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          _screensaver.handleTap();
-        },
-        onTapDown: (deets) {
-          _screensaver.handleTap();
-        },
-        onTapCancel: () {
+    return Listener(
+        //behavior: HitTestBehavior.opaque,
+        onPointerDown: (event) {
           _screensaver.handleTap();
         },
         child: appRoot(context));
