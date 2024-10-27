@@ -5,6 +5,7 @@ import 'package:despresso/model/shot.dart';
 import 'package:despresso/model/shotstate.dart';
 import 'package:despresso/objectbox.dart';
 import 'package:despresso/service_locator.dart';
+import 'package:despresso/ui/screens/settings_screen.dart';
 import 'package:despresso/ui/screens/shot_edit.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:despresso/generated/l10n.dart';
 
 import 'package:despresso/ui/theme.dart' as theme;
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 
 class ShotGraph extends StatefulWidget {
   final int id;
@@ -131,22 +133,51 @@ class ShotGraphState extends State<ShotGraph> {
                         flex: 2,
                         child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
-														mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Flexible(
                                   flex: 2, child: Text(e?.description ?? '')),
                               Flexible(
                                   flex: 1,
-                                  child: Text(e!.shotstates
-                                      .map((state) => '${state.frameNumber}: ${state.pourTime}')
-                                      .toList()
-                                      .join("\n"))),
+                                  child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 16.0),
+                                      child: Text(e!.shotstates
+                                          .fold(
+                                              List<ShotState>.empty(
+                                                  growable: true),
+                                              (states, newState) {
+                                            if (states.any((e) =>
+                                                e.frameNumber ==
+                                                newState.frameNumber)) {
+                                              return states;
+                                            }
+                                            states.add(newState);
+                                            return states;
+                                          })
+                                          .map((state) => _stepInfo(e, state,
+                                              getIt<ProfileService>()))
+                                          .toList()
+                                          .join("\n")))),
                             ])),
                     Container(height: 30)
                   ])))
         ],
       ),
     );
+  }
+
+  String _stepInfo(Shot shot, ShotState state, ProfileService service) {
+    String info = '';
+    final profile = service.getProfile(shot.recipe.target!.profileId);
+    if (profile == null) {
+      return '${state.frameNumber} - ${state.sampleTimeCorrected.toStringAsFixed(1)}';
+    }
+    info +=
+        '${state.frameNumber} ${profile.shotFrames[state.frameNumber].name}';
+    info += ' at ';
+    info += state.sampleTimeCorrected.toStringAsFixed(1);
+    return info;
   }
 
   _buildGraphs() {
