@@ -256,9 +256,9 @@ class SteamScreenState extends State<SteamScreen> {
                               Slider(
                                 value: settings.targetSteamFlow,
                                 max: 2.5,
-                                min: 0.3,
+                                min: 0.25,
                                 divisions: 22,
-                                label: "${settings.targetSteamFlow.toStringAsFixed(1)} ml/s",
+                                label: "${settings.targetSteamFlow.toStringAsFixed(2)} ml/s",
                                 onChanged: (double value) {
                                   setState(() {
                                     settings.targetSteamFlow = value;
