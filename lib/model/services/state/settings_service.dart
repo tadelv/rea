@@ -106,7 +106,6 @@ enum SettingKeys {
   visualizerRefreshToken,
   visualizerExpiring,
   currentVersion,
-  alwaysAllowSkipping,
   uploadTailMethod,
 }
 
@@ -566,11 +565,6 @@ class SettingsService extends ChangeNotifier {
       Settings.getValue<String>(SettingKeys.scaleSecondary.name) ?? "";
   set scaleSecondary(String value) =>
       Settings.setValue<String>(SettingKeys.scaleSecondary.name, value);
-
-  bool get alwaysAllowSkipping =>
-      Settings.getValue<bool>(SettingKeys.alwaysAllowSkipping.name) ?? true;
-  set alwaysAllowSkipping(bool value) =>
-      Settings.setValue<bool>(SettingKeys.alwaysAllowSkipping.name, value);
 
   UploadTailMethod get uploadTailMethod {
     String? stringRep =

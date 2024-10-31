@@ -128,14 +128,19 @@ class EspressoScreenState extends State<EspressoScreen> {
   }
 
   void checkForRefill() {
-    if (refillAnounced == false && machineService.state.coffeeState == EspressoMachineState.refill) {
-      getIt<SnackbarService>().notify(S.of(context).screenEspressoRefillTheWaterTank, SnackbarNotificationType.warn);
+    if (refillAnounced == false &&
+        machineService.state.coffeeState == EspressoMachineState.refill) {
+      getIt<SnackbarService>().notify(
+          S.of(context).screenEspressoRefillTheWaterTank,
+          SnackbarNotificationType.warn);
       refillAnounced = true;
     }
   }
 
   _buildGraphs() {
-    if (machineService.inShot || ranges.isEmpty || machineService.shotList.lastTouched != _lastLength) {
+    if (machineService.inShot ||
+        ranges.isEmpty ||
+        machineService.shotList.lastTouched != _lastLength) {
       ranges = _createPhasesFl();
       data = _createDataFlCharts();
 
@@ -165,15 +170,19 @@ class EspressoScreenState extends State<EspressoScreen> {
       var arr = [
         FlSpot(tStart - 5, m * (tStart - 5) + b),
         FlSpot(tEnd, m * tEnd + b),
-        FlSpot(machineService.currentShot.estimatedWeightReachedTime, weightGoal),
+        FlSpot(
+            machineService.currentShot.estimatedWeightReachedTime, weightGoal),
         FlSpot(machineService.currentShot.estimatedWeightReachedTime, 0),
-        FlSpot(machineService.currentShot.estimatedWeightReachedTime, weightGoal),
+        FlSpot(
+            machineService.currentShot.estimatedWeightReachedTime, weightGoal),
         FlSpot(0, weightGoal),
       ];
 
 // Show the new scaled maxtime only of 5g before end of shot.
       if (machineService.inShot == false ||
-          machineService.currentShot.targetEspressoWeight - (machineService.state.shot?.weight ?? 30) < 5) {
+          machineService.currentShot.targetEspressoWeight -
+                  (machineService.state.shot?.weight ?? 30) <
+              5) {
         var corrected = (timeGoal ~/ 5.0).toInt() * 5.0 + 5;
         maxTime = max(maxTime, corrected);
       }
@@ -191,10 +200,13 @@ class EspressoScreenState extends State<EspressoScreen> {
       return [];
     }
 
-    var stateChanges = machineService.shotList.entries.where((element) => element.subState.isNotEmpty).toList();
+    var stateChanges = machineService.shotList.entries
+        .where((element) => element.subState.isNotEmpty)
+        .toList();
 
     int i = 0;
-    var maxSampleTime = machineService.shotList.entries.last.sampleTimeCorrected;
+    var maxSampleTime =
+        machineService.shotList.entries.last.sampleTimeCorrected;
     return stateChanges.map((from) {
       var toSampleTime = maxSampleTime;
 
@@ -226,21 +238,41 @@ class EspressoScreenState extends State<EspressoScreen> {
 
   Map<String, List<FlSpot>> _createDataFlCharts() {
     return {
-      "pressure": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.groupPressure)).toList(),
-      "pressureSet":
-          machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.setGroupPressure)).toList(),
-      "flow": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.groupFlow)).toList(),
-      "flowSet": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.setGroupFlow)).toList(),
-      "temp": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.headTemp)).toList(),
-      "mixTemp": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.mixTemp)).toList(),
-      "mixTempSet": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.setMixTemp)).toList(),
-      "tempSet": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.setHeadTemp)).toList(),
-      "weight": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.weight)).toList(),
-      "flowG": machineService.shotList.entries.map((e) => FlSpot(e.sampleTimeCorrected, e.flowWeight)).toList(),
+      "pressure": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.groupPressure))
+          .toList(),
+      "pressureSet": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.setGroupPressure))
+          .toList(),
+      "flow": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.groupFlow))
+          .toList(),
+      "flowSet": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.setGroupFlow))
+          .toList(),
+      "temp": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.headTemp))
+          .toList(),
+      "mixTemp": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.mixTemp))
+          .toList(),
+      "mixTempSet": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.setMixTemp))
+          .toList(),
+      "tempSet": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.setHeadTemp))
+          .toList(),
+      "weight": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.weight))
+          .toList(),
+      "flowG": machineService.shotList.entries
+          .map((e) => FlSpot(e.sampleTimeCorrected, e.flowWeight))
+          .toList(),
     };
   }
 
-  LineChartBarData createChartLineDatapoints(List<FlSpot> points, double barWidth, Color col, List<int>? dash) {
+  LineChartBarData createChartLineDatapoints(
+      List<FlSpot> points, double barWidth, Color col, List<int>? dash) {
     // var data = machineService.shotList.entries;
     // var last = data.lastIndexWhere((element) => !element.isInterpolated);
     return LineChartBarData(
@@ -265,8 +297,8 @@ class EspressoScreenState extends State<EspressoScreen> {
     );
   }
 
-  Widget _buildGraphSingleFlCharts(
-      Map<String, List<FlSpot>> data, double maxTime, Iterable<VerticalRangeAnnotation> ranges) {
+  Widget _buildGraphSingleFlCharts(Map<String, List<FlSpot>> data,
+      double maxTime, Iterable<VerticalRangeAnnotation> ranges) {
     var borderData = FlBorderData(
       show: true,
       border: Border.all(
@@ -287,17 +319,36 @@ class EspressoScreenState extends State<EspressoScreen> {
     bool hasFlow = settingsService.showFlowGraph;
     bool hasPressure = settingsService.showPressureGraph;
     const double sep = 5;
-    double minX = data["pressure"]!.first.x; // max(0, (data["pressureSet"]!.last.x) - 5); //data["pressure"]!.first.x;
+    double minX = data["pressure"]!
+        .first
+        .x; // max(0, (data["pressureSet"]!.last.x) - 5); //data["pressure"]!.first.x;
     // maxTime = (data["pressureSet"]!.last.x) + 1;
 
-    double maxY1 =
-        (!hasPressure) ? 0 : data["pressureSet"]!.map((e) => e.y).reduce((value, element) => max(value, element)) + 0.5;
-    double maxY3 =
-        (!hasPressure) ? 0 : data["pressure"]!.map((e) => e.y).reduce((value, element) => max(value, element)) + 0.5;
-    double maxY2 =
-        (!hasFlow) ? 0 : data["flowSet"]!.map((e) => e.y).reduce((value, element) => max(value, element)) + 0.5;
+    double maxY1 = (!hasPressure)
+        ? 0
+        : data["pressureSet"]!
+                .map((e) => e.y)
+                .reduce((value, element) => max(value, element)) +
+            0.5;
+    double maxY3 = (!hasPressure)
+        ? 0
+        : data["pressure"]!
+                .map((e) => e.y)
+                .reduce((value, element) => max(value, element)) +
+            0.5;
+    double maxY2 = (!hasFlow)
+        ? 0
+        : data["flowSet"]!
+                .map((e) => e.y)
+                .reduce((value, element) => max(value, element)) +
+            0.5;
 
-    double maxY4 = (!hasFlow) ? 0 : data["flow"]!.map((e) => e.y).reduce((value, element) => max(value, element)) + 0.5;
+    double maxY4 = (!hasFlow)
+        ? 0
+        : data["flow"]!
+                .map((e) => e.y)
+                .reduce((value, element) => max(value, element)) +
+            0.5;
     var flowChart1 = LineChart(
       LineChartData(
         minY: 0,
@@ -312,11 +363,21 @@ class EspressoScreenState extends State<EspressoScreen> {
           drawVerticalLine: true,
         ),
         lineBarsData: [
-          if (hasPressure) createChartLineDatapoints(data["pressure"]!, 4, theme.ThemeColors.pressureColor, null),
-          if (hasPressure) createChartLineDatapoints(data["pressureSet"]!, 1, theme.ThemeColors.pressureColor, [5, 5]),
-          if (hasFlow) createChartLineDatapoints(data["flow"]!, 4, theme.ThemeColors.flowColor, null),
-          if (hasFlow) createChartLineDatapoints(data["flowSet"]!, 1, theme.ThemeColors.flowColor, [5, 5]),
-          if (hasFlow) createChartLineDatapoints(data["flowG"]!, 2, theme.ThemeColors.weightColor, null),
+          if (hasPressure)
+            createChartLineDatapoints(
+                data["pressure"]!, 4, theme.ThemeColors.pressureColor, null),
+          if (hasPressure)
+            createChartLineDatapoints(data["pressureSet"]!, 1,
+                theme.ThemeColors.pressureColor, [5, 5]),
+          if (hasFlow)
+            createChartLineDatapoints(
+                data["flow"]!, 4, theme.ThemeColors.flowColor, null),
+          if (hasFlow)
+            createChartLineDatapoints(
+                data["flowSet"]!, 1, theme.ThemeColors.flowColor, [5, 5]),
+          if (hasFlow)
+            createChartLineDatapoints(
+                data["flowG"]!, 2, theme.ThemeColors.weightColor, null),
         ],
         rangeAnnotations: const RangeAnnotations(
           verticalRangeAnnotations: [
@@ -338,7 +399,8 @@ class EspressoScreenState extends State<EspressoScreen> {
             sideTitles: SideTitles(showTitles: false),
           ),
 
-          bottomTitles: (!settingsService.showTempGraph && !settingsService.showWeightGraph)
+          bottomTitles: (!settingsService.showTempGraph &&
+                  !settingsService.showWeightGraph)
               ? AxisTitles(
                   axisNameSize: 25,
                   axisNameWidget: Text(
@@ -395,11 +457,15 @@ class EspressoScreenState extends State<EspressoScreen> {
 
     maxY3 = (!settingsService.showWeightGraph)
         ? 0
-        : data["weight"]!.map((e) => e.y).reduce((value, element) => max(value, element)) + 0.5;
+        : data["weight"]!
+                .map((e) => e.y)
+                .reduce((value, element) => max(value, element)) +
+            0.5;
     var flowChart2 = LineChart(
       LineChartData(
         minY: 0,
-        maxY: max(maxY3, machineService.currentShot.targetEspressoWeight * 1.15),
+        maxY:
+            max(maxY3, machineService.currentShot.targetEspressoWeight * 1.15),
         minX: minX,
         maxX: maxTime,
         borderData: borderData,
@@ -410,10 +476,12 @@ class EspressoScreenState extends State<EspressoScreen> {
           drawVerticalLine: true,
         ),
         lineBarsData: [
-          createChartLineDatapoints(data["weight"]!, 2, theme.ThemeColors.weightColor, null),
+          createChartLineDatapoints(
+              data["weight"]!, 2, theme.ThemeColors.weightColor, null),
           // createChartLineDatapoints(data["temp"]!, 4, theme.ThemeColors.tempColor, null),
           // createChartLineDatapoints(data["tempSet"]!, 2, theme.ThemeColors.tempColor, null),
-          createChartLineDatapoints(data["weightApprox"]!, 2, theme.ThemeColors.weightColor, [5, 5]),
+          createChartLineDatapoints(
+              data["weightApprox"]!, 2, theme.ThemeColors.weightColor, [5, 5]),
         ],
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(
@@ -465,8 +533,18 @@ class EspressoScreenState extends State<EspressoScreen> {
     maxY1 = 0;
     double minY1 = 100;
     for (var s in ["mixTempSet", "mixTemp", "temp", "tempSet"]) {
-      maxY1 = max(maxY1, data[s]!.map((e) => e.y).reduce((value, element) => max(value, element))) + 0.5;
-      minY1 = min(minY1, data[s]!.map((e) => e.y).reduce((value, element) => min(value, element))) - 1;
+      maxY1 = max(
+              maxY1,
+              data[s]!
+                  .map((e) => e.y)
+                  .reduce((value, element) => max(value, element))) +
+          0.5;
+      minY1 = min(
+              minY1,
+              data[s]!
+                  .map((e) => e.y)
+                  .reduce((value, element) => min(value, element))) -
+          1;
     }
 
     var flowChart3 = LineChart(
@@ -484,10 +562,14 @@ class EspressoScreenState extends State<EspressoScreen> {
           drawVerticalLine: true,
         ),
         lineBarsData: [
-          createChartLineDatapoints(data["temp"]!, 2, theme.ThemeColors.tempColor, null),
-          createChartLineDatapoints(data["tempSet"]!, 1, theme.ThemeColors.tempColor, [5, 5]),
-          createChartLineDatapoints(data["mixTemp"]!, 2, theme.ThemeColors.tempColor2, null),
-          createChartLineDatapoints(data["mixTempSet"]!, 1, theme.ThemeColors.tempColor2, [5, 5]),
+          createChartLineDatapoints(
+              data["temp"]!, 2, theme.ThemeColors.tempColor, null),
+          createChartLineDatapoints(
+              data["tempSet"]!, 1, theme.ThemeColors.tempColor, [5, 5]),
+          createChartLineDatapoints(
+              data["mixTemp"]!, 2, theme.ThemeColors.tempColor2, null),
+          createChartLineDatapoints(
+              data["mixTempSet"]!, 1, theme.ThemeColors.tempColor2, [5, 5]),
 
           // createChartLineDatapoints(data["temp"]!, 4, theme.ThemeColors.tempColor, null),
           // createChartLineDatapoints(data["tempSet"]!, 2, theme.ThemeColors.tempColor, null),
@@ -538,18 +620,22 @@ class EspressoScreenState extends State<EspressoScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (settingsService.showPressureGraph || settingsService.showFlowGraph)
+          if (settingsService.showPressureGraph ||
+              settingsService.showFlowGraph)
             Expanded(
                 flex: 1,
                 child: InkWell(
                     onTap: () {
-                      if (settingsService.showPressureGraph == false && settingsService.showFlowGraph == true) {
+                      if (settingsService.showPressureGraph == false &&
+                          settingsService.showFlowGraph == true) {
                         settingsService.showPressureGraph = false;
                         settingsService.showFlowGraph = false;
-                      } else if (settingsService.showPressureGraph == true && settingsService.showFlowGraph == false) {
+                      } else if (settingsService.showPressureGraph == true &&
+                          settingsService.showFlowGraph == false) {
                         settingsService.showPressureGraph = false;
                         settingsService.showFlowGraph = true;
-                      } else if (settingsService.showPressureGraph == true && settingsService.showFlowGraph == true) {
+                      } else if (settingsService.showPressureGraph == true &&
+                          settingsService.showFlowGraph == true) {
                         settingsService.showPressureGraph = false;
                         settingsService.showFlowGraph = true;
                       }
@@ -557,7 +643,8 @@ class EspressoScreenState extends State<EspressoScreen> {
                       setState(() {});
                     },
                     child: flowChart1)),
-          if (settingsService.showWeightGraph || settingsService.showTempGraph) const SizedBox(height: sep),
+          if (settingsService.showWeightGraph || settingsService.showTempGraph)
+            const SizedBox(height: sep),
           if (settingsService.showWeightGraph)
             Expanded(
                 flex: 1,
@@ -629,7 +716,8 @@ class EspressoScreenState extends State<EspressoScreen> {
     return SideTitleWidget(
       axisSide: meta.axisSide,
       space: 6,
-      child: Text(meta.formattedValue, style: Theme.of(context).textTheme.labelSmall),
+      child: Text(meta.formattedValue,
+          style: Theme.of(context).textTheme.labelSmall),
     );
   }
 
@@ -637,7 +725,8 @@ class EspressoScreenState extends State<EspressoScreen> {
     return SideTitleWidget(
       axisSide: meta.axisSide,
       space: 6,
-      child: Text(meta.formattedValue, style: Theme.of(context).textTheme.labelSmall),
+      child: Text(meta.formattedValue,
+          style: Theme.of(context).textTheme.labelSmall),
     );
   }
 
@@ -647,7 +736,9 @@ class EspressoScreenState extends State<EspressoScreen> {
     insights = Column(
       key: _mywidgetkey,
       children: [
-        if (machineService.state.coffeeState == EspressoMachineState.disconnected) const Icon(Icons.bluetooth_disabled),
+        if (machineService.state.coffeeState ==
+            EspressoMachineState.disconnected)
+          const Icon(Icons.bluetooth_disabled),
         KeyValueWidget(
             width: width,
             label: S.of(context).screenEspressoRecipe,
@@ -660,9 +751,14 @@ class EspressoScreenState extends State<EspressoScreen> {
             width: width,
             label: S.of(context).screenEspressoBean,
             value: coffeeSelectionService.selectedCoffeeId > 0
-                ? coffeeSelectionService.coffeeBox.get(coffeeSelectionService.selectedCoffeeId)?.name ?? ""
+                ? coffeeSelectionService.coffeeBox
+                        .get(coffeeSelectionService.selectedCoffeeId)
+                        ?.name ??
+                    ""
                 : "No Beans"),
-        if ((coffeeSelectionService.currentRecipe?.disableStopOnWeight ?? false) == false)
+        if ((coffeeSelectionService.currentRecipe?.disableStopOnWeight ??
+                false) ==
+            false)
           KeyValueWidget(
               width: width,
               label: S.of(context).screenEspressoTarget,
@@ -679,18 +775,22 @@ class EspressoScreenState extends State<EspressoScreen> {
           KeyValueWidget(
               width: width,
               label: S.of(context).screenEspressoTimer,
-              value: S.of(context).screenEspressoPour(machineService.lastPourTime.toStringAsFixed(1))),
+              value: S.of(context).screenEspressoPour(
+                  machineService.lastPourTime.toStringAsFixed(1))),
         if (machineService.getOverallTime() > 0)
           KeyValueWidget(
               width: width,
               label: "",
-              value: S.of(context).screenEspressoTotal(machineService.getOverallTime().toStringAsFixed(1))),
-        if (machineService.isPouring && (machineService.state.shot?.timeToWeight ?? 0) > 0)
+              value: S.of(context).screenEspressoTotal(
+                  machineService.getOverallTime().toStringAsFixed(1))),
+        if (machineService.isPouring &&
+            (machineService.state.shot?.timeToWeight ?? 0) > 0)
           KeyValueWidget(
               width: width,
               label: "",
-              value:
-                  S.of(context).screenEspressoTtw(machineService.state.shot?.timeToWeight.toStringAsFixed(1) ?? "?")),
+              value: S.of(context).screenEspressoTtw(
+                  machineService.state.shot?.timeToWeight.toStringAsFixed(1) ??
+                      "?")),
         StreamBuilder<String>(
             stream: machineService.streamFrameName,
             builder: (context, snapshot) {
@@ -699,17 +799,14 @@ class EspressoScreenState extends State<EspressoScreen> {
                   children: [
                     Text(
                       snapshot.data!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelMedium
-                          ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.primary),
                     ),
-                    if (snapshot.data!.toLowerCase().startsWith("pause") || (settingsService.alwaysAllowSkipping && machineService.state.coffeeState == EspressoMachineState.espresso && machineService.isPouring == true))
-                      ElevatedButton(
-                          onPressed: () {
-                            machineService.moveToNextFrame();
-                          },
-                          child: const Text("Skip"))
+                    ElevatedButton(
+                        onPressed: () {
+                          machineService.moveToNextFrame();
+                        },
+                        child: const Text("Skip"))
                   ],
                 );
               }
@@ -745,7 +842,8 @@ class EspressoScreenState extends State<EspressoScreen> {
             machineService.currentShot.visualizerId.isNotEmpty)
           TextButton.icon(
             onPressed: () {
-              launchUrl(Uri.parse('https://visualizer.coffee/shots/${machineService.currentShot.visualizerId}'));
+              launchUrl(Uri.parse(
+                  'https://visualizer.coffee/shots/${machineService.currentShot.visualizerId}'));
             },
             icon: const Icon(Icons.cloud),
             label: const Text("Visualizer.coffee"),
@@ -810,14 +908,17 @@ class EspressoScreenState extends State<EspressoScreen> {
     double expand = 0;
     try {
       final size = MediaQuery.of(context);
-      final apparentSize = size.size.height - size.padding.bottom - size.padding.top;
+      final apparentSize =
+          size.size.height - size.padding.bottom - size.padding.top;
 
-      RenderBox? renderbox = _mywidgetkey.currentContext?.findRenderObject() as RenderBox?;
+      RenderBox? renderbox =
+          _mywidgetkey.currentContext?.findRenderObject() as RenderBox?;
       if (renderbox != null) {
         height = renderbox.size.height;
       } else {
         height = 400;
-        Future.delayed(const Duration(milliseconds: 100), () => setState(() {}));
+        Future.delayed(
+            const Duration(milliseconds: 100), () => setState(() {}));
       }
       expand = apparentSize - height - 360;
     } catch (e) {
@@ -826,20 +927,22 @@ class EspressoScreenState extends State<EspressoScreen> {
 
     return SizedBox(
       width: 230,
-      child:
-          Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start, children: [
-        _buildLiveInsights(),
-        // Expanded(
-        //   flex: 1,
-        //   child: _buildScaleInsight(),
-        // ),
-        if (expand > 0) SizedBox(height: expand),
-        const Padding(
-          padding: EdgeInsets.all(5.0),
-          child: StartStopButton(requestedState: De1StateEnum.espresso),
-        ),
-        // _buildButtons()
-      ]),
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _buildLiveInsights(),
+            // Expanded(
+            //   flex: 1,
+            //   child: _buildScaleInsight(),
+            // ),
+            if (expand > 0) SizedBox(height: expand),
+            const Padding(
+              padding: EdgeInsets.all(5.0),
+              child: StartStopButton(requestedState: De1StateEnum.espresso),
+            ),
+            // _buildButtons()
+          ]),
     );
   }
 
