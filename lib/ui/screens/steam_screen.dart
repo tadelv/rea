@@ -159,11 +159,8 @@ class SteamScreenState extends State<SteamScreen> {
                       ],
                     ),
                   ),
-                  const Divider(
-                    height: 20,
-                    thickness: 5,
-                    indent: 20,
-                    endIndent: 0,
+                  Divider(
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -237,11 +234,8 @@ class SteamScreenState extends State<SteamScreen> {
                         ),
                       ],
                     ),
-                  const Divider(
-                    height: 20,
-                    thickness: 5,
-                    indent: 20,
-                    endIndent: 0,
+                  Divider(
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),

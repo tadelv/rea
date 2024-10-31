@@ -1484,7 +1484,7 @@ class SettingsVisualizer extends StatelessWidget {
                   .of(context)
                   .screenSettingsUserNameCantBeSmallerThan4Letters;
             },
-            borderColor: Colors.blueAccent,
+            borderColor: Theme.of(context).colorScheme.primary,
             errorColor: Colors.deepOrangeAccent,
           ),
           TextInputSettingsTile(
