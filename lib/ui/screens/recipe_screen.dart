@@ -257,7 +257,7 @@ class RecipeDescription extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(),
+        Divider(color: Theme.of(context).colorScheme.primary),
 
         Text(
           S.of(context).screenRecipeProfileDetails,
@@ -532,7 +532,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                             ),
                           ],
                         ),
-                      const Divider(),
+                      Divider(color: Theme.of(context).colorScheme.primary,),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -566,7 +566,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           ),
                         ],
                       ),
-                      const Divider(),
+                      Divider(color: Theme.of(context).colorScheme.primary,),
 
                       // if ((widget.coffeeService.currentRecipe?.grinderSettings ?? 0) > 0)
                       Row(
@@ -598,7 +598,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                       0.0,
                                   decimals: 1,
                                   step: 0.1,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     border: InputBorder.none,
                                     focusedBorder: InputBorder.none,
                                     enabledBorder: InputBorder.none,
