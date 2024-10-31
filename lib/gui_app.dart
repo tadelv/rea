@@ -86,8 +86,6 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget appRoot(BuildContext context) {
-    var schemaLight = lightColorSchemes[int.parse(_settings.screenThemeIndex)];
-    var themeDark = darkColorSchemes[int.parse(_settings.screenThemeIndex)];
     return BetterFeedback(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -100,14 +98,20 @@ class _MyAppState extends State<MyApp> {
         ],
         supportedLocales: S.delegate.supportedLocales,
         locale: _settings.locale == "auto" ? null : Locale(_settings.locale),
-        theme: ThemeData.from(
-          useMaterial3: true,
-          colorScheme: schemaLight,
-        ),
-        darkTheme: ThemeData.from(
-          useMaterial3: true,
-          colorScheme: themeDark,
-        ),
+        theme: ThemeData(
+            colorScheme: ColorScheme.fromSwatch(
+                primarySwatch: Colors.brown, brightness: Brightness.light)),
+        darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSwatch(
+                primarySwatch: Colors.brown, brightness: Brightness.dark)),
+        //theme: ThemeData.from(
+        //  useMaterial3: true,
+        //  colorScheme: schemaLight,
+        //),
+        //darkTheme: ThemeData.from(
+        //  useMaterial3: true,
+        //  colorScheme: themeDark,
+        //),
         themeMode: _settings.screenThemeMode == 0
             ? ThemeMode.system
             : _settings.screenThemeMode == 1

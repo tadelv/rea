@@ -95,8 +95,8 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
                           SizedBox(
                               width: 150,
                               child: Text(
-                                  S.of(context).screenBeanSelectSelectBeans,
-                                  style: theme.TextStyles.tabPrimary)),
+                                  S.of(context).screenBeanSelectSelectBeans
+																	)),
                           Expanded(
                             flex: 8,
                             child: DropdownButton(
@@ -104,7 +104,6 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
                               alignment: Alignment.centerLeft,
                               value: _selectedCoffeeId,
                               items: coffees,
-                              style: theme.TextStyles.tabPrimary,
                               onChanged: (value) {
                                 setState(() {
                                   _selectedCoffeeId = value!;
@@ -171,10 +170,8 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
       final Roaster r = coffeeService.roasterBox.get(p.roaster.targetId)!;
       return DropdownMenuItem(
         value: p.id,
-        child: Text("${p.name} (${r.name})",
-            style: p.id == _selectedCoffeeId
-                ? theme.TextStyles.tabPrimary
-                : theme.TextStyles.tabSecondary),
+        child: Text("${p.name} (${r.name})"
+            ),
       );
     }).toList();
     coffees.insert(0, DropdownMenuItem(value: 0, child: Text(newCoffee.name)));

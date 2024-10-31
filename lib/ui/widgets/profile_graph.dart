@@ -381,9 +381,9 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
       }
 
       var col = i == widget.selectedPhase + 1
-          ? Theme.of(context).colorScheme.onPrimary
-          : theme.ThemeColors
-              .backgroundColor; // theme.ThemeColors.statesColors[from.subState];
+          ? Theme.of(context).colorScheme.tertiary
+          : Theme.of(context).colorScheme.onSecondary;
+               // theme.ThemeColors.statesColors[from.subState];
       var col2 = charts.ColorUtil.fromDartColor(col);
       // col == null ? col! : charts.Color(r: 0xff, g: 50, b: i * 19, a: 100);
       return charts.RangeAnnotationSegment(from.sampleTimeCorrected,

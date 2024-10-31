@@ -211,7 +211,7 @@ class ShotGraphState extends State<ShotGraph> {
       }
 
       var col = theme.ThemeColors.statesColors[from.subState];
-      var col2 = col ?? theme.ThemeColors.goodColor;
+      var col2 = col ?? Theme.of(context).cardColor;
       // col == null ? col! : charts.Color(r: 0xff, g: 50, b: i * 19, a: 100);
       return VerticalRangeAnnotation(
         x1: from.sampleTimeCorrected,
