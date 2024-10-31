@@ -9,6 +9,7 @@ import 'package:despresso/model/shotstate.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:despresso/model/services/state/screen_saver.dart';
+import 'package:path/path.dart';
 
 import '../../model/services/ble/machine_service.dart';
 import '../../service_locator.dart';
@@ -342,7 +343,7 @@ class ScaleFooter extends StatelessWidget {
                                   onPressed: () async {
                                     await machineService.scaleService.tare(index: index);
                                   },
-                                  child: Text(S.of(context).footerTare),
+                                  child: Text(S.of(context).footerTare, style: Theme.of(context).textTheme.bodyMedium),
                                 ),
                               if (machineService.scaleService.state[index] != ScaleState.connecting &&
                                   machineService.scaleService.state[index] != ScaleState.connected)
@@ -352,6 +353,7 @@ class ScaleFooter extends StatelessWidget {
                                   },
                                   child: Text(
                                     S.of(context).footerConnect,
+																		style: Theme.of(context).textTheme.bodyMedium,
                                   ),
                                 ),
 
@@ -405,7 +407,8 @@ class ScaleFooter extends StatelessWidget {
                                                 settingsService.targetEspressoWeight = r.adjustedWeight;
                                               }
                                             },
-                                            child: const FittedBox(child: Text("Set-in")),
+                                            child: FittedBox(child: Text("Set-in", style:
+																						Theme.of(context).textTheme.bodyMedium)),
                                           ),
                                         ),
                                       if (showFlowIn)

@@ -103,7 +103,7 @@ class _MyAppState extends State<MyApp> {
                 primarySwatch: Colors.brown, brightness: Brightness.light)),
         darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSwatch(
-                primarySwatch: Colors.brown, brightness: Brightness.dark)),
+                primarySwatch: Colors.amber, brightness: Brightness.dark)),
         //theme: ThemeData.from(
         //  useMaterial3: true,
         //  colorScheme: schemaLight,
