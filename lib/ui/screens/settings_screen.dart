@@ -18,7 +18,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as ble;
-// import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:logging/logging.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
@@ -29,7 +28,7 @@ import 'package:screen_brightness/screen_brightness.dart';
 import '../../service_locator.dart';
 
 class AppSettingsScreen extends StatefulWidget {
-  const AppSettingsScreen({Key? key}) : super(key: key);
+  const AppSettingsScreen({super.key});
 
   @override
   SettingsScreenState createState() => SettingsScreenState();

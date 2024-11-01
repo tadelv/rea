@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:despresso/model/services/state/screen_saver.dart';
+import 'package:despresso/ui/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'objectbox.dart';
 import 'ui/landingpage.dart';
-import 'color_schemes.g.dart';
-// import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/l10n.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
@@ -18,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'logger_util.dart';
 import 'dart:async';
 import 'package:despresso/devices/decent_de1_simulated.dart';
+import 'package:despresso/ui/screens/home_screen.dart';
 
 late ObjectBox objectbox;
 
@@ -82,7 +82,9 @@ class _MyAppState extends State<MyApp> {
         onPointerDown: (event) {
           _screensaver.handleTap();
         },
-        child: appRoot(context));
+        child: String.fromEnvironment("dgui") == "1"
+            ? MaterialApp(title: "REA", home: HomeScreen())
+            : appRoot(context));
   }
 
   Widget appRoot(BuildContext context) {
