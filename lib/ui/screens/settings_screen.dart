@@ -1149,23 +1149,23 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: ElevatedButton(
                                     onPressed: isBusy
-                                          ? null
-                                          : () async {
-                                              setState(() {
-                                                isBusy = true;
-                                                _controllerRefresh.add(0);
-                                              });
-                                              await exportLogs();
-                                              Future.delayed(
-                                                Duration(seconds: 3),
-                                                () {
-                                                  setState(() {
-                                                    isBusy = false;
-                                                    _controllerRefresh.add(0);
-                                                  });
-                                                },
-                                              );
-                                            },
+                                        ? null
+                                        : () async {
+                                            setState(() {
+                                              isBusy = true;
+                                              _controllerRefresh.add(0);
+                                            });
+                                            await exportLogs();
+                                            Future.delayed(
+                                              Duration(seconds: 3),
+                                              () {
+                                                setState(() {
+                                                  isBusy = false;
+                                                  _controllerRefresh.add(0);
+                                                });
+                                              },
+                                            );
+                                          },
                                     child: Text("Export logs"),
                                   ),
                                 ),
@@ -1341,11 +1341,11 @@ class SettingsScreenState extends State<AppSettingsScreen> {
         "application/zip",
       ]);
       // ignore: use_build_context_synchronously
-      getIt<SnackbarService>().notify(S.of(context).screenSettingsSavedBackup,
-          SnackbarNotificationType.info);
+      getIt<SnackbarService>()
+          .notify("Logs exported", SnackbarNotificationType.info);
     } catch (e) {
       getIt<SnackbarService>()
-          .notify('Saving backup failed $e', SnackbarNotificationType.severe);
+          .notify('Saving logs failed $e', SnackbarNotificationType.severe);
       log.severe("Save database failed $e");
     }
   }
