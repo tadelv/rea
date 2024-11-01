@@ -106,7 +106,7 @@ class De1ShotProfile {
   }
 
   void insertStep(int index, De1ShotFrameClass frame) {
-    if (index < 0 || index >= shotFrames.length) return;
+    if (index < 0 || index > shotFrames.length) return;
     shotFrames.insert(index, frame);
     shotHeader.numberOfFrames = shotFrames.length;
   }
