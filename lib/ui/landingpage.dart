@@ -20,6 +20,7 @@ import 'package:despresso/ui/screens/water_screen.dart';
 import 'package:despresso/ui/widgets/machine_footer.dart';
 import 'package:despresso/ui/widgets/screen_saver.dart';
 import 'package:feedback_sentry/feedback_sentry.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -141,7 +142,6 @@ class LandingPageState extends State<LandingPage>
             break;
           case SnackbarNotificationType.info:
             col = null;
-            Theme.of(context).primaryColor;
             log.info(n.text);
             break;
           case SnackbarNotificationType.warn:
@@ -207,7 +207,7 @@ class LandingPageState extends State<LandingPage>
       MaterialPageRoute(
         builder: (context) => const WhatsNewPage.changelog(
           title: Text(
-            "despresso What's New",
+            "What's New in REA",
             textAlign: TextAlign.center,
             style: TextStyle(
               // Text Style Needed to Look like iOS 11
@@ -274,18 +274,21 @@ class LandingPageState extends State<LandingPage>
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color(0xFF4F378B),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
               ),
               child: Column(
                 children: [
-                  Image.asset("assets/iconStore.png", height: 80),
-                  const Text("despresso"),
+                  Image.asset("assets/focus.png", height: 80),
+                  Text(
+                    "REA",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.auto_graph_outlined),
+              leading: const Icon(Icons.library_books),
               title: Text(S.of(context).mainMenuEspressoDiary),
               onTap: () {
                 _screensaver.pause();
@@ -298,7 +301,7 @@ class LandingPageState extends State<LandingPage>
               },
             ),
             ListTile(
-              leading: const Icon(Icons.add),
+              leading: const Icon(Icons.auto_graph),
               title: Text(S.of(context).profiles),
               onTap: () {
                 _screensaver.pause();
@@ -313,7 +316,7 @@ class LandingPageState extends State<LandingPage>
               },
             ),
             ListTile(
-              leading: const Icon(Icons.coffee),
+              leading: const Icon(Icons.coffee_outlined),
               title: Text(S.of(context).beans),
               onTap: () {
                 _screensaver.pause();
@@ -426,18 +429,30 @@ class LandingPageState extends State<LandingPage>
                     return AboutListTile(
                         icon: const Icon(Icons.info),
                         applicationIcon:
-                            Image.asset("assets/iconStore.png", height: 80),
-                        applicationName: 'despresso',
+                            Image.asset("assets/focus.png", height: 80),
+                        applicationName: 'REA',
                         applicationVersion:
                             "Version ${snapshot.data!.version} (${snapshot.data!.buildNumber})",
                         applicationLegalese:
-                            '\u{a9} 2024 MMMedia Markus Miertschink',
+                            '\u{a9} ${DateTime.now().year} Vid Tadel',
                         aboutBoxChildren: [
                           TextButton(
                               onPressed: () {
                                 openWhatsNew();
                               },
-                              child: const Text("Show Changelog"))
+                              child: const Text("Show Changelog")),
+                          RichText(
+                              text: TextSpan(children: [
+                            TextSpan(text: "Based on the excellent "),
+                            TextSpan(
+                                text: "Despresso app from Markus",
+																style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    launchUrl(Uri.parse(
+                                        "https://github.com/obiwan007/despresso"));
+                                  })
+                          ]))
                         ]
                         // aboutBoxChildren: aboutBoxChildren,
                         );

@@ -500,6 +500,14 @@ packages:
       url: "https://github.com/mchome/flutter_colorpicker"
     source: git
     version: "1.1.0"
+  flutter_glow:
+    dependency: "direct main"
+    description:
+      name: flutter_glow
+      sha256: d9b55bcc01eb0f0d922df837015c63732b1c7d62395c2bfa750f3d741ba2336e
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2"
   flutter_keyboard_visibility:
     dependency: "direct main"
     description:

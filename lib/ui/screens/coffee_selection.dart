@@ -82,75 +82,69 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          SizedBox(
-                              width: 150,
-                              child: Text(
-                                  S.of(context).screenBeanSelectSelectBeans
-																	)),
-                          Expanded(
-                            flex: 8,
-                            child: DropdownButton(
-                              isExpanded: true,
-                              alignment: Alignment.centerLeft,
-                              value: _selectedCoffeeId,
-                              items: coffees,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedCoffeeId = value!;
-                                  if (value == 0) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const CoffeeEdit(0)),
-                                    );
-                                  } else {
-                                    coffeeService
-                                        .setSelectedCoffee(_selectedCoffeeId);
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                          if (_editCoffeeMode == EditModes.show)
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              CoffeeEdit(_selectedCoffeeId)),
-                                    );
-                                    // _editCoffeeMode = EditModes.edit;
-                                    // _editRosterMode = EditModes.show;
-                                    // _editedCoffee = coffee;
-                                    // form.value = _editedCoffee.toJson();
-                                  });
-                                },
-                                child: Text(S.of(context).edit),
-                              ),
-                            ),
-                        ],
+                      SizedBox(
+                          width: 150,
+                          child:
+                              Text(S.of(context).screenBeanSelectSelectBeans)),
+                      Expanded(
+                        flex: 8,
+                        child: DropdownButton(
+                          isExpanded: true,
+                          alignment: Alignment.centerLeft,
+                          value: _selectedCoffeeId,
+                          items: coffees,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCoffeeId = value!;
+                              if (value == 0) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const CoffeeEdit(0)),
+                                );
+                              } else {
+                                coffeeService
+                                    .setSelectedCoffee(_selectedCoffeeId);
+                              }
+                            });
+                          },
+                        ),
                       ),
-                      if (_selectedCoffeeId > 0) coffeeData(),
+                      if (_editCoffeeMode == EditModes.show)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          CoffeeEdit(_selectedCoffeeId)),
+                                );
+                                // _editCoffeeMode = EditModes.edit;
+                                // _editRosterMode = EditModes.show;
+                                // _editedCoffee = coffee;
+                                // form.value = _editedCoffee.toJson();
+                              });
+                            },
+                            child: Text(S.of(context).edit),
+                          ),
+                        ),
                     ],
                   ),
-                ),
+                  if (_selectedCoffeeId > 0) coffeeData(),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -170,8 +164,7 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
       final Roaster r = coffeeService.roasterBox.get(p.roaster.targetId)!;
       return DropdownMenuItem(
         value: p.id,
-        child: Text("${p.name} (${r.name})"
-            ),
+        child: Text("${p.name} (${r.name})"),
       );
     }).toList();
     coffees.insert(0, DropdownMenuItem(value: 0, child: Text(newCoffee.name)));
@@ -186,12 +179,15 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
     DateTime d1 = DateTime.now();
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
         KeyValueWidget(
             label: S.of(context).screenBeanSelectNameOfBean,
             value:
                 coffee.name + (roaster != null ? " by ${roaster.name}" : "")),
+        const SizedBox(
+          height: 10,
+        ),
         if (coffee.description.isNotEmpty)
           KeyValueWidget(
               label: S.of(context).screenBeanSelectDescriptionOfBean,
@@ -199,58 +195,45 @@ class CoffeeSelectionTabState extends State<CoffeeSelectionTab> {
         const SizedBox(height: 10),
         KeyValueWidget(
             label: S.of(context).screenBeanSelectTasting, value: coffee.taste),
+        const SizedBox(
+          height: 10,
+        ),
         KeyValueWidget(
             label: S.of(context).screenBeanSelectTypeOfBeans,
             value: coffee.type),
+        const SizedBox(
+          height: 10,
+        ),
+        KeyValueWidget(label: "Process", value: coffee.process),
+        const SizedBox(
+          height: 10,
+        ),
         KeyValueWidget(
             label: S.of(context).screenBeanSelectRoastingDate,
             value:
                 "${DateFormat.Md().format(coffee.roastDate)}, ${d1.difference(coffee.roastDate).inDays} ${S.of(context).screenBeanSelectDaysAgo}"),
         const SizedBox(height: 10),
         KeyValueWidget(
-          label: S.of(context).screenBeanSelectAcidity,
-          value: "",
-          widget: RatingBarIndicator(
-            rating: coffee.acidRating,
-            itemBuilder: (context, index) => const Icon(
-              Icons.star,
-              color: Colors.amber,
-            ),
-            itemCount: 5,
-            itemSize: 20.0,
-            direction: Axis.horizontal,
-          ),
-        ),
-        const SizedBox(height: 10),
-        KeyValueWidget(
-          label: S.of(context).screenBeanSelectIntensity,
-          value: "",
-          widget: RatingBarIndicator(
-            rating: coffee.intensityRating,
-            itemBuilder: (context, index) => const Icon(
-              Icons.star,
-              color: Colors.red,
-            ),
-            itemCount: 5,
-            itemSize: 20.0,
-            direction: Axis.horizontal,
-          ),
-        ),
-        const SizedBox(height: 10),
-        KeyValueWidget(
           label: S.of(context).screenBeanSelectRoastLevel,
           value: "",
           widget: RatingBarIndicator(
             rating: coffee.roastLevel,
-            itemBuilder: (context, index) => const Icon(
+            itemBuilder: (context, index) => Icon(
               Icons.star,
-              color: Colors.lightBlue,
+              color: Theme.of(context).colorScheme.primary,
             ),
             itemCount: 5,
             itemSize: 20.0,
             direction: Axis.horizontal,
           ),
         ),
+        SizedBox(
+          height: 10,
+        ),
+        if (coffee.description.isEmpty == false)
+          KeyValueWidget(
+              label: S.of(context).screenRecipeCoffeeNotes,
+              value: coffee.description)
       ],
     );
   }
