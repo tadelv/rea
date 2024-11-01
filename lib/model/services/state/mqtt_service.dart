@@ -72,7 +72,7 @@ class MqttService extends ChangeNotifier {
         client.pongCallback = pong;
 
         final connMess = MqttConnectMessage()
-            .withClientIdentifier('despresso')
+            .withClientIdentifier('rea')
             // .withWillTopic('willtopic')
             // .withWillMessage('My Will message')
             .startClean()

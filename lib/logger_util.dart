@@ -39,7 +39,7 @@ Future<void> initLogger() async {
   ).attachToLogger(Logger.root);
 
   log.info("##############################");
-  log.info("STARTING APPLICATION DESPRESSO");
+  log.info("STARTING REA");
   log.info("##############################");
 }
 
