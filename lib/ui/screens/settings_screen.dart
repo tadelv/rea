@@ -1145,6 +1145,30 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                         S.of(context).screenSettingsRestore),
                                   ),
                                 ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    onPressed: isBusy
+                                          ? null
+                                          : () async {
+                                              setState(() {
+                                                isBusy = true;
+                                                _controllerRefresh.add(0);
+                                              });
+                                              await exportLogs();
+                                              Future.delayed(
+                                                Duration(seconds: 3),
+                                                () {
+                                                  setState(() {
+                                                    isBusy = false;
+                                                    _controllerRefresh.add(0);
+                                                  });
+                                                },
+                                              );
+                                            },
+                                    child: Text("Export logs"),
+                                  ),
+                                ),
                               ],
                             ),
                             if (isBusy)
@@ -1342,7 +1366,7 @@ class SettingsScreenState extends State<AppSettingsScreen> {
         final profileBak = File("${tmpDir.path}/profileBackup.bak");
 
         if (profileBak.existsSync()) {
-				log.info("found profile bak at: ${profileBak.path}");
+          log.info("found profile bak at: ${profileBak.path}");
           Uint8List profilesMap = await profileBak.readAsBytes();
           getIt<ProfileService>().setProfilesFromBackup(profilesMap);
         }
