@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'dart:io';
 
@@ -341,8 +342,10 @@ class ProfileService extends ChangeNotifier {
     buffer.writeln('"tank_temperature": "${prof.shotHeader.tankTemperature}",');
     buffer.writeln('"target_weight": "${prof.shotHeader.targetWeight}",');
     buffer.writeln('"target_volume": "${prof.shotHeader.targetVolume}",');
-    buffer.writeln('"target_volume_count_start": "${prof.shotHeader.targetVolumeCountStart}",');
-    buffer.writeln('"legacy_profile_type": "${prof.shotHeader.legacyProfileType}",');
+    buffer.writeln(
+        '"target_volume_count_start": "${prof.shotHeader.targetVolumeCountStart}",');
+    buffer.writeln(
+        '"legacy_profile_type": "${prof.shotHeader.legacyProfileType}",');
     buffer.writeln('"type": "${prof.shotHeader.type}",');
     buffer.writeln('"lang": "${prof.shotHeader.lang}",');
     buffer.writeln('"hidden": "${prof.shotHeader.hidden}",');
@@ -392,7 +395,8 @@ class ProfileService extends ChangeNotifier {
         exitCondition = "under";
         exitValue = step.triggerVal.toString();
       }
-      if (step.flag & (DoCompare | DC_CompF | DC_GT) == DoCompare | DC_CompF | DC_GT) {
+      if (step.flag & (DoCompare | DC_CompF | DC_GT) ==
+          DoCompare | DC_CompF | DC_GT) {
         exitType = "flow";
         exitCondition = "over";
         exitValue = step.triggerVal.toString();
@@ -408,11 +412,11 @@ class ProfileService extends ChangeNotifier {
       }
 
       if (step.limiter != null) {
-          buffer.writeln(',');
-          buffer.writeln('"limiter": {');
-          buffer.writeln('  "value": "${step.limiterValue}",');
-          buffer.writeln('  "range": "${step.limiterRange}"');
-          buffer.writeln("  }");
+        buffer.writeln(',');
+        buffer.writeln('"limiter": {');
+        buffer.writeln('  "value": "${step.limiterValue}",');
+        buffer.writeln('  "range": "${step.limiterRange}"');
+        buffer.writeln("  }");
       }
 
       if (frameNum < prof.shotFrames.length - 1) {
@@ -606,6 +610,40 @@ class ProfileService extends ChangeNotifier {
       }
     } else {
       throw ("Error in code");
+    }
+  }
+
+  Future<Uint8List> getProfilesBackup() async {
+    final files = await getSavedProfileFiles();
+    // build json array
+    Map<String, String> jsonMap = files.fold({}, (json, file) {
+      if (!file.existsSync()) {
+        return json;
+      }
+      File f = File(file.path);
+      json[file.uri.toString()] = f.readAsStringSync();
+      return json;
+    });
+    final jsonData = jsonEncode(jsonMap);
+    return Uint8List.fromList(jsonData.runes.toList());
+  }
+
+  Future<void> setProfilesFromBackup(Uint8List dataList) async {
+    String profileList = String.fromCharCodes(dataList.toList());
+    Map<String, dynamic> jsonMap = jsonDecode(profileList);
+		log.fine("got list: $jsonMap");
+
+    final directory = await getApplicationDocumentsDirectory();
+    log.info("Storing to path:${directory.path}");
+    final Directory appDocDirFolder = Directory('${directory.path}/profiles/');
+
+    if (!appDocDirFolder.existsSync()) {
+      appDocDirFolder.create(recursive: true);
+    }
+    for (var key in jsonMap.keys) {
+      String filename = key.substring(key.lastIndexOf("/"));
+      File f = File("${appDocDirFolder.path}/$filename");
+      await f.writeAsString(jsonMap[key]!);
     }
   }
 }

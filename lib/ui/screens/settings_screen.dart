@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -10,6 +11,7 @@ import 'package:despresso/model/services/ble/machine_service.dart';
 import 'package:despresso/model/services/ble/scale_service.dart';
 import 'package:despresso/model/services/state/mqtt_service.dart';
 import 'package:despresso/model/services/state/notification_service.dart';
+import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/model/services/state/visualizer_service.dart';
 import 'package:despresso/objectbox.dart';
@@ -17,12 +19,14 @@ import 'package:despresso/ui/widgets/screen_saver.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_archive/flutter_archive.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as ble;
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:logging/logging.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as bledevice;
+import 'package:path_provider/path_provider.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
 import '../../service_locator.dart';
@@ -1266,21 +1270,52 @@ class SettingsScreenState extends State<AppSettingsScreen> {
   Future<void> backupDatabase() async {
     try {
       var objectBox = getIt<ObjectBox>();
+      var profileService = getIt<ProfileService>();
       List<Uint8List> data = [];
       data.add(objectBox.getBackupData());
-      data.add(await getLoggerBackupData());
+      data.add(await profileService.getProfilesBackup());
 
+      // combine data into one zip file
+      Directory tmpDir = await getTemporaryDirectory();
+      await tmpDir.create(recursive: true);
+      final zipFile = File("${tmpDir.path}/backup.zip");
+      final dbBak = File("${tmpDir.path}/dBBackup.bak");
+      final profileBak = File("${tmpDir.path}/profileBackup.bak");
+
+      await dbBak.writeAsBytes(data[0]);
+      await profileBak.writeAsBytes(data[1]);
+
+      await ZipFile.createFromFiles(
+          sourceDir: tmpDir, files: [dbBak, profileBak], zipFile: zipFile);
+
+      Uint8List backupData = await zipFile.readAsBytes();
+
+      await DocumentFileSavePlus().saveFile(backupData,
+          "rea_backup_${DateTime.now().toLocal()}", "application/zip");
+
+      log.info("Backupdata saved ${data[0].length + data[1].length}");
+      // ignore: use_build_context_synchronously
+      getIt<SnackbarService>().notify(S.of(context).screenSettingsSavedBackup,
+          SnackbarNotificationType.info);
+    } catch (e) {
+      getIt<SnackbarService>()
+          .notify('Saving backup failed $e', SnackbarNotificationType.severe);
+      log.severe("Save database failed $e");
+    }
+  }
+
+  Future<void> exportLogs() async {
+    try {
+      List<Uint8List> data = [];
+      data.add(await getLoggerBackupData());
       var dateStr = DateTime.now().toLocal();
-      // var doc = DocumentFileSavePlus();
+
       await DocumentFileSavePlus()
           .saveMultipleFiles(dataList: data, fileNameList: [
-        "despresso_backup_$dateStr.bak",
-        "logs_$dateStr.zip"
+        "logs_$dateStr.zip",
       ], mimeTypeList: [
-        "application/octet-stream",
         "application/zip",
       ]);
-      log.info("Backupdata saved ${data[0].length + data[1].length}");
       // ignore: use_build_context_synchronously
       getIt<SnackbarService>().notify(S.of(context).screenSettingsSavedBackup,
           SnackbarNotificationType.info);
@@ -1296,17 +1331,30 @@ class SettingsScreenState extends State<AppSettingsScreen> {
         .pickFiles(lockParentWindow: true, type: FileType.any);
 
     if (filePickerResult != null) {
-      var objectBox = getIt<ObjectBox>();
+      // extract zip to tmp, restore db and profiles
       try {
-        await objectBox
-            .restoreBackupData(filePickerResult.files.single.path.toString());
+        var file = File(filePickerResult.files.first.path!);
+        Directory tmpDir = await getTemporaryDirectory();
+        await tmpDir.create(recursive: true);
+        await ZipFile.extractToDirectory(zipFile: file, destinationDir: tmpDir);
+
+        final dbBak = File("${tmpDir.path}/dBBackup.bak");
+        final profileBak = File("${tmpDir.path}/profileBackup.bak");
+
+        if (profileBak.existsSync()) {
+				log.info("found profile bak at: ${profileBak.path}");
+          Uint8List profilesMap = await profileBak.readAsBytes();
+          getIt<ProfileService>().setProfilesFromBackup(profilesMap);
+        }
+        var objectBox = getIt<ObjectBox>();
+        await objectBox.restoreBackupData(dbBak.path);
         showRestartNowScreen();
         // ignore: use_build_context_synchronously
         getIt<SnackbarService>().notify(
             S.of(context).screenSettingsRestoredBackup,
             SnackbarNotificationType.ok);
       } catch (e) {
-        log.severe("Store restored $e");
+        log.severe("Restore failed: $e");
         getIt<SnackbarService>()
             // ignore: use_build_context_synchronously
             .notify(S.of(context).screenSettingsFailedRestoringBackup,
