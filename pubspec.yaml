@@ -123,16 +123,14 @@ source_gen:combining_builder:
   generate_for:
     - lib/**/model/*.dart
 flutter_native_splash:
-  color: "#c988be"
+  color: "#000000"
   image: assets/splash.png
-  fullscreen: true
   # android_gravity: fill
   # ios_content_mode: fill
 
   android_12:
-    color: "#c988be"
+    color: "#000000"
     image: assets/splash.png
-    fullscreen: true
     # android_gravity: fill
     # ios_content_mode: fill
 
