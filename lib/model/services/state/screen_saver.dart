@@ -146,7 +146,7 @@ class ScreensaverService extends ChangeNotifier {
         _screenSaverTimer > _settings.screenBrightnessTimer * 60 &&
         screenSaverOn == false) {
       await ScreenBrightness()
-          .setScreenBrightness(_settings.screenBrightnessValue);
+          .setApplicationScreenBrightness(_settings.screenBrightnessValue);
       screenSaverOn = true;
       notifyListeners();
     }
@@ -164,7 +164,7 @@ class ScreensaverService extends ChangeNotifier {
     log.info("Tap");
     if (screenSaverOn) {
       screenSaverOn = false;
-      ScreenBrightness().resetScreenBrightness();
+      ScreenBrightness().resetApplicationScreenBrightness();
       setWakelock();
 
       if (_settings.screenTapWake) {

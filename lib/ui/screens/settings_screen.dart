@@ -1422,7 +1422,7 @@ class SettingsScreenState extends State<AppSettingsScreen> {
             Expanded(
               flex: 5,
               child: SizedBox.expand(
-                child: Image.asset("assets/logo.png"),
+                child: Image.asset("assets/splash.png"),
               ),
             ),
             Expanded(

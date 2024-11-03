@@ -291,7 +291,6 @@ class LandingPageState extends State<LandingPage>
               leading: const Icon(Icons.library_books),
               title: Text(S.of(context).mainMenuEspressoDiary),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -304,7 +303,6 @@ class LandingPageState extends State<LandingPage>
               leading: const Icon(Icons.auto_graph),
               title: Text(S.of(context).profiles),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -319,7 +317,6 @@ class LandingPageState extends State<LandingPage>
               leading: const Icon(Icons.coffee_outlined),
               title: Text(S.of(context).beans),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -334,7 +331,6 @@ class LandingPageState extends State<LandingPage>
               leading: const Icon(Icons.graphic_eq),
               title: Text(S.of(context).mainMenuStatistics),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -350,7 +346,6 @@ class LandingPageState extends State<LandingPage>
               leading: const Icon(Icons.settings),
               title: Text(S.of(context).settings),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -367,14 +362,12 @@ class LandingPageState extends State<LandingPage>
               leading: const Icon(Icons.build),
               title: Text(S.of(context).mainMenuMaintenance),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => const MaintenanceScreen()),
                 ).then((value) {
-                  _screensaver.resume();
                   machineService.updateFlush();
                 });
                 // Then close the drawer

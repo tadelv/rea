@@ -362,7 +362,6 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         profileName:
                             widget.profileService.currentProfile?.title ??
                                 "Default");
-                    _screensaver.pause();
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -374,7 +373,6 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     _screensaver.resume();
                     break;
                   case SelectedMenu.edit:
-                    _screensaver.pause();
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -391,7 +389,6 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     var id = await widget.coffeeService.copyRecipeFromId(
                         widget.coffeeService.currentRecipe!.id);
                     if (id > 0) {
-                      _screensaver.pause();
                       // ignore: use_build_context_synchronously
                       await Navigator.push(
                         context,

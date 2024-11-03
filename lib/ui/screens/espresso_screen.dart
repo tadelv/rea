@@ -820,7 +820,6 @@ class EspressoScreenState extends State<EspressoScreen> {
         ),
         TextButton.icon(
           onPressed: () {
-            _screensaver.pause();
             Navigator.push(
               context,
               MaterialPageRoute(
