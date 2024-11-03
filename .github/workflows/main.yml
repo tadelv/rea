@@ -28,14 +28,10 @@ jobs:
           key: deps-${{ hashFiles('**/pubspec.lock') }}
 
       - name: Decode secrets.properties file
-        env:
-          KEYSTORE: ${{ secrets.KEYSTORE }}
         run: echo ${{ secrets.KEYSTORE }} | base64 -d > release.keystore
 
       - name: bash
-        env:
-          KEYPROPERTIES: ${{ secrets.KEYPROPERTIES }}
-        run: echo {{ $secrets.PROPS }} > android/key.properties        
+        run: echo ${{ secrets.PROPS }} > android/key.properties        
 
       - run: ls -l android
 
