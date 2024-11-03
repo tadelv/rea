@@ -43,7 +43,7 @@ class DecrementIntent extends Intent {
 }
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({Key? key, required this.title}) : super(key: key);
+  const LandingPage({super.key, required this.title});
 
   final String title;
 
