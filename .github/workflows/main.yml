@@ -37,6 +37,11 @@ jobs:
           KEYPROPERTIES: ${{ secrets.PROPS }}
         run: echo "$KEYPROPERTIES" > android/key.properties        
 
+      - name: bash
+        env:
+          ENV_DIST: ${{ secrets.ENV_DIST }}
+        run: echo "$ENV_DIST" > .env.dist
+
       - run: ls -l android
 
       - name: JavaSetup
@@ -65,7 +70,7 @@ jobs:
         run: flutter build ios --release --no-codesign
 
       - name: Build APK  
-        run: flutter build apk
+        run: flutter build apk --dart-define-from-file ".env.dist"
 
       - name: Upload Android app
         uses: actions/upload-artifact@v4
