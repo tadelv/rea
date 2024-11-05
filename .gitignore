@@ -49,3 +49,4 @@ doc/api/
 *.js.deps
 *.js.map
 .env.*
+*.keystore
