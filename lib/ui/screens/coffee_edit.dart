@@ -71,12 +71,12 @@ class CoffeeEditState extends State<CoffeeEdit> {
     } else {
       _editedCoffee = Coffee();
     }
-    if (_editedCoffee.roaster.targetId == 0) {
+    if (_editedCoffee.roaster.targetId == 0 &&
+        coffeeService.selectedRoasterId > 1) {
       _selectedRoasterId = coffeeService.selectedRoasterId;
     } else {
       _selectedRoasterId = _editedCoffee.roaster.targetId;
     }
-    log.shout("found roaster id: $_selectedRoasterId");
     theForm = fb.group(<String, Object>{
       'name': [_editedCoffee.name, Validators.required],
       'description': [_editedCoffee.description],
@@ -92,7 +92,7 @@ class CoffeeEditState extends State<CoffeeEdit> {
       "farm": [_editedCoffee.farm],
       "cropyear": [_editedCoffee.cropyear],
       "process": [_editedCoffee.process],
-      "elevation": [_editedCoffee.elevation, Validators.number],
+      "elevation": [_editedCoffee.elevation, Validators.number(allowNegatives: false)],
     });
   }
 
@@ -180,7 +180,7 @@ class CoffeeEditState extends State<CoffeeEdit> {
             value: _selectedRoasterId,
             items: loadRoasters(),
             onChanged: (value) async {
-              if (value == null) {
+              if (value == null || value == 0) {
                 // navigate to new roaster
                 Navigator.push(
                     context,
@@ -439,36 +439,43 @@ class CoffeeEditState extends State<CoffeeEdit> {
   }
 
   List<DropdownMenuItem<int>> loadRoasters() {
-    var roasters = coffeeService.roasterBox
-        .getAll()
-        .map((p) => DropdownMenuItem(
-            value: p.id,
-            child: Row(children: [
-              Text(p.name),
-              if (p.id > 0 && p.id != _selectedRoasterId)
-                ElevatedButton(
-                    onPressed: () {
-                      try {
-                        Roaster? r = coffeeService.roasterBox.get(p.id);
-                        if (r != null) {
-                          coffeeService.deleteRoaster(r);
-                          updateCoffee();
-                          Navigator.pop(roasterDropdownKey.currentContext!);
-                        }
-                      } catch (e) {
-                        getIt<SnackbarService>().notify(
-                            "Failed to delete roaster: $e",
-                            SnackbarNotificationType.severe);
-                      }
-                    },
-                    child: const Icon(Icons.crisis_alert_rounded)),
-            ])))
-        .toList();
-    roasters.insert(
-        0, const DropdownMenuItem(child: Text("<Add new Roaster>")));
+    var roasters = List<DropdownMenuItem<int>>.empty(growable: true);
+    roasters.add(
+        const DropdownMenuItem(value: 0, child: Text("<Add new Roaster>")));
+    final savedRoasters = coffeeService.roasterBox.getAll();
+    if (savedRoasters.isEmpty) {
+      return roasters;
+    }
+    roasters.insertAll(
+        1,
+        savedRoasters
+            .map((p) => DropdownMenuItem(
+                value: p.id,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(p.name),
+                      if (p.id > 0 && p.id != _selectedRoasterId)
+                        ElevatedButton(
+                            onPressed: () {
+                              try {
+                                Roaster? r = coffeeService.roasterBox.get(p.id);
+                                if (r != null) {
+                                  coffeeService.deleteRoaster(r);
+                                  updateCoffee();
+                                  Navigator.pop(
+                                      roasterDropdownKey.currentContext!);
+                                }
+                              } catch (e) {
+                                getIt<SnackbarService>().notify(
+                                    "Failed to delete roaster: $e",
+                                    SnackbarNotificationType.severe);
+                              }
+                            },
+                            child: const Icon(Icons.delete)),
+                    ])))
+            .toList());
 
-    log.shout("new roasters: ${roasters.map(((e) => e.value))}");
-    log.shout("selected id: $_selectedRoasterId");
     return roasters;
   }
 }
