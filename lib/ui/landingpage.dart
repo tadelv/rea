@@ -83,6 +83,8 @@ class LandingPageState extends State<LandingPage>
   );
 
   late StreamSubscription<bool> _keyboardSubscription;
+  final FocusNode hwKbdFocus = FocusNode();
+  final FocusNode recipesFocus = FocusNode();
 
   @override
   void initState() {
@@ -248,12 +250,23 @@ class LandingPageState extends State<LandingPage>
             ),
             Expanded(
               child: Focus(
+                  focusNode: hwKbdFocus,
                   autofocus: true,
                   onKeyEvent: _onKey,
+                  onFocusChange: (val) {
+                    if (val) {
+                      return;
+                    }
+                    if (!recipesFocus.hasPrimaryFocus &&
+                        !hwKbdFocus.hasPrimaryFocus) {
+                      hwKbdFocus.requestFocus();
+                    }
+                  },
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      const RecipeScreen(),
+                      Focus(
+                          focusNode: recipesFocus, child: const RecipeScreen()),
                       const EspressoScreen(),
                       if (_settings.useSteam) const SteamScreen(),
                       if (_settings.useWater) const WaterScreen(),
@@ -659,6 +672,7 @@ class LandingPageState extends State<LandingPage>
         return Scaffold(
             backgroundColor: Colors.black,
             body: Focus(
+              focusNode: hwKbdFocus,
               autofocus: true,
               onKeyEvent: _onKey,
               child: GestureDetector(
@@ -687,10 +701,10 @@ class LandingPageState extends State<LandingPage>
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     log.fine("got $event from $node");
-    if (event is! KeyDownEvent) {
+    if (event is! KeyDownEvent || hwKbdFocus.hasPrimaryFocus == false) {
       return KeyEventResult.ignored;
     }
-    log.fine("event: $event");
+    log.fine("handling event: $event");
     switch (event.logicalKey) {
       case LogicalKeyboardKey.keyE:
         log.info("Brewing");
@@ -743,6 +757,6 @@ class LandingPageState extends State<LandingPage>
         }
     }
 
-    return KeyEventResult.ignored;
+    return KeyEventResult.handled;
   }
 }
