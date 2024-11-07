@@ -41,18 +41,6 @@ class CoffeeEditState extends State<CoffeeEdit> {
 
   int _selectedRoasterId = 0;
 
-  FormGroup get theForm2 => fb.group(<String, Object>{
-        'name': ['test', Validators.required],
-        'description': [''],
-        'type': [''],
-        'price': [''],
-        'taste': [''],
-        'origin': [''],
-        'intensityRating': [0.1],
-        'acidRating': [0.1],
-        'roastLevel': [0.1],
-      });
-
   late FormGroup theForm;
 
   CoffeeEditState();
