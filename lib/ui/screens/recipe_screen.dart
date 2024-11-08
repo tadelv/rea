@@ -1,5 +1,4 @@
 // ignore_for_file: unnecessary_string_interpolations
-
 import 'package:despresso/model/recipe.dart';
 import 'package:despresso/model/services/ble/machine_service.dart';
 import 'package:despresso/model/services/ble/scale_service.dart';
@@ -529,7 +528,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                             ),
                           ],
                         ),
-                      Divider(color: Theme.of(context).colorScheme.primary,),
+                      Divider(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -563,7 +564,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           ),
                         ],
                       ),
-                      Divider(color: Theme.of(context).colorScheme.primary,),
+                      Divider(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
 
                       // if ((widget.coffeeService.currentRecipe?.grinderSettings ?? 0) > 0)
                       Row(
@@ -611,27 +614,34 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         ],
                       ),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        //crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          Expanded(child: Text("Ratio ")),
+                          Expanded(child: Text("${widget.coffeeService.currentRecipe?.ratio1.toInt() ?? 1} :")),
                           Expanded(
-                              child: Text(S.of(context).screenRecipeRatio)),
-                          Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                    "${formatRatio(widget.coffeeService.currentRecipe?.ratio1 ?? 0.0)} : ${formatRatio(widget.coffeeService.currentRecipe?.ratio2 ?? 0.0)}"),
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    _openRatioDialog();
-                                    setState(() => {});
-                                  },
-                                )
-                              ],
-                            ),
-                          ),
+													flex: 2,
+                              child: SpinBox(
+                            keyboardType: const TextInputType.numberWithOptions(
+                                signed: false, decimal: true),
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (val) {
+                              var r = widget.coffeeService.currentRecipe;
+                              if (r != null && val > 0) {
+                                r.ratio2 = val;
+                                r.adjustedWeight = val * r.grinderDoseWeight;
+                                widget.coffeeService.updateRecipe(r);
+                              }
+                                setState(() {});
+                            },
+                            max: 20.0,
+                            value:
+                                widget.coffeeService.currentRecipe?.ratio2 ?? 0,
+                            decimals: 1,
+                            step: 0.1,
+                            decoration: InputDecoration(
+                                contentPadding: EdgeInsets.all(5)),
+                          )),
                         ],
                       ),
                       Row(

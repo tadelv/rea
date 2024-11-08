@@ -86,6 +86,7 @@ class RecipeEditState extends State<RecipeEdit> {
         _editedRecipe.ratio1,
         Validators.min(0.0),
         Validators.max(100.0),
+        Validators.number(allowNegatives: false, allowedDecimals: 0)
       ],
       'ratio2': [
         _editedRecipe.ratio2,
@@ -124,7 +125,9 @@ class RecipeEditState extends State<RecipeEdit> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: widget.title == null ? Text(S.of(context).screenRecipeEditTitle) : Text(widget.title!),
+        title: widget.title == null
+            ? Text(S.of(context).screenRecipeEditTitle)
+            : Text(widget.title!),
         actions: <Widget>[
           ElevatedButton(
             child: const Text(
@@ -203,11 +206,12 @@ class RecipeEditState extends State<RecipeEdit> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Profile", style: Theme.of(context).textTheme.labelMedium),
+                    Text("Profile",
+                        style: Theme.of(context).textTheme.labelMedium),
                     ProfileSelect(
                       onChanged: (p0) {
                         _editedRecipe.profileId = p0.id;
-												_editedRecipe.profileName = p0.title;
+                        _editedRecipe.profileName = p0.title;
                       },
                     ),
                   ],
@@ -221,7 +225,8 @@ class RecipeEditState extends State<RecipeEdit> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Beans", style: Theme.of(context).textTheme.labelMedium),
+                    Text("Beans",
+                        style: Theme.of(context).textTheme.labelMedium),
                     BeanSelect(
                       onChanged: (coffeeId) {
                         _editedRecipe.coffee.targetId = coffeeId;
@@ -229,7 +234,8 @@ class RecipeEditState extends State<RecipeEdit> {
                           if (coffeeId == 0) {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const CoffeeEdit(0)),
+                              MaterialPageRoute(
+                                  builder: (context) => const CoffeeEdit(0)),
                             );
                           } else {
                             coffeeService.setSelectedCoffee(coffeeId);
@@ -257,9 +263,11 @@ class RecipeEditState extends State<RecipeEdit> {
                     width: 200,
                     child: ReactiveTextField<double>(
                       formControlName: 'grinderSettings',
-                      keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                          signed: true, decimal: true),
                       decoration: InputDecoration(
-                        labelText: S.of(context).screenRecipeEditGrinderSettings,
+                        labelText:
+                            S.of(context).screenRecipeEditGrinderSettings,
                       ),
                     ),
                   ),
@@ -287,7 +295,8 @@ class RecipeEditState extends State<RecipeEdit> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(S.of(context).screenRecipeEditDosingAndWeights, style: Theme.of(context).textTheme.labelMedium),
+              Text(S.of(context).screenRecipeEditDosingAndWeights,
+                  style: Theme.of(context).textTheme.labelMedium),
               Row(
                 children: [
                   SizedBox(
@@ -304,8 +313,10 @@ class RecipeEditState extends State<RecipeEdit> {
                       },
                       showErrors: (control) => control.invalid,
                       validationMessages: {
-                        ValidationMessage.max: (error) => 'A value greater than ${(error as Map)['max']} is not accepted',
-                        ValidationMessage.min: (error) => 'A value lower than ${(error as Map)['min']} is not accepted',
+                        ValidationMessage.max: (error) =>
+                            'A value greater than ${(error as Map)['max']} is not accepted',
+                        ValidationMessage.min: (error) =>
+                            'A value lower than ${(error as Map)['min']} is not accepted',
                       },
                     ),
                   ),
@@ -326,8 +337,10 @@ class RecipeEditState extends State<RecipeEdit> {
                       },
                       showErrors: (control) => control.invalid,
                       validationMessages: {
-                        ValidationMessage.max: (error) => 'A value greater than ${(error as Map)['max']} is not accepted',
-                        ValidationMessage.min: (error) => 'A value lower than ${(error as Map)['min']} is not accepted',
+                        ValidationMessage.max: (error) =>
+                            'A value greater than ${(error as Map)['max']} is not accepted',
+                        ValidationMessage.min: (error) =>
+                            'A value lower than ${(error as Map)['min']} is not accepted',
                       },
                     ),
                   ),
@@ -348,8 +361,10 @@ class RecipeEditState extends State<RecipeEdit> {
                       },
                       showErrors: (control) => control.invalid,
                       validationMessages: {
-                        ValidationMessage.max: (error) => 'A value greater than ${(error as Map)['max']} is not accepted',
-                        ValidationMessage.min: (error) => 'A value lower than ${(error as Map)['min']} is not accepted',
+                        ValidationMessage.max: (error) =>
+                            'A value greater than ${(error as Map)['max']} is not accepted',
+                        ValidationMessage.min: (error) =>
+                            'A value lower than ${(error as Map)['min']} is not accepted',
                       },
                     ),
                   ),
@@ -366,8 +381,10 @@ class RecipeEditState extends State<RecipeEdit> {
                       ),
                       showErrors: (control) => control.invalid,
                       validationMessages: {
-                        ValidationMessage.max: (error) => 'A value greater than ${(error as Map)['max']} is not accepted',
-                        ValidationMessage.min: (error) => 'A value lower than ${(error as Map)['min']} is not accepted',
+                        ValidationMessage.max: (error) =>
+                            'A value greater than ${(error as Map)['max']} is not accepted',
+                        ValidationMessage.min: (error) =>
+                            'A value lower than ${(error as Map)['min']} is not accepted',
                       },
                     ),
                   ),
@@ -383,21 +400,26 @@ class RecipeEditState extends State<RecipeEdit> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(S.of(context).screenRecipeEditAdjustments, style: Theme.of(context).textTheme.labelMedium),
+              Text(S.of(context).screenRecipeEditAdjustments,
+                  style: Theme.of(context).textTheme.labelMedium),
               Row(
                 children: [
                   SizedBox(
                     width: 200,
                     child: ReactiveTextField<double>(
                       formControlName: 'adjustedTemp',
-                      keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                          signed: true, decimal: true),
                       decoration: InputDecoration(
-                        labelText: S.of(context).screenRecipeEditTemperatureCorrection,
+                        labelText:
+                            S.of(context).screenRecipeEditTemperatureCorrection,
                       ),
                       showErrors: (control) => control.invalid,
                       validationMessages: {
-                        ValidationMessage.max: (error) => 'A value greater than ${(error as Map)['max']} is not accepted',
-                        ValidationMessage.min: (error) => 'A value lower than ${(error as Map)['min']} is not accepted',
+                        ValidationMessage.max: (error) =>
+                            'A value greater than ${(error as Map)['max']} is not accepted',
+                        ValidationMessage.min: (error) =>
+                            'A value lower than ${(error as Map)['min']} is not accepted',
                       },
                     ),
                   ),
@@ -407,7 +429,10 @@ class RecipeEditState extends State<RecipeEdit> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Expanded(child: Text(S.of(context).screenRecipeEditDisableStoponweightSelectThisForPourOverWhereYouDo)),
+                  Expanded(
+                      child: Text(S
+                          .of(context)
+                          .screenRecipeEditDisableStoponweightSelectThisForPourOverWhereYouDo)),
                   SizedBox(
                     width: 120,
                     child: ReactiveSwitch(
@@ -427,10 +452,13 @@ class RecipeEditState extends State<RecipeEdit> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(S.of(context).screenRecipeEditMilkAndWater, style: Theme.of(context).textTheme.labelMedium),
+              Text(S.of(context).screenRecipeEditMilkAndWater,
+                  style: Theme.of(context).textTheme.labelMedium),
               Row(
                 children: [
-                  SizedBox(width: 150, child: Text(S.of(context).screenRecipeEditUseSteam)),
+                  SizedBox(
+                      width: 150,
+                      child: Text(S.of(context).screenRecipeEditUseSteam)),
                   ReactiveSwitch(
                     formControlName: 'useSteam',
                     onChanged: (control) => setState(() {}),
@@ -451,7 +479,9 @@ class RecipeEditState extends State<RecipeEdit> {
               const Divider(),
               Row(
                 children: [
-                  SizedBox(width: 150, child: Text(S.of(context).screenRecipeEditUseWater)),
+                  SizedBox(
+                      width: 150,
+                      child: Text(S.of(context).screenRecipeEditUseWater)),
                   ReactiveSwitch(
                     formControlName: 'useWater',
                     onChanged: (control) => setState(() {}),
@@ -466,8 +496,10 @@ class RecipeEditState extends State<RecipeEdit> {
                     keyboardType: const TextInputType.numberWithOptions(),
                     showErrors: (control) => control.invalid,
                     validationMessages: {
-                      ValidationMessage.max: (error) => 'A value greater than ${(error as Map)['max']} is not accepted',
-                      ValidationMessage.min: (error) => 'A value lower than ${(error as Map)['min']} is not accepted',
+                      ValidationMessage.max: (error) =>
+                          'A value greater than ${(error as Map)['max']} is not accepted',
+                      ValidationMessage.min: (error) =>
+                          'A value lower than ${(error as Map)['min']} is not accepted',
                     },
                     decoration: const InputDecoration(
                       labelText: 'Water weight',
@@ -496,11 +528,14 @@ class RecipeEditState extends State<RecipeEdit> {
   void saveFormData(FormGroup form) {
     _editedRecipe.name = form.value["name"] as String;
     _editedRecipe.description = form.value["description"] as String;
-    _editedRecipe.adjustedPressure = form.value["adjustedPressure"] as double? ?? 0;
+    _editedRecipe.adjustedPressure =
+        form.value["adjustedPressure"] as double? ?? 0;
     _editedRecipe.adjustedTemp = form.value["adjustedTemp"] as double? ?? 0;
     _editedRecipe.adjustedWeight = form.value["adjustedWeight"] as double? ?? 0;
-    _editedRecipe.grinderDoseWeight = form.value["grinderDoseWeight"] as double? ?? 0;
-    _editedRecipe.grinderSettings = form.value["grinderSettings"] as double? ?? 0;
+    _editedRecipe.grinderDoseWeight =
+        form.value["grinderDoseWeight"] as double? ?? 0;
+    _editedRecipe.grinderSettings =
+        form.value["grinderSettings"] as double? ?? 0;
     _editedRecipe.grinderModel = form.value["grinderModel"] as String? ?? "";
     _editedRecipe.ratio1 = form.value["ratio1"] as double? ?? 0;
     _editedRecipe.ratio2 = form.value["ratio2"] as double? ?? 0;
@@ -510,7 +545,8 @@ class RecipeEditState extends State<RecipeEdit> {
     _editedRecipe.timeWater = form.value["timeWater"] as double? ?? 0;
     _editedRecipe.useSteam = form.value["useSteam"] as bool;
     _editedRecipe.useWater = form.value["useWater"] as bool;
-    _editedRecipe.disableStopOnWeight = form.value["disableStopOnWeight"] as bool;
+    _editedRecipe.disableStopOnWeight =
+        form.value["disableStopOnWeight"] as bool;
     _editedRecipe.weightMilk = form.value["weightMilk"] as double? ?? 0;
     _editedRecipe.weightWater = form.value["weightWater"] as double? ?? 0;
 
