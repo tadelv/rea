@@ -290,7 +290,7 @@ class LandingPageState extends State<LandingPage>
               ),
               child: Column(
                 children: [
-                  Image.asset("assets/focus.png", height: 80),
+                  Image.asset("assets/rea.png", height: 80),
                   Text(
                     "REA",
                     style: Theme.of(context).textTheme.titleMedium,
@@ -433,7 +433,7 @@ class LandingPageState extends State<LandingPage>
                     return AboutListTile(
                         icon: const Icon(Icons.info),
                         applicationIcon:
-                            Image.asset("assets/focus.png", height: 80),
+                            Image.asset("assets/rea.png", height: 80),
                         applicationName: 'REA',
                         applicationVersion:
                             "Version ${snapshot.data!.version} (${snapshot.data!.buildNumber})",

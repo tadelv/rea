@@ -124,13 +124,14 @@ source_gen:combining_builder:
     - lib/**/model/*.dart
 flutter_native_splash:
   color: "#000000"
-  image: assets/rea.png
+  # background_image: assets/rea.png
+  # image: assets/rea.png
   # android_gravity: fill
   # ios_content_mode: fill
 
   android_12:
     color: "#000000"
-    image: assets/rea.png
+    # image: assets/rea.png
     # android_gravity: fill
     # ios_content_mode: fill
 
@@ -188,6 +189,8 @@ flutter_launcher_icons:
   android: true
   image_path_android: "assets/rea.png"
   image_path_ios: "assets/rea.png"
+  adaptive_icon_foreground: "assets/rea.png"
+  adaptive_icon_background: "#000000"
   ios: true
 
 flutter_intl:
