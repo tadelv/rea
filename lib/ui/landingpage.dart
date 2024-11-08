@@ -264,8 +264,7 @@ class LandingPageState extends State<LandingPage>
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      Focus(
-                          focusNode: recipesFocus, child: const RecipeScreen()),
+                      const RecipeScreen(),
                       const EspressoScreen(),
                       if (_settings.useSteam) const SteamScreen(),
                       if (_settings.useWater) const WaterScreen(),
@@ -659,6 +658,11 @@ class LandingPageState extends State<LandingPage>
       if (_saverContext != null) {
         Navigator.pop(_saverContext!);
         _saverContext = null;
+        Future.delayed(Duration(milliseconds: 500), () {
+          if (mounted) {
+            FocusScope.of(context).requestFocus(hwKbdFocus);
+          }
+        });
       }
     }
   }
