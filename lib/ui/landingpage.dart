@@ -257,8 +257,7 @@ class LandingPageState extends State<LandingPage>
                     if (val) {
                       return;
                     }
-                    if (!recipesFocus.hasPrimaryFocus &&
-                        !hwKbdFocus.hasPrimaryFocus) {
+                    if (!hwKbdFocus.hasPrimaryFocus) {
                       hwKbdFocus.requestFocus();
                     }
                   },
