@@ -124,13 +124,13 @@ source_gen:combining_builder:
     - lib/**/model/*.dart
 flutter_native_splash:
   color: "#000000"
-  image: assets/splash.png
+  image: assets/rea.png
   # android_gravity: fill
   # ios_content_mode: fill
 
   android_12:
     color: "#000000"
-    image: assets/splash.png
+    image: assets/rea.png
     # android_gravity: fill
     # ios_content_mode: fill
 
@@ -153,11 +153,7 @@ flutter:
   generate: true
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/logo.png
-    - assets/icon.png
-    - assets/iconStore.png
-    - assets/splash.png
-    - assets/focus.png
+    - assets/rea.png
     - assets/profiles/
     - assets/website/
     - assets/website/static/
@@ -188,9 +184,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
-flutter_icons:
-  android: "launcher_icon"
-  image_path: "assets/splash.png"
+flutter_launcher_icons:
+  android: true
+  image_path_android: "assets/rea.png"
+  image_path_ios: "assets/rea.png"
   ios: true
 
 flutter_intl:
