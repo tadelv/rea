@@ -81,6 +81,11 @@ android {
                 debugSymbolLevel 'full'
             }
         }
+
+				debug {
+					applicationIdSuffix '.debug'
+					versionNameSuffix "-debug"
+				}
     }
 }
 
