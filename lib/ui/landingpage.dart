@@ -19,6 +19,7 @@ import 'package:despresso/ui/screens/steam_screen.dart';
 import 'package:despresso/ui/screens/water_screen.dart';
 import 'package:despresso/ui/widgets/machine_footer.dart';
 import 'package:despresso/ui/widgets/screen_saver.dart';
+import 'package:despresso/utils/debounce.dart';
 import 'package:feedback_sentry/feedback_sentry.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +88,7 @@ class LandingPageState extends State<LandingPage>
   final FocusNode hwKbdFocus = FocusNode();
   final FocusNode recipesFocus = FocusNode();
   bool currentlyVisible = false;
+  final Debouncer _focusDebouncer = Debouncer(milliseconds: 900);
 
   @override
   void initState() {
@@ -225,6 +227,18 @@ class LandingPageState extends State<LandingPage>
     );
   }
 
+  _processFocus(bool val) {
+    log.fine(
+        "mnt: $mounted, vis: $currentlyVisible, foc: ${hwKbdFocus.hasPrimaryFocus}, rcp:${recipesFocus.hasPrimaryFocus}, rcpf: ${recipesFocus.hasFocus}");
+    if (val || !mounted || !currentlyVisible || recipesFocus.hasPrimaryFocus) {
+      return;
+    }
+    if (!hwKbdFocus.hasPrimaryFocus && !recipesFocus.hasFocus) {
+      log.fine("refocusing");
+      hwKbdFocus.requestFocus();
+    }
+  }
+
   Widget scaffoldNewLayout(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: false,
@@ -257,29 +271,32 @@ class LandingPageState extends State<LandingPage>
                     log.fine("visibile: $visibility");
                     bool visible = visibility.size.height ==
                         visibility.visibleBounds.height;
+                    visible &= MediaQuery.sizeOf(context).height -
+                            visibility.visibleBounds.height <=
+                        145; // TODO: does this change?
+
                     currentlyVisible = visible;
-                    if (visible) {
-                      hwKbdFocus.requestFocus();
-                    } else {
-                      hwKbdFocus.unfocus();
+                    if (visible &&
+                        !recipesFocus.hasPrimaryFocus &&
+                        !hwKbdFocus.hasFocus) {
+                      //hwKbdFocus.requestFocus();
+                      _focusDebouncer.run(_processFocus(false));
                     }
                   },
                   child: Focus(
                       focusNode: hwKbdFocus,
-                      autofocus: true,
                       onKeyEvent: _onKey,
                       onFocusChange: (val) {
-                        if (val || !mounted || !currentlyVisible) {
-                          return;
-                        }
-                        if (!hwKbdFocus.hasPrimaryFocus) {
-                          hwKbdFocus.requestFocus();
-                        }
+                        log.fine("focus: $val");
+                        //log.fine(
+                        //    "mnt: $mounted, vis: $currentlyVisible, foc: ${hwKbdFocus.hasPrimaryFocus}, rcp:${recipesFocus.hasPrimaryFocus}, rcpf: ${recipesFocus.hasFocus}");
+                        _focusDebouncer.run(_processFocus(val));
                       },
                       child: TabBarView(
                         controller: _tabController,
                         children: [
-                          const RecipeScreen(),
+                          //const RecipeScreen(),
+                          Focus(focusNode: recipesFocus, child: RecipeScreen()),
                           const EspressoScreen(),
                           if (_settings.useSteam) const SteamScreen(),
                           if (_settings.useWater) const WaterScreen(),
