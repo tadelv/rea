@@ -618,30 +618,42 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         //crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(child: Text("Ratio ")),
-                          Expanded(child: Text("${widget.coffeeService.currentRecipe?.ratio1.toInt() ?? 1} :")),
                           Expanded(
-													flex: 2,
+                              child: Text(
+                                  "${widget.coffeeService.currentRecipe?.ratio1.toInt() ?? 1} :")),
+                          Expanded(
+                              flex: 2,
                               child: SpinBox(
-                            keyboardType: const TextInputType.numberWithOptions(
-                                signed: false, decimal: true),
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (val) {
-                              var r = widget.coffeeService.currentRecipe;
-                              if (r != null && val > 0) {
-                                r.ratio2 = val;
-                                r.adjustedWeight = val * r.grinderDoseWeight;
-                                widget.coffeeService.updateRecipe(r);
-                              }
-                                setState(() {});
-                            },
-                            max: 20.0,
-                            value:
-                                widget.coffeeService.currentRecipe?.ratio2 ?? 0,
-                            decimals: 1,
-                            step: 0.1,
-                            decoration: InputDecoration(
-                                contentPadding: EdgeInsets.all(5)),
-                          )),
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        signed: false, decimal: true),
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (val) {
+                                  var r = widget.coffeeService.currentRecipe;
+                                  if (r != null && val > 0) {
+                                    r.ratio2 = val;
+                                    r.adjustedWeight =
+                                        val * r.grinderDoseWeight;
+                                    widget.coffeeService.updateRecipe(r);
+                                  }
+                                  setState(() {});
+                                },
+                                max: 20.0,
+                                value: widget
+                                        .coffeeService.currentRecipe?.ratio2 ??
+                                    0,
+                                decimals: 1,
+                                step: 0.1,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  errorBorder: InputBorder.none,
+                                  disabledBorder: InputBorder.none,
+                                  contentPadding: EdgeInsets.only(
+                                      left: 5, bottom: 24, top: 24, right: 5),
+                                ),
+                              )),
                         ],
                       ),
                       Row(
