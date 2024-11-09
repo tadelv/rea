@@ -88,7 +88,7 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
           lineStyle: charts.LineStyleSpec(
               thickness: 0,
               color: charts.ColorUtil.fromDartColor(
-                  Theme.of(context).colorScheme.secondary)),
+                  Theme.of(context).colorScheme.primaryContainer)),
         ),
       ),
       secondaryMeasureAxis: charts.NumericAxisSpec(
@@ -100,7 +100,7 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
           lineStyle: charts.LineStyleSpec(
               thickness: 0,
               color: charts.ColorUtil.fromDartColor(
-                  Theme.of(context).colorScheme.secondary)),
+                  Theme.of(context).colorScheme.primaryContainer)),
         ),
       ),
       domainAxis: charts.NumericAxisSpec(
@@ -112,7 +112,7 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
           lineStyle: charts.LineStyleSpec(
               thickness: 0,
               color: charts.ColorUtil.fromDartColor(
-                  Theme.of(context).colorScheme.secondary)),
+                  Theme.of(context).colorScheme.primaryContainer)),
         ),
       ),
     );
@@ -122,7 +122,7 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
       margin: const EdgeInsets.only(left: 10.0),
       //width: MediaQuery.of(context).size.width - 105,
       decoration: BoxDecoration(
-        color: Colors.black12,
+        color: Theme.of(context).colorScheme.surface,
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -381,8 +381,8 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
       }
 
       var col = i == widget.selectedPhase + 1
-          ? Theme.of(context).colorScheme.tertiary
-          : Theme.of(context).colorScheme.onSecondary;
+          ? Theme.of(context).colorScheme.surfaceContainerLow
+          : Theme.of(context).colorScheme.surfaceContainerLow;
                // theme.ThemeColors.statesColors[from.subState];
       var col2 = charts.ColorUtil.fromDartColor(col);
       // col == null ? col! : charts.Color(r: 0xff, g: 50, b: i * 19, a: 100);
@@ -394,7 +394,7 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
           labelStyleSpec: charts.TextStyleSpec(
               fontSize: 10,
               // color: charts.ColorUtil.fromDartColor(theme.ThemeColors.secondaryColor)),
-              color: charts.ColorUtil.fromDartColor(const Color(0xFFD0BCFF))),
+              color: charts.ColorUtil.fromDartColor(Theme.of(context).colorScheme.surface)),
           labelDirection: charts.AnnotationLabelDirection.vertical);
       // log.info("Phase ${element.subState}");
     });

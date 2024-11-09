@@ -100,19 +100,18 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: S.delegate.supportedLocales,
       locale: _settings.locale == "auto" ? null : Locale(_settings.locale),
       theme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch(
-              primarySwatch: Colors.brown, brightness: Brightness.light)),
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.brown,
+              //       accentColor: Colors.lightBlueAccent,
+              //backgroundColor: Colors.black,
+              brightness: Brightness.light)),
       darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSwatch(
-              primarySwatch: Colors.amber, brightness: Brightness.dark)),
-      //theme: ThemeData.from(
-      //  useMaterial3: true,
-      //  colorScheme: schemaLight,
-      //),
-      //darkTheme: ThemeData.from(
-      //  useMaterial3: true,
-      //  colorScheme: themeDark,
-      //),
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.amber,
+              //accentColor: Colors.orange,
+              brightness: Brightness.dark)),
       themeMode: _settings.screenThemeMode == 0
           ? ThemeMode.system
           : _settings.screenThemeMode == 1
