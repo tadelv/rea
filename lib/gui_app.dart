@@ -88,39 +88,37 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget appRoot(BuildContext context) {
-    return BetterFeedback(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'REA',
-        localizationsDelegates: const [
-          S.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: S.delegate.supportedLocales,
-        locale: _settings.locale == "auto" ? null : Locale(_settings.locale),
-        theme: ThemeData(
-            colorScheme: ColorScheme.fromSwatch(
-                primarySwatch: Colors.brown, brightness: Brightness.light)),
-        darkTheme: ThemeData(
-            colorScheme: ColorScheme.fromSwatch(
-                primarySwatch: Colors.amber, brightness: Brightness.dark)),
-        //theme: ThemeData.from(
-        //  useMaterial3: true,
-        //  colorScheme: schemaLight,
-        //),
-        //darkTheme: ThemeData.from(
-        //  useMaterial3: true,
-        //  colorScheme: themeDark,
-        //),
-        themeMode: _settings.screenThemeMode == 0
-            ? ThemeMode.system
-            : _settings.screenThemeMode == 1
-                ? ThemeMode.dark
-                : ThemeMode.light,
-        home: const LandingPage(title: 'REA'),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'REA',
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
+      locale: _settings.locale == "auto" ? null : Locale(_settings.locale),
+      theme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.brown, brightness: Brightness.light)),
+      darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSwatch(
+              primarySwatch: Colors.amber, brightness: Brightness.dark)),
+      //theme: ThemeData.from(
+      //  useMaterial3: true,
+      //  colorScheme: schemaLight,
+      //),
+      //darkTheme: ThemeData.from(
+      //  useMaterial3: true,
+      //  colorScheme: themeDark,
+      //),
+      themeMode: _settings.screenThemeMode == 0
+          ? ThemeMode.system
+          : _settings.screenThemeMode == 1
+              ? ThemeMode.dark
+              : ThemeMode.light,
+      home: const LandingPage(title: 'REA'),
     );
   }
 }

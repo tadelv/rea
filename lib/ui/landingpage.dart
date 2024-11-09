@@ -417,24 +417,24 @@ class LandingPageState extends State<LandingPage>
               },
             ),
 
-            ListTile(
-              leading: const Icon(Icons.feedback),
-              title: Text(S.of(context).mainMenuFeedback),
-              onTap: () async {
-                Navigator.pop(context);
-                var settings = getIt<SettingsService>();
-                if (!settings.useSentry) {
-                  _showMyDialog("Feedback currently disabled",
-                      "Please enable the option 'Feedback and crashreporting' in the Settings menu.");
-
-                  return;
-                }
-                BetterFeedback.of(context).showAndUploadToSentry(
-                  name: S.of(context).mainMenuDespressoFeedback, // optional
-                  email: 'foo_bar@example.com', // optional
-                );
-              },
-            ),
+            //ListTile(
+            //  leading: const Icon(Icons.feedback),
+            //  title: Text(S.of(context).mainMenuFeedback),
+            //  onTap: () async {
+            //    Navigator.pop(context);
+            //    var settings = getIt<SettingsService>();
+            //    if (!settings.useSentry) {
+            //      _showMyDialog("Feedback currently disabled",
+            //          "Please enable the option 'Feedback and crashreporting' in the Settings menu.");
+            //
+            //      return;
+            //    }
+            //    BetterFeedback.of(context).showAndUploadToSentry(
+            //      name: S.of(context).mainMenuDespressoFeedback, // optional
+            //      email: 'foo_bar@example.com', // optional
+            //    );
+            //  },
+            //),
             ListTile(
               leading: const Icon(Icons.privacy_tip),
               title: Text(S.of(context).privacy),
