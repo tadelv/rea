@@ -1,7 +1,16 @@
-# Version History
+# What's new
 
-## 1.0.16
+## Hello and welcome to REA!
 
-- Version bump for Android
-- Stop on Weight more save if goal was reached in strange ways.
-- Library updates
+REA is an app to control your DE1, based on Despresso.
+It's still in development, so there will be rough edges, beware 😅
+
+### What's different?
+
+- Profiles editing, limiter settings, create new Profiles
+- Coffee beans and roasters editing has been simplified a bit
+- Support for same keyboard behavior as the original de1 app
+- Slightly changed user interface
+- Recipes screen simplification, the ratio setting
+
+I hope you will like it!
