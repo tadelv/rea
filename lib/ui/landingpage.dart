@@ -33,6 +33,7 @@ import '../model/services/ble/ble_service.dart';
 import '../model/services/ble/machine_service.dart';
 import 'screens/flush_screen.dart';
 import 'package:despresso/generated/l10n.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class IncrementIntent extends Intent {
   const IncrementIntent();
@@ -85,6 +86,7 @@ class LandingPageState extends State<LandingPage>
   late StreamSubscription<bool> _keyboardSubscription;
   final FocusNode hwKbdFocus = FocusNode();
   final FocusNode recipesFocus = FocusNode();
+  bool currentlyVisible = false;
 
   @override
   void initState() {
@@ -249,28 +251,41 @@ class LandingPageState extends State<LandingPage>
               ],
             ),
             Expanded(
-              child: Focus(
-                  focusNode: hwKbdFocus,
-                  autofocus: true,
-                  onKeyEvent: _onKey,
-                  onFocusChange: (val) {
-                    if (val) {
-                      return;
-                    }
-                    if (!hwKbdFocus.hasPrimaryFocus) {
+              child: VisibilityDetector(
+                  key: Key("landing-visibility"),
+                  onVisibilityChanged: (visibility) {
+                    log.fine("visibile: $visibility");
+                    bool visible = visibility.size.height ==
+                        visibility.visibleBounds.height;
+                    currentlyVisible = visible;
+                    if (visible) {
                       hwKbdFocus.requestFocus();
+                    } else {
+                      hwKbdFocus.unfocus();
                     }
                   },
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      const RecipeScreen(),
-                      const EspressoScreen(),
-                      if (_settings.useSteam) const SteamScreen(),
-                      if (_settings.useWater) const WaterScreen(),
-                      if (_settings.showFlushScreen) const FlushScreen(),
-                    ],
-                  )),
+                  child: Focus(
+                      focusNode: hwKbdFocus,
+                      autofocus: true,
+                      onKeyEvent: _onKey,
+                      onFocusChange: (val) {
+                        if (val || !mounted || !currentlyVisible) {
+                          return;
+                        }
+                        if (!hwKbdFocus.hasPrimaryFocus) {
+                          hwKbdFocus.requestFocus();
+                        }
+                      },
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          const RecipeScreen(),
+                          const EspressoScreen(),
+                          if (_settings.useSteam) const SteamScreen(),
+                          if (_settings.useWater) const WaterScreen(),
+                          if (_settings.showFlushScreen) const FlushScreen(),
+                        ],
+                      ))),
             ),
             const MachineFooter(),
           ],
