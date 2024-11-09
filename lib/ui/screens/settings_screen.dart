@@ -679,7 +679,7 @@ class SettingsScreenState extends State<AppSettingsScreen> {
           title: S.of(context).screenSettingsTabletGroup,
           children: [
             SimpleSettingsTile(
-              title: S.of(context).screenSettingsThemeSelection,
+              title: "Theme",
               leading: const Icon(Icons.palette),
               child: StreamBuilder<int>(
                   stream: _streamRefresh,
@@ -697,38 +697,6 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                           onChange: (value) {
                             settingsService.notifyDelayed();
                           }),
-                      DropDownSettingsTile(
-                          title: S.of(context).screenSettingsThemeSelection,
-                          settingKey: SettingKeys.screenThemeIndex.name,
-                          selected: settingsService.screenThemeIndex,
-                          values: {
-                            "0": S.of(context).red,
-                            "1": S.of(context).orange,
-                            "2": S.of(context).blue,
-                            "3": S.of(context).green,
-                          },
-                          onChange: (value) {
-                            settingsService.notifyDelayed();
-                          }),
-                      SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: DropDownSettingsTile(
-                            title: S.of(context).screenSettingsLanguage,
-                            settingKey: SettingKeys.locale.name,
-                            selected: settingsService.locale,
-                            values: {
-                              "auto": S.of(context).screenSettingsTabletDefault,
-                              "en": S.of(context).screenSettingsEnglish,
-                              "de": S.of(context).screenSettingsGerman,
-                              "es": S.of(context).screenSettingsSpanish,
-                              "ko": S.of(context).screenSettingsKorean,
-                              "ar": S.of(context).screenSettingsArabic,
-                            },
-                            onChange: (value) {
-                              settingsService.notifyDelayed();
-                            }),
-                      ),
                     ]);
                   }),
             ),
@@ -1252,23 +1220,6 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                       settingsService.notifyDelayed();
                     },
                   ),
-                  SizedBox(
-                      height: 100,
-                      width: 100,
-                      child: DropDownSettingsTile(
-                          title: "Upload tail method",
-                          settingKey: SettingKeys.uploadTailMethod.name,
-                          selected: settingsService.uploadTailMethod.index,
-                          values: const {
-                            1: "Upload old tail",
-                            2: "Upload empty tail",
-                            0: "Don't upload tail",
-                          },
-                          onChange: (value) {
-                            var val = UploadTailMethod.values[value];
-                            settingsService.uploadTailMethod = val;
-                            settingsService.notifyDelayed();
-                          })),
                 ],
               ),
             ),

@@ -192,7 +192,7 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
                               initialValue:
                                   _profile.shotHeader.targetVolume.toString(),
                               decoration: InputDecoration(
-                                  labelText: "Desired volume",
+                                  labelText: "Desired shot volume (leave 0 to disable)",
                                   suffixText: "ml"),
                               keyboardType: TextInputType.number,
                               inputFormatters: [

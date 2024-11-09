@@ -619,7 +619,8 @@ class EspressoMachineService extends ChangeNotifier {
 
     bool isSameProfileId = _activeProfile?.id == profileToBeUploaded.id;
     bool isSameTemp = _activeProfile?.shotFrames.first.temp ==
-        profileToBeUploaded.shotFrames.first.temp + settingsService.targetTempCorrection;
+        profileToBeUploaded.shotFrames.first.temp +
+            settingsService.targetTempCorrection;
 
     if (isSameProfileId && isSameTemp) {
       log.fine("Profile ${profileToBeUploaded.id} already uploaded");
@@ -663,18 +664,7 @@ class EspressoMachineService extends ChangeNotifier {
     }
 
     try {
-      log.fine("Check tail method ${settingsService.uploadTailMethod}");
-      switch (settingsService.uploadTailMethod) {
-        case UploadTailMethod.none:
-          break;
-        case UploadTailMethod.targetVolume:
-          await _uploadTail(profileData.tailData);
-          break;
-        case UploadTailMethod.empty:
-          Uint8List uint8List = Uint8List(8);
-          uint8List[0] = profileData.frameData.length.toUnsigned(8);
-          await _uploadTail(uint8List);
-      }
+      await _uploadTail(profileData.tailData);
     } catch (ex) {
       log.severe("Error writing tail $ex");
       return "Error writing tail ${profile.title}";
@@ -724,7 +714,7 @@ class EspressoMachineService extends ChangeNotifier {
     }
     if (!inShot && state.coffeeState == EspressoMachineState.espresso) {
       log.info('Not Idle and not in Shot');
-			log.info('Starting shot with: $_activeProfile');
+      log.info('Starting shot with: $_activeProfile');
       inShot = true;
       currentShot = Shot();
       currentShot.targetEspressoWeight = settingsService.targetEspressoWeight;
