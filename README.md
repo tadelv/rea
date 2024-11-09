@@ -1,36 +1,34 @@
-# despresso
+# REA
 
-A new app for the decent de1 espresso machine.
-It is intended to be running on Android and iOS with a direct BLE connection to the decent machine.
+![rea logo](assets/rea.png)
 
-## Getting Started
+REA stands for Reasonable Espresso App. Its intended purpose is to cater to your coffee needs by talking to your Decent
+Espresso DE1 (and hopefully soon Bengle) machine.
 
-This project is using Flutter as a development framework.
+# Features
 
-A few resources to get you started if this is your first Flutter project:
+## Recipes screen
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Editing recipes
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Profiles screen
 
-The app is prepared to use fastlane deployment - this is limited in the way that you need to have the required signatures and keys for signing and uploading to the appstore.
+### Creating or editing a profile
 
-For a normal build it should just work.
+## Bean cellar
 
-## Supported devices
+### Adding new coffee beans
 
-- decent de1 (tested with 1.43 hardware)
-- Atomax Skale 2 (thx for sponsoring us!)
-- Acaia Lunar '21
-- Eureka
-- Decent scale
+## Shot diary
 
-- Android: Galaxy Tab A8, decent Teclast
-- iOS: iPad, iPad Air 5
+### Editing a diary entry
+
+## Support
+
+Currently, REA is available and tested with Android only. You can get the apk from the releases page.
 
 ## Credits
 
-Please check our credits page here (https://github.com/obiwan007/despresso/blob/main/CREDITS.md)
+REA is based on Despresso by @obiwan007
+
+Please check the credits page here (https://github.com/obiwan007/despresso/blob/main/CREDITS.md)
