@@ -1307,8 +1307,8 @@ class SettingsScreenState extends State<AppSettingsScreen> {
 
     if (filePickerResult != null) {
       // extract zip to tmp, restore db and profiles
+      var file = File(filePickerResult.files.first.path!);
       try {
-        var file = File(filePickerResult.files.first.path!);
         Directory tmpDir = await getTemporaryDirectory();
         await tmpDir.create(recursive: true);
         await ZipFile.extractToDirectory(zipFile: file, destinationDir: tmpDir);
@@ -1321,6 +1321,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
           Uint8List profilesMap = await profileBak.readAsBytes();
           getIt<ProfileService>().setProfilesFromBackup(profilesMap);
         }
+        if (!dbBak.existsSync()) {
+          throw Exception("Missing db backup file");
+        }
         var objectBox = getIt<ObjectBox>();
         await objectBox.restoreBackupData(dbBak.path);
         showRestartNowScreen();
@@ -1329,11 +1332,18 @@ class SettingsScreenState extends State<AppSettingsScreen> {
             S.of(context).screenSettingsRestoredBackup,
             SnackbarNotificationType.ok);
       } catch (e) {
-        log.severe("Restore failed: $e");
-        getIt<SnackbarService>()
-            // ignore: use_build_context_synchronously
-            .notify(S.of(context).screenSettingsFailedRestoringBackup,
-                SnackbarNotificationType.severe);
+        log.severe("Restore with zip failed: $e");
+
+        try {
+          var objectBox = getIt<ObjectBox>();
+          await objectBox.restoreBackupData(file.path);
+          showRestartNowScreen();
+        } catch (e) {
+          getIt<SnackbarService>()
+              // ignore: use_build_context_synchronously
+              .notify(S.of(context).screenSettingsFailedRestoringBackup,
+                  SnackbarNotificationType.severe);
+        }
       }
     } else {
       // can perform some actions like notification etc
