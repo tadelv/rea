@@ -15,7 +15,7 @@ import 'package:despresso/ui/theme.dart' as theme;
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
-class ShotGraph extends StatefulWidget {
+class ShotGraph extends StatefulWidget  {
   final int id;
   final List<int>? overlayIds;
 
@@ -87,7 +87,7 @@ class ShotGraphState extends State<ShotGraph> {
                             );
                           },
                           icon: const Icon(Icons.note_add),
-                          label: Text(S.of(context).screenEspressoDiary))
+                          label: Text("Edit")),
                     ]),
                 Row(children: [
                   Text(
