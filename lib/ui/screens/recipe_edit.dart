@@ -85,13 +85,12 @@ class RecipeEditState extends State<RecipeEdit> {
       'ratio1': [
         _editedRecipe.ratio1,
         Validators.min(0.0),
-        Validators.max(100.0),
-        Validators.number(allowNegatives: false, allowedDecimals: 0)
+        Validators.max(5.0),
       ],
       'ratio2': [
         _editedRecipe.ratio2,
         Validators.min(0.0),
-        Validators.max(100.0),
+        Validators.max(20.0),
       ],
       'tempSteam': [_editedRecipe.tempSteam],
       'tempWater': [_editedRecipe.tempWater],
