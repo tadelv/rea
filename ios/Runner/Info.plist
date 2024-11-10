@@ -2,25 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
-	<key>CFBundleURLTypes</key>
-<array>
-    <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-            <string>com.mmmedia.despresso</string>
-        </array>
-    </dict>
-</array>
-    <key>CFBundleLocalizations</key>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.mmmedia.despresso</string>
+				</array>
+			</dict>
+		</array>
+		<key>CFBundleLocalizations</key>
 		<array>
 			<string>en</string>
-            <string>de</string>
-            <string>es</string>
+			<string>de</string>
+			<string>es</string>
 		</array>
-        <key>CADisableMinimumFrameDurationOnPhone</key>
-	    <true/>
+		<key>CADisableMinimumFrameDurationOnPhone</key>
+		<true/>
 		<key>NSPhotoLibraryAddUsageDescription</key>
 		<string>FLogs would like to save photos from the app to your gallery</string>
 		<key>NSPhotoLibraryUsageDescription</key>
@@ -32,7 +32,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>despresso</string>
+		<string>REA</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -40,7 +40,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>despresso</string>
+		<string>REA</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -56,14 +56,14 @@
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
 		<key>UISupportedInterfaceOrientations</key>
-		<array>			
+		<array>
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>UISupportedInterfaceOrientations~ipad</key>
-		<array>        
-            <string>UIInterfaceOrientationPortrait</string>
-            <string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationPortraitUpsideDown</string>
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
@@ -75,12 +75,12 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
-	    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>  
-	    <string>Need Location permission</string>  
-	    <key>NSLocationAlwaysUsageDescription</key>  
-	    <string>Need Location permission</string>  
-	    <key>NSLocationWhenInUseUsageDescription</key>  
-	    <string>Need Location permission</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Need Location permission</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>Need Location permission</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Need Location permission</string>
 		<key>NSBluetoothAlwaysUsageDescription</key>
 		<string>The app uses bluetooth to find, connect and transfer data between different devices like finding your BLE scale and decent DE1 machine.</string>
 		<key>NSBluetoothPeripheralUsageDescription</key>

@@ -39,7 +39,7 @@ Future<void> initLogger() async {
   ).attachToLogger(Logger.root);
 
   log.info("##############################");
-  log.info("STARTING APPLICATION DESPRESSO");
+  log.info("STARTING REA");
   log.info("##############################");
 }
 
@@ -49,7 +49,7 @@ Future<Directory?> getDirectory() async {
   await checkPermissions();
 
   if (Platform.isAndroid) {
-    dir = Directory('/storage/emulated/0/Download/despresso');
+    dir = Directory('/storage/emulated/0/Download/REA');
     try {
       await dir.create(recursive: true);
     } catch (e) {

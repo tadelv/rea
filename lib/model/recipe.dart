@@ -9,6 +9,7 @@ class Recipe {
 
   final coffee = ToOne<Coffee>();
   String profileId = "Default";
+	String profileName = "Default";
 
   double adjustedWeight = 36;
   double adjustedPressure = 0;

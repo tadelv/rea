@@ -30,12 +30,17 @@ jobs:
       - name: Decode secrets.properties file
         env:
           KEYSTORE: ${{ secrets.KEYSTORE }}
-        run: echo "$KEYSTORE" | base64 -d > android/upload-keystore.jks
+        run: echo "$KEYSTORE" | base64 -d > release.keystore
+
+      - name: bash 
+        env:
+          KEYPROPERTIES: ${{ secrets.PROPS }}
+        run: echo "$KEYPROPERTIES" > android/key.properties        
 
       - name: bash
         env:
-          KEYPROPERTIES: ${{ secrets.KEYPROPERTIES }}
-        run: echo "$KEYPROPERTIES" > android/key.properties        
+          ENV_DIST: ${{ secrets.ENV_DIST }}
+        run: echo "$ENV_DIST" > .env.dist
 
       - run: ls -l android
 
@@ -65,11 +70,11 @@ jobs:
         run: flutter build ios --release --no-codesign
 
       - name: Build APK  
-        run: flutter build appbundle
+        run: flutter build apk --dart-define-from-file ".env.dist"
 
       - name: Upload Android app
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Android
-          path:  build/app/outputs/bundle/release/*
+          path:  build/app/outputs/flutter-apk/*

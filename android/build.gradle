@@ -20,6 +20,26 @@ allprojects {
 
 rootProject.buildDir = '../build'
 subprojects {
+		afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            project.android {
+                compileSdkVersion 34
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_1_8
+                    targetCompatibility JavaVersion.VERSION_1_8
+                    //compileSdkVersion 34
+                }
+            }
+ 
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions {
+                    jvmTarget = "1.8"
+                }
+            }
+        }
+    }
+}
+subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {

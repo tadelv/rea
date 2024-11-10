@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -10,6 +11,7 @@ import 'package:despresso/model/services/ble/machine_service.dart';
 import 'package:despresso/model/services/ble/scale_service.dart';
 import 'package:despresso/model/services/state/mqtt_service.dart';
 import 'package:despresso/model/services/state/notification_service.dart';
+import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/model/services/state/visualizer_service.dart';
 import 'package:despresso/objectbox.dart';
@@ -17,19 +19,20 @@ import 'package:despresso/ui/widgets/screen_saver.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_archive/flutter_archive.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as ble;
-// import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
 import 'package:logging/logging.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as bledevice;
+import 'package:path_provider/path_provider.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
 import '../../service_locator.dart';
 
 class AppSettingsScreen extends StatefulWidget {
-  const AppSettingsScreen({Key? key}) : super(key: key);
+  const AppSettingsScreen({super.key});
 
   @override
   SettingsScreenState createState() => SettingsScreenState();
@@ -93,7 +96,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
       title: S.of(context).screenSettingsApplicationSettings,
       children: [
         SettingsGroup(
-          title: S.of(context).screenSettingsApplicationSettingsHardwareAndConnections,
+          title: S
+              .of(context)
+              .screenSettingsApplicationSettingsHardwareAndConnections,
           children: [
             SimpleSettingsTile(
               title: 'Bluetooth',
@@ -111,7 +116,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
-                                  Text(S.of(context).screenSettingsApplicationSettingsScanStart),
+                                  Text(S
+                                      .of(context)
+                                      .screenSettingsApplicationSettingsScanStart),
                                   if (!bleService.isScanning)
                                     ElevatedButton(
                                         onPressed: () {
@@ -120,7 +127,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                             _controllerRefresh.add(0);
                                           });
                                         },
-                                        child: Text(S.of(context).screenSettingsApplicationSettingsScanForDevices)),
+                                        child: Text(S
+                                            .of(context)
+                                            .screenSettingsApplicationSettingsScanForDevices)),
                                 ],
                               ),
                             ),
@@ -138,7 +147,10 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                               ),
                             Row(
                               children: [
-                                SizedBox(width: 100, child: Text("Found: ${bleService.devices.length} devices")),
+                                SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                        "Found: ${bleService.devices.length} devices")),
                                 DeviceAssignment(
                                   bleService: bleService,
                                   settingsService: settingsService,
@@ -161,7 +173,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                         leading: const Icon(Icons.thermostat),
                         settingKey: SettingKeys.hasSteamThermometer.name,
                         defaultValue: settingsService.hasSteamThermometer,
-                        title: S.of(context).screenSettingsMilkSteamingThermometerSupport,
+                        title: S
+                            .of(context)
+                            .screenSettingsMilkSteamingThermometerSupport,
                       ),
                       SwitchSettingsTile(
                         leading: const Icon(Icons.water_drop),
@@ -186,25 +200,32 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      const SizedBox(width: 150, child: Text("Timer")),
+                                      const SizedBox(
+                                          width: 150, child: Text("Timer")),
                                       Row(
                                         children: [
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.timer(TimerMode.start);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .timer(TimerMode.start);
                                               },
                                               child: const Text("Start")),
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.timer(TimerMode.stop);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .timer(TimerMode.stop);
                                               },
                                               child: const Text("Stop")),
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.timer(TimerMode.reset);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .timer(TimerMode.reset);
                                               },
                                               child: const Text("Reset")),
                                         ],
@@ -213,19 +234,25 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                   ),
                                   Row(
                                     children: [
-                                      const SizedBox(width: 150, child: Text("Displaymode")),
+                                      const SizedBox(
+                                          width: 150,
+                                          child: Text("Displaymode")),
                                       Row(
                                         children: [
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.display(DisplayMode.on);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .display(DisplayMode.on);
                                               },
                                               child: const Text("On")),
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.display(DisplayMode.off);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .display(DisplayMode.off);
                                               },
                                               child: const Text("Off")),
                                         ],
@@ -234,25 +261,35 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                   ),
                                   Row(
                                     children: [
-                                      SizedBox(width: 150, child: Text(S.of(context).screenSettingsPowermode)),
+                                      SizedBox(
+                                          width: 150,
+                                          child: Text(S
+                                              .of(context)
+                                              .screenSettingsPowermode)),
                                       Row(
                                         children: [
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.power(PowerMode.on);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .power(PowerMode.on);
                                               },
                                               child: const Text("On")),
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.power(PowerMode.off);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .power(PowerMode.off);
                                               },
                                               child: const Text("Off")),
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
-                                                scaleService.power(PowerMode.sleep);
+                                                var scaleService =
+                                                    getIt<ScaleService>();
+                                                scaleService
+                                                    .power(PowerMode.sleep);
                                               },
                                               child: const Text("Sleep")),
                                         ],
@@ -261,27 +298,36 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                   ),
                                   Row(
                                     children: [
-                                      SizedBox(width: 150, child: Text(S.of(context).screenSettingsTare)),
+                                      SizedBox(
+                                          width: 150,
+                                          child: Text(S
+                                              .of(context)
+                                              .screenSettingsTare)),
                                       Row(
                                         children: [
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
+                                                var scaleService =
+                                                    getIt<ScaleService>();
                                                 scaleService.tare();
                                               },
-                                              child: Text(S.of(context).screenSettingsTare)),
+                                              child: Text(S
+                                                  .of(context)
+                                                  .screenSettingsTare)),
                                         ],
                                       ),
                                     ],
                                   ),
                                   Row(
                                     children: [
-                                      const SizedBox(width: 150, child: Text("Beep")),
+                                      const SizedBox(
+                                          width: 150, child: Text("Beep")),
                                       Row(
                                         children: [
                                           ElevatedButton(
                                               onPressed: () {
-                                                var scaleService = getIt<ScaleService>();
+                                                var scaleService =
+                                                    getIt<ScaleService>();
                                                 scaleService.beep();
                                               },
                                               child: const Text("Beep")),
@@ -329,22 +375,37 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             if (snapshot.hasData)
                               Row(
                                 children: [
-                                  Text(S.of(context).settingsContainerCurrentWeight,
-                                      style: Theme.of(context).textTheme.labelLarge),
-                                  Text("  ${(snapshot.data as WeightMeassurement).weight} g"),
+                                  Text(
+                                      S
+                                          .of(context)
+                                          .settingsContainerCurrentWeight,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge),
+                                  Text(
+                                      "  ${(snapshot.data as WeightMeassurement).weight} g"),
                                 ],
                               ),
                             const SizedBox(height: 10),
                             Row(
                               children: [
-                                SizedBox(width: w, child: Text(S.of(context).settingsWeightcontainer1IeWeightCup)),
-                                SizedBox(width: 80, child: Text("${settingsService.tareOnWeight1}")),
+                                SizedBox(
+                                    width: w,
+                                    child: Text(S
+                                        .of(context)
+                                        .settingsWeightcontainer1IeWeightCup)),
+                                SizedBox(
+                                    width: 80,
+                                    child: Text(
+                                        "${settingsService.tareOnWeight1}")),
                                 SizedBox(
                                   width: 100,
                                   child: IconButton(
                                     icon: const Icon(Icons.save),
                                     onPressed: () {
-                                      settingsService.tareOnWeight1 = (snapshot.data as WeightMeassurement).weight;
+                                      settingsService.tareOnWeight1 =
+                                          (snapshot.data as WeightMeassurement)
+                                              .weight;
                                     },
                                   ),
                                 ),
@@ -358,14 +419,23 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             ),
                             Row(
                               children: [
-                                SizedBox(width: w, child: Text(S.of(context).settingsWeightcontainer2IeEspressoCup)),
-                                SizedBox(width: 80, child: Text("${settingsService.tareOnWeight2}")),
+                                SizedBox(
+                                    width: w,
+                                    child: Text(S
+                                        .of(context)
+                                        .settingsWeightcontainer2IeEspressoCup)),
+                                SizedBox(
+                                    width: 80,
+                                    child: Text(
+                                        "${settingsService.tareOnWeight2}")),
                                 SizedBox(
                                   width: 100,
                                   child: IconButton(
                                     icon: const Icon(Icons.save),
                                     onPressed: () {
-                                      settingsService.tareOnWeight2 = (snapshot.data as WeightMeassurement).weight;
+                                      settingsService.tareOnWeight2 =
+                                          (snapshot.data as WeightMeassurement)
+                                              .weight;
                                     },
                                   ),
                                 ),
@@ -379,14 +449,23 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             ),
                             Row(
                               children: [
-                                SizedBox(width: w, child: Text(S.of(context).settingsWeightcontainer3IeSteamMug)),
-                                SizedBox(width: 80, child: Text("${settingsService.tareOnWeight3}")),
+                                SizedBox(
+                                    width: w,
+                                    child: Text(S
+                                        .of(context)
+                                        .settingsWeightcontainer3IeSteamMug)),
+                                SizedBox(
+                                    width: 80,
+                                    child: Text(
+                                        "${settingsService.tareOnWeight3}")),
                                 SizedBox(
                                   width: 100,
                                   child: IconButton(
                                     icon: const Icon(Icons.save),
                                     onPressed: () {
-                                      settingsService.tareOnWeight3 = (snapshot.data as WeightMeassurement).weight;
+                                      settingsService.tareOnWeight3 =
+                                          (snapshot.data as WeightMeassurement)
+                                              .weight;
                                     },
                                   ),
                                 ),
@@ -400,14 +479,23 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             ),
                             Row(
                               children: [
-                                SizedBox(width: w, child: Text(S.of(context).settingsWeightcontainer4IeSteamMug)),
-                                SizedBox(width: 80, child: Text("${settingsService.tareOnWeight4}")),
+                                SizedBox(
+                                    width: w,
+                                    child: Text(S
+                                        .of(context)
+                                        .settingsWeightcontainer4IeSteamMug)),
+                                SizedBox(
+                                    width: 80,
+                                    child: Text(
+                                        "${settingsService.tareOnWeight4}")),
                                 SizedBox(
                                   width: 100,
                                   child: IconButton(
                                     icon: const Icon(Icons.save),
                                     onPressed: () {
-                                      settingsService.tareOnWeight4 = (snapshot.data as WeightMeassurement).weight;
+                                      settingsService.tareOnWeight4 =
+                                          (snapshot.data as WeightMeassurement)
+                                              .weight;
                                     },
                                   ),
                                 ),
@@ -439,18 +527,23 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                   SwitchSettingsTile(
                     settingKey: SettingKeys.shotStopOnWeight.name,
                     defaultValue: settingsService.shotStopOnWeight,
-                    title: S.of(context).screenSettingsStopOnWeightIfScaleDetected,
-                    subtitle: S.of(context).screenSettingsIfTheScaleIsConnectedItIsUsedToStop,
+                    title:
+                        S.of(context).screenSettingsStopOnWeightIfScaleDetected,
+                    subtitle: S
+                        .of(context)
+                        .screenSettingsIfTheScaleIsConnectedItIsUsedToStop,
                     enabledLabel: S.of(context).enabled,
                     disabledLabel: S.of(context).disabled,
                     onChange: (value) {},
                   ),
                   SliderSettingsTile(
-                    title: S.of(context).screenSettingsStopBeforeWeightWasReachedS,
+                    title:
+                        S.of(context).screenSettingsStopBeforeWeightWasReachedS,
                     // subtitle:
                     //     "Delays in scale could be adjusted accordingly. The weight is calculated based on the current flow during an espresso shot",
                     settingKey: SettingKeys.targetEspressoWeightTimeAdjust.name,
-                    defaultValue: settingsService.targetEspressoWeightTimeAdjust,
+                    defaultValue:
+                        settingsService.targetEspressoWeightTimeAdjust,
                     min: 0.05,
                     max: 0.95,
                     step: 0.05,
@@ -459,7 +552,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                   ),
                   SliderSettingsTile(
                     title: S.of(context).settingsMoveonatweightThresholdS,
-                    subtitle: S.of(context).settingsNextStepWillBeTriggeredAtThisDurationFromReaching,
+                    subtitle: S
+                        .of(context)
+                        .settingsNextStepWillBeTriggeredAtThisDurationFromReaching,
                     settingKey: SettingKeys.stepLimitWeightTimeAdjust.name,
                     defaultValue: settingsService.stepLimitWeightTimeAdjust,
                     min: 0.0,
@@ -472,7 +567,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                     settingKey: SettingKeys.shotAutoTare.name,
                     defaultValue: settingsService.shotAutoTare,
                     title: S.of(context).screenSettingsAutoTare,
-                    subtitle: S.of(context).screenSettingsIfAShotIsStartingAutotareTheScale,
+                    subtitle: S
+                        .of(context)
+                        .screenSettingsIfAShotIsStartingAutotareTheScale,
                     enabledLabel: S.of(context).enabled,
                     disabledLabel: S.of(context).disabled,
                     onChange: (value) {},
@@ -481,13 +578,16 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                     leading: const Icon(Icons.timer),
                     settingKey: SettingKeys.scaleStartTimer.name,
                     defaultValue: settingsService.scaleStartTimer,
-                    title: S.of(context).settingsAutostartTimerOnScaleDuringPuring,
+                    title:
+                        S.of(context).settingsAutostartTimerOnScaleDuringPuring,
                   ),
                   SwitchSettingsTile(
                     settingKey: SettingKeys.steamHeaterOff.name,
                     defaultValue: settingsService.steamHeaterOff,
                     title: S.of(context).screenSettingsSwitchOffSteamHeating,
-                    subtitle: S.of(context).screenSettingsToSaveEnergyTheSteamHeaterWillBeTurnedOff,
+                    subtitle: S
+                        .of(context)
+                        .screenSettingsToSaveEnergyTheSteamHeaterWillBeTurnedOff,
                     enabledLabel: S.of(context).enabled,
                     disabledLabel: S.of(context).disabled,
                     onChange: (value) {
@@ -498,7 +598,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                     settingKey: SettingKeys.showFlushScreen.name,
                     defaultValue: settingsService.showFlushScreen,
                     title: S.of(context).screenSettingsShowFlush,
-                    subtitle: S.of(context).screenSettingsIfYouHaveNoGhcInstalledYouWouldNeedThe,
+                    subtitle: S
+                        .of(context)
+                        .screenSettingsIfYouHaveNoGhcInstalledYouWouldNeedThe,
                     enabledLabel: S.of(context).show,
                     disabledLabel: S.of(context).hide,
                     onChange: (value) {
@@ -528,8 +630,12 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                   SwitchSettingsTile(
                     settingKey: SettingKeys.recordPrePouring.name,
                     defaultValue: settingsService.recordPrePouring,
-                    title: S.of(context).screenShowGraphDataBeforePouringPhaseStarts,
-                    subtitle: S.of(context).screenSettingsifSwitchedOffYouDoNotSeeHeatingAndPreinfusion,
+                    title: S
+                        .of(context)
+                        .screenShowGraphDataBeforePouringPhaseStarts,
+                    subtitle: S
+                        .of(context)
+                        .screenSettingsifSwitchedOffYouDoNotSeeHeatingAndPreinfusion,
                     enabledLabel: S.of(context).show,
                     disabledLabel: S.of(context).hide,
                     onChange: (value) {
@@ -539,8 +645,12 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                   SwitchSettingsTile(
                     settingKey: SettingKeys.savePrePouring.name,
                     defaultValue: settingsService.savePrePouring,
-                    title: S.of(context).screenSettingsSaveShotGraphDataEvenForPrePouringStates,
-                    subtitle: S.of(context).screenSettingsGraphDataDuringHeatingAndPreinfusionAreSavedIntoShot,
+                    title: S
+                        .of(context)
+                        .screenSettingsSaveShotGraphDataEvenForPrePouringStates,
+                    subtitle: S
+                        .of(context)
+                        .screenSettingsGraphDataDuringHeatingAndPreinfusionAreSavedIntoShot,
                     enabledLabel: S.of(context).show,
                     disabledLabel: S.of(context).hide,
                     onChange: (value) {
@@ -550,7 +660,8 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                   SliderSettingsTile(
                     title: S.of(context).settingsRefillWatertankAtLimit,
                     settingKey: SettingKeys.targetWaterlevel.name,
-                    defaultValue: settingsService.targetWaterlevel.toInt().toDouble(),
+                    defaultValue:
+                        settingsService.targetWaterlevel.toInt().toDouble(),
                     min: 20,
                     max: 2040,
                     step: 20.0,
@@ -558,15 +669,6 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                     onChange: (value) {
                       machineService.de1?.setWaterLevelWarning(value.toInt());
                     },
-                  ),
-                  SwitchSettingsTile(
-                    settingKey: SettingKeys.alwaysAllowSkipping.name,
-                    defaultValue: settingsService.alwaysAllowSkipping,
-                    title: 'Always allow Step skipping',//S.of(context).screenSettingsAlwaysallowSkipping,
-                    subtitle: 'If enabled every step can be skipped - not only those called "pause"',//S.of(context).screenSettingsalwaysAllowSkippingDesc,
-                    enabledLabel: S.of(context).enabled,
-                    disabledLabel: S.of(context).disabled,
-                    onChange: (value) {},
                   ),
                 ],
               ),
@@ -577,7 +679,7 @@ class SettingsScreenState extends State<AppSettingsScreen> {
           title: S.of(context).screenSettingsTabletGroup,
           children: [
             SimpleSettingsTile(
-              title: S.of(context).screenSettingsThemeSelection,
+              title: "Theme",
               leading: const Icon(Icons.palette),
               child: StreamBuilder<int>(
                   stream: _streamRefresh,
@@ -595,220 +697,237 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                           onChange: (value) {
                             settingsService.notifyDelayed();
                           }),
-                      DropDownSettingsTile(
-                          title: S.of(context).screenSettingsThemeSelection,
-                          settingKey: SettingKeys.screenThemeIndex.name,
-                          selected: settingsService.screenThemeIndex,
-                          values: {
-                            "0": S.of(context).red,
-                            "1": S.of(context).orange,
-                            "2": S.of(context).blue,
-                            "3": S.of(context).green,
-                          },
-                          onChange: (value) {
-                            settingsService.notifyDelayed();
-                          }),
-                      SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: DropDownSettingsTile(
-                            title: S.of(context).screenSettingsLanguage,
-                            settingKey: SettingKeys.locale.name,
-                            selected: settingsService.locale,
-                            values: {
-                              "auto": S.of(context).screenSettingsTabletDefault,
-                              "en": S.of(context).screenSettingsEnglish,
-                              "de": S.of(context).screenSettingsGerman,
-                              "es": S.of(context).screenSettingsSpanish,
-                              "ko": S.of(context).screenSettingsKorean,
-                              "ar": S.of(context).screenSettingsArabic,
-                            },
-                            onChange: (value) {
-                              settingsService.notifyDelayed();
-                            }),
-                      ),
                     ]);
                   }),
             ),
             SimpleSettingsTile(
               title: S.of(context).screenSettingsScreenAndBrightness,
               leading: const Icon(Icons.brightness_2),
-              subtitle: S.of(context).screenSettingsChangeHowTheAppIsChangingScreenBrightnessIfNot,
-              child: SettingsScreen(title: S.of(context).screenSettingsBrightnessSleepAndScreensaver, children: [
-                SliderSettingsTile(
-                  title: S.of(context).screenSettingsReduceScreenBrightnessAfter0offMin,
-                  settingKey: SettingKeys.screenBrightnessTimer.name,
-                  defaultValue: settingsService.screenBrightnessTimer,
-                  min: 0,
-                  max: 60,
-                  step: 1,
-                  leading: const Icon(Icons.timer),
-                  onChange: (value) {
-                    debugPrint('key-slider-volume: $value');
-                  },
-                ),
-                SliderSettingsTile(
-                  title: S.of(context).screenSettingsReduceBrightnessToLevel,
-                  settingKey: SettingKeys.screenBrightnessValue.name,
-                  defaultValue: settingsService.screenBrightnessValue,
-                  min: 0,
-                  max: 1,
-                  step: 0.01,
-                  leading: const Icon(Icons.brightness_3),
-                  onChange: (value) async {
-                    try {
-                      await ScreenBrightness().setScreenBrightness(value);
-                      if (_resetBrightness != null) {
-                        _resetBrightness!.cancel();
-                        _resetBrightness = null;
-                      }
-                      _resetBrightness = Timer(
-                        const Duration(seconds: 2),
-                        () async {
-                          await ScreenBrightness().resetScreenBrightness();
-                        },
-                      );
-                    } catch (e) {
-                      log.severe('Failed to set brightness');
-                    }
-                  },
-                ),
-                SwitchSettingsTile(
-                  title: S.of(context).screenSettingsShowClockDuringScreensaver,
-                  settingKey: SettingKeys.screensaverShowClock.name,
-                  defaultValue: settingsService.screensaverShowClock,
-                  leading: const Icon(Icons.watch),
-                  onChange: (value) async {},
-                ),
-                SettingsContainer(
-                  leftPadding: 16,
+              subtitle: S
+                  .of(context)
+                  .screenSettingsChangeHowTheAppIsChangingScreenBrightnessIfNot,
+              child: SettingsScreen(
+                  title:
+                      S.of(context).screenSettingsBrightnessSleepAndScreensaver,
                   children: [
-                    Text(S.of(context).screenSettingsLoadScreensaverFiles),
-                    Row(
+                    SliderSettingsTile(
+                      title: S
+                          .of(context)
+                          .screenSettingsReduceScreenBrightnessAfter0offMin,
+                      settingKey: SettingKeys.screenBrightnessTimer.name,
+                      defaultValue: settingsService.screenBrightnessTimer,
+                      min: 0,
+                      max: 60,
+                      step: 1,
+                      leading: const Icon(Icons.timer),
+                      onChange: (value) {
+                        debugPrint('key-slider-volume: $value');
+                      },
+                    ),
+                    SliderSettingsTile(
+                      title:
+                          S.of(context).screenSettingsReduceBrightnessToLevel,
+                      settingKey: SettingKeys.screenBrightnessValue.name,
+                      defaultValue: settingsService.screenBrightnessValue,
+                      min: 0,
+                      max: 1,
+                      step: 0.01,
+                      leading: const Icon(Icons.brightness_3),
+                      onChange: (value) async {
+                        try {
+                          await ScreenBrightness().setScreenBrightness(value);
+                          if (_resetBrightness != null) {
+                            _resetBrightness!.cancel();
+                            _resetBrightness = null;
+                          }
+                          _resetBrightness = Timer(
+                            const Duration(seconds: 2),
+                            () async {
+                              await ScreenBrightness().resetScreenBrightness();
+                            },
+                          );
+                        } catch (e) {
+                          log.severe('Failed to set brightness');
+                        }
+                      },
+                    ),
+                    SwitchSettingsTile(
+                      title: S
+                          .of(context)
+                          .screenSettingsShowClockDuringScreensaver,
+                      settingKey: SettingKeys.screensaverShowClock.name,
+                      defaultValue: settingsService.screensaverShowClock,
+                      leading: const Icon(Icons.watch),
+                      onChange: (value) async {},
+                    ),
+                    SettingsContainer(
+                      leftPadding: 16,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                pickScreensaver();
-                              },
-                              child: Text(S.of(context).screenSettingsSelectFiles)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ElevatedButton(
-                              onPressed: () {
-                                ScreenSaver.deleteAllFiles();
-                              },
-                              child: Text(S.of(context).screenSettingsDeleteAllScreensaverFiles)),
+                        Text(S.of(context).screenSettingsLoadScreensaverFiles),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    pickScreensaver();
+                                  },
+                                  child: Text(
+                                      S.of(context).screenSettingsSelectFiles)),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    ScreenSaver.deleteAllFiles();
+                                  },
+                                  child: Text(S
+                                      .of(context)
+                                      .screenSettingsDeleteAllScreensaverFiles)),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-                SettingsGroup(title: S.of(context).settingsTabletSleep, children: [
-                  SwitchSettingsTile(
-                    title: S.of(context).settingsSleepAllowTabletSleepDuringScreensaver,
-                    settingKey: SettingKeys.tabletSleepDuringScreensaver.name,
-                    defaultValue: settingsService.tabletSleepDuringScreensaver,
-                    childrenIfEnabled: [
-                      SliderSettingsTile(
-                        title: S.of(context).settingsSleepMinutesToSpendInScreensaverBeforeAllowingSleep,
-                        settingKey: SettingKeys.tabletSleepDuringScreensaverTimeout.name,
-                        defaultValue: settingsService.tabletSleepDuringScreensaverTimeout,
-                        min: 0,
-                        max: 240,
-                        step: 5,
-                        decimalPrecision: 0,
-                      ),
-                    ],
-                  ),
-                  SwitchSettingsTile(
-                    title: S.of(context).settingsSleepAllowTabletSleepWhenMachineIsSleepingOrDisconnected,
-                    settingKey: SettingKeys.tabletSleepWhenMachineOff.name,
-                    defaultValue: settingsService.tabletSleepWhenMachineOff,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16, bottom: 32, left: 16, right: 16),
-                    child: Text(S.of(context).settingsSleepWarning),
-                  )
-                ]),
-              ]),
+                    SettingsGroup(
+                        title: S.of(context).settingsTabletSleep,
+                        children: [
+                          SwitchSettingsTile(
+                            title: S
+                                .of(context)
+                                .settingsSleepAllowTabletSleepDuringScreensaver,
+                            settingKey:
+                                SettingKeys.tabletSleepDuringScreensaver.name,
+                            defaultValue:
+                                settingsService.tabletSleepDuringScreensaver,
+                            childrenIfEnabled: [
+                              SliderSettingsTile(
+                                title: S
+                                    .of(context)
+                                    .settingsSleepMinutesToSpendInScreensaverBeforeAllowingSleep,
+                                settingKey: SettingKeys
+                                    .tabletSleepDuringScreensaverTimeout.name,
+                                defaultValue: settingsService
+                                    .tabletSleepDuringScreensaverTimeout,
+                                min: 0,
+                                max: 240,
+                                step: 5,
+                                decimalPrecision: 0,
+                              ),
+                            ],
+                          ),
+                          SwitchSettingsTile(
+                            title: S
+                                .of(context)
+                                .settingsSleepAllowTabletSleepWhenMachineIsSleepingOrDisconnected,
+                            settingKey:
+                                SettingKeys.tabletSleepWhenMachineOff.name,
+                            defaultValue:
+                                settingsService.tabletSleepWhenMachineOff,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: 16, bottom: 32, left: 16, right: 16),
+                            child: Text(S.of(context).settingsSleepWarning),
+                          )
+                        ]),
+                  ]),
             ),
             SimpleSettingsTile(
               title: S.of(context).screenSettingsBahaviour,
               leading: const Icon(Icons.switch_access_shortcut),
-              subtitle: S.of(context).screenSettingsChangeHowTheAppIsHandlingTheDe1InCase,
-              child: SettingsScreen(title: S.of(context).screenSettingsBehaviour, children: [
-                SliderSettingsTile(
-                  title: S.of(context).screenSettingsSwitchDe1ToSleepModeIfItIsIdleFor,
-                  settingKey: SettingKeys.sleepTimer.name,
-                  defaultValue: settingsService.sleepTimer,
-                  min: 0,
-                  max: 240,
-                  step: 5,
-                  leading: const Icon(Icons.timer),
-                  onChange: (value) {},
-                ),
-                SwitchSettingsTile(
-                  title: S.of(context).screenSettingsWakeUpDe1IfAppIsLaunched,
-                  settingKey: SettingKeys.launchWake.name,
-                  defaultValue: settingsService.launchWake,
-                  leading: const Icon(Icons.back_hand),
-                  onChange: (value) async {},
-                ),
-                SwitchSettingsTile(
-                  title: S.of(context).screenSettingsWakeUpDe1IfScreenTappedIfScreenWasOff,
-                  settingKey: SettingKeys.screenTapWake.name,
-                  defaultValue: settingsService.screenTapWake,
-                  leading: const Icon(Icons.back_hand),
-                  onChange: (value) async {},
-                ),
-                SwitchSettingsTile(
-                  title: S.of(context).screenSettingsSwitchOnScreensaverIfDe1ManuallySwitchedToSleep,
-                  settingKey: SettingKeys.screensaverOnIfIdle.name,
-                  defaultValue: settingsService.screensaverOnIfIdle,
-                  leading: const Icon(Icons.back_hand),
-                  onChange: (value) async {},
-                ),
-                SwitchSettingsTile(
-                  settingKey: SettingKeys.tareOnWakeUp.name,
-                  defaultValue: settingsService.tareOnWakeUp,
-                  title: S.of(context).settingsTareOnWakeupOfDe1,
-                  subtitle: S.of(context).settingsTareifTheScaleIsAlreadyConnectedTareIsCalledIf,
-                  enabledLabel: S.of(context).enabled,
-                  disabledLabel: S.of(context).disabled,
-                  onChange: (value) {},
-                  leading: const Icon(Icons.monitor_weight),
-                ),
-                SwitchSettingsTile(
-                  title: S.of(context).screenSettingsGoBackToRecipeScreenIfTimeoutOccured,
-                  settingKey: SettingKeys.screenTimoutGoToRecipe.name,
-                  defaultValue: settingsService.screenTimoutGoToRecipe,
-                  leading: const Icon(Icons.coffee),
-                  onChange: (value) async {},
-                ),
-                SwitchSettingsTile(
-                  title: S.of(context).settingsSleepWhenMachineIsInSleepSwitchOffScaleDisplayIf,
-                  settingKey: SettingKeys.scaleDisplayOffOnSleep.name,
-                  defaultValue: settingsService.scaleDisplayOffOnSleep,
-                  leading: const Icon(Icons.watch),
-                  onChange: (value) async {},
-                ),
-              ]),
+              subtitle: S
+                  .of(context)
+                  .screenSettingsChangeHowTheAppIsHandlingTheDe1InCase,
+              child: SettingsScreen(
+                  title: S.of(context).screenSettingsBehaviour,
+                  children: [
+                    SliderSettingsTile(
+                      title: S
+                          .of(context)
+                          .screenSettingsSwitchDe1ToSleepModeIfItIsIdleFor,
+                      settingKey: SettingKeys.sleepTimer.name,
+                      defaultValue: settingsService.sleepTimer,
+                      min: 0,
+                      max: 240,
+                      step: 5,
+                      leading: const Icon(Icons.timer),
+                      onChange: (value) {},
+                    ),
+                    SwitchSettingsTile(
+                      title:
+                          S.of(context).screenSettingsWakeUpDe1IfAppIsLaunched,
+                      settingKey: SettingKeys.launchWake.name,
+                      defaultValue: settingsService.launchWake,
+                      leading: const Icon(Icons.back_hand),
+                      onChange: (value) async {},
+                    ),
+                    SwitchSettingsTile(
+                      title: S
+                          .of(context)
+                          .screenSettingsWakeUpDe1IfScreenTappedIfScreenWasOff,
+                      settingKey: SettingKeys.screenTapWake.name,
+                      defaultValue: settingsService.screenTapWake,
+                      leading: const Icon(Icons.back_hand),
+                      onChange: (value) async {},
+                    ),
+                    SwitchSettingsTile(
+                      title: S
+                          .of(context)
+                          .screenSettingsSwitchOnScreensaverIfDe1ManuallySwitchedToSleep,
+                      settingKey: SettingKeys.screensaverOnIfIdle.name,
+                      defaultValue: settingsService.screensaverOnIfIdle,
+                      leading: const Icon(Icons.back_hand),
+                      onChange: (value) async {},
+                    ),
+                    SwitchSettingsTile(
+                      settingKey: SettingKeys.tareOnWakeUp.name,
+                      defaultValue: settingsService.tareOnWakeUp,
+                      title: S.of(context).settingsTareOnWakeupOfDe1,
+                      subtitle: S
+                          .of(context)
+                          .settingsTareifTheScaleIsAlreadyConnectedTareIsCalledIf,
+                      enabledLabel: S.of(context).enabled,
+                      disabledLabel: S.of(context).disabled,
+                      onChange: (value) {},
+                      leading: const Icon(Icons.monitor_weight),
+                    ),
+                    SwitchSettingsTile(
+                      title: S
+                          .of(context)
+                          .screenSettingsGoBackToRecipeScreenIfTimeoutOccured,
+                      settingKey: SettingKeys.screenTimoutGoToRecipe.name,
+                      defaultValue: settingsService.screenTimoutGoToRecipe,
+                      leading: const Icon(Icons.coffee),
+                      onChange: (value) async {},
+                    ),
+                    SwitchSettingsTile(
+                      title: S
+                          .of(context)
+                          .settingsSleepWhenMachineIsInSleepSwitchOffScaleDisplayIf,
+                      settingKey: SettingKeys.scaleDisplayOffOnSleep.name,
+                      defaultValue: settingsService.scaleDisplayOffOnSleep,
+                      leading: const Icon(Icons.watch),
+                      onChange: (value) async {},
+                    ),
+                  ]),
             ),
             SimpleSettingsTile(
               title: S.of(context).screenSettingsSmartCharging,
               leading: const Icon(Icons.power),
-              child: SettingsScreen(title: S.of(context).screenSettingsSmartCharging, children: [
-                SwitchSettingsTile(
-                  leading: const Icon(Icons.power),
-                  defaultValue: settingsService.smartCharging,
-                  settingKey: SettingKeys.smartCharging.name,
-                  title: S.of(context).screenSettingsKeepTabletChargedBetween6090,
-                  onChange: (value) {},
-                ),
-              ]),
+              child: SettingsScreen(
+                  title: S.of(context).screenSettingsSmartCharging,
+                  children: [
+                    SwitchSettingsTile(
+                      leading: const Icon(Icons.power),
+                      defaultValue: settingsService.smartCharging,
+                      settingKey: SettingKeys.smartCharging.name,
+                      title: S
+                          .of(context)
+                          .screenSettingsKeepTabletChargedBetween6090,
+                      onChange: (value) {},
+                    ),
+                  ]),
             ),
           ],
         ),
@@ -817,13 +936,17 @@ class SettingsScreenState extends State<AppSettingsScreen> {
           children: [
             SimpleSettingsTile(
               title: S.of(context).screenSettingsCloudAndNetwork,
-              subtitle: S.of(context).screenSettingsHandlingOfConnectionsToOtherExternalSystemsLikeMqttAnd,
+              subtitle: S
+                  .of(context)
+                  .screenSettingsHandlingOfConnectionsToOtherExternalSystemsLikeMqttAnd,
               leading: const Icon(Icons.cloud),
               child: SettingsScreen(
                 title: S.of(context).screenSettingsCloudAndNetwork,
                 children: [
                   ExpandableSettingsTile(
-                    title: S.of(context).screenSettingsMessageQueueBroadcastMqttClient,
+                    title: S
+                        .of(context)
+                        .screenSettingsMessageQueueBroadcastMqttClient,
                     children: [
                       SwitchSettingsTile(
                         defaultValue: settingsService.mqttEnabled,
@@ -869,7 +992,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                         settingKey: SettingKeys.mqttSendState.name,
                         defaultValue: settingsService.mqttSendState,
                         title: S.of(context).screenSettingsSendDe1StateUpdates,
-                        subtitle: S.of(context).screenSettingsSendingTheStatusOfTheDe1,
+                        subtitle: S
+                            .of(context)
+                            .screenSettingsSendingTheStatusOfTheDe1,
                         onChange: (value) {},
                       ),
                       SwitchSettingsTile(
@@ -877,22 +1002,30 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                         settingKey: SettingKeys.mqttSendShot.name,
                         defaultValue: settingsService.mqttSendShot,
                         title: S.of(context).screenSettingsSendDe1ShotUpdates,
-                        subtitle: S.of(context).screenSettingsThisCanLeadToAHigherLoadOnYourMqtt,
+                        subtitle: S
+                            .of(context)
+                            .screenSettingsThisCanLeadToAHigherLoadOnYourMqtt,
                         onChange: (value) {},
                       ),
                       SwitchSettingsTile(
                         leading: const Icon(Icons.settings_remote),
                         settingKey: SettingKeys.mqttSendWater.name,
                         defaultValue: settingsService.mqttSendWater,
-                        title: S.of(context).screenSettingsSendDe1WaterLevelUpdates,
-                        subtitle: S.of(context).screenSettingsThisCanLeadToAHigherLoadOnYourMqtt,
+                        title: S
+                            .of(context)
+                            .screenSettingsSendDe1WaterLevelUpdates,
+                        subtitle: S
+                            .of(context)
+                            .screenSettingsThisCanLeadToAHigherLoadOnYourMqtt,
                         onChange: (value) {},
                       ),
                       SwitchSettingsTile(
                         leading: const Icon(Icons.settings_remote),
                         settingKey: SettingKeys.mqttSendBattery.name,
                         defaultValue: settingsService.mqttSendBattery,
-                        title: S.of(context).screenSettingsSendTabletBatteryLevelUpdates,
+                        title: S
+                            .of(context)
+                            .screenSettingsSendTabletBatteryLevelUpdates,
                         onChange: (value) {},
                       ),
                     ],
@@ -908,7 +1041,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                         defaultValue: settingsService.webServer,
                         leading: const Icon(Icons.settings_remote),
                         settingKey: SettingKeys.webServer.name,
-                        title: S.of(context).screenSettingsEnableMiniWebsiteWithPort8888,
+                        title: S
+                            .of(context)
+                            .screenSettingsEnableMiniWebsiteWithPort8888,
                         subtitle:
                             "${S.of(context).screenSettingsCheckYourRouterForIpAdressOfYourTabletOpen} http://$ownIpAdress:8888",
                         onChange: (value) {
@@ -937,7 +1072,9 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                         return SettingsContainer(
                           leftPadding: 16,
                           children: [
-                            Text(S.of(context).screenSettingsBackuprestoreDatabase),
+                            Text(S
+                                .of(context)
+                                .screenSettingsBackuprestoreDatabase),
                             Row(
                               children: [
                                 Padding(
@@ -961,7 +1098,8 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                                 },
                                               );
                                             },
-                                      child: Text(S.of(context).screenSettingsBackup)),
+                                      child: Text(
+                                          S.of(context).screenSettingsBackup)),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -971,7 +1109,32 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                                         : () {
                                             restoreDatabase();
                                           },
-                                    child: Text(S.of(context).screenSettingsRestore),
+                                    child: Text(
+                                        S.of(context).screenSettingsRestore),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: ElevatedButton(
+                                    onPressed: isBusy
+                                        ? null
+                                        : () async {
+                                            setState(() {
+                                              isBusy = true;
+                                              _controllerRefresh.add(0);
+                                            });
+                                            await exportLogs();
+                                            Future.delayed(
+                                              Duration(seconds: 3),
+                                              () {
+                                                setState(() {
+                                                  isBusy = false;
+                                                  _controllerRefresh.add(0);
+                                                });
+                                              },
+                                            );
+                                          },
+                                    child: Text("Export logs"),
                                   ),
                                 ),
                               ],
@@ -996,76 +1159,82 @@ class SettingsScreenState extends State<AppSettingsScreen> {
             ),
           ],
         ),
-        SettingsGroup(
-          title: S.of(context).screenSettingsPrivacySettings,
-          children: [
-            SimpleSettingsTile(
-              title: S.of(context).screenSettingsPrivacySettings,
-              leading: const Icon(Icons.privacy_tip),
-              child: SettingsScreen(
-                title: S.of(context).screenSettingsFeedbackAndCrashReporting,
-                children: <Widget>[
-                  SwitchSettingsTile(
-                    leading: const Icon(Icons.settings_remote),
-                    settingKey: SettingKeys.useSentry.name,
-                    defaultValue: settingsService.useSentry,
-                    title: S.of(context).screenSettingsSendInformationsToSentryioIfTheAppCrashesOrYou,
-                    onChange: (value) {
-                      showSnackbar(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SettingsGroup(
-          title: "Experimental",
-          children: [
-            SimpleSettingsTile(
-              title: "Experimental",
-              leading: const Icon(Icons.privacy_tip),
-              child: SettingsScreen(
-                title: "Experimental",
-                children: <Widget>[
-                  SwitchSettingsTile(
-                    leading: const Icon(Icons.settings_remote),
-                    settingKey: SettingKeys.useCafeHub.name,
-                    defaultValue: settingsService.useCafeHub,
-                    title: "Use CafeHub instead of BlueTooth",
-                    onChange: (value) {
-                      settingsService.notifyDelayed();
-                    },
-                  ),
-                  TextInputSettingsTile(
-                    title: "CafeHub Websocket Endpoint (Usually: ws://IP_OF_YOUR_TABLET_RUNNING_CAFEHUB:8765)",
-                    settingKey: SettingKeys.chUrl.name,
-                    initialValue: settingsService.chUrl,
-                    onChange: (value) {
-                      settingsService.notifyDelayed();
-                    },
-                  ),
-                  SwitchSettingsTile(
-                    leading: const Icon(Icons.settings_remote),
-                    settingKey: SettingKeys.useLongUUID.name,
-                    defaultValue: settingsService.useLongUUID,
-                    title: "Use Long UUID (usually if Android)",
-                    onChange: (value) {
-                      settingsService.notifyDelayed();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        //SettingsGroup(
+        //  title: S.of(context).screenSettingsPrivacySettings,
+        //  children: [
+        //    SimpleSettingsTile(
+        //      title: S.of(context).screenSettingsPrivacySettings,
+        //      leading: const Icon(Icons.privacy_tip),
+        //      child: SettingsScreen(
+        //        title: S.of(context).screenSettingsFeedbackAndCrashReporting,
+        //        children: <Widget>[
+        //          SwitchSettingsTile(
+        //            leading: const Icon(Icons.settings_remote),
+        //            settingKey: SettingKeys.useSentry.name,
+        //            defaultValue: settingsService.useSentry,
+        //            title: S
+        //                .of(context)
+        //                .screenSettingsSendInformationsToSentryioIfTheAppCrashesOrYou,
+        //            onChange: (value) {
+        //              showSnackbar(context);
+        //            },
+        //          ),
+        //        ],
+        //      ),
+        //    ),
+        //  ],
+        //),
+        //SettingsGroup(
+        //  title: "Experimental",
+        //  children: [
+        //    SimpleSettingsTile(
+        //      title: "Experimental",
+        //      leading: const Icon(Icons.privacy_tip),
+        //      child: SettingsScreen(
+        //        title: "Experimental",
+        //        children: <Widget>[
+        //          SwitchSettingsTile(
+        //            leading: const Icon(Icons.settings_remote),
+        //            settingKey: SettingKeys.useCafeHub.name,
+        //            defaultValue: settingsService.useCafeHub,
+        //            title: "Use CafeHub instead of BlueTooth",
+        //            onChange: (value) {
+        //              settingsService.notifyDelayed();
+        //            },
+        //          ),
+        //          TextInputSettingsTile(
+        //            title:
+        //                "CafeHub Websocket Endpoint (Usually: ws://IP_OF_YOUR_TABLET_RUNNING_CAFEHUB:8765)",
+        //            settingKey: SettingKeys.chUrl.name,
+        //            initialValue: settingsService.chUrl,
+        //            onChange: (value) {
+        //              settingsService.notifyDelayed();
+        //            },
+        //          ),
+        //          SwitchSettingsTile(
+        //            leading: const Icon(Icons.settings_remote),
+        //            settingKey: SettingKeys.useLongUUID.name,
+        //            defaultValue: settingsService.useLongUUID,
+        //            title: "Use Long UUID (usually if Android)",
+        //            onChange: (value) {
+        //              settingsService.notifyDelayed();
+        //            },
+        //          ),
+        //        ],
+        //      ),
+        //    ),
+        //  ],
+        //),
       ],
     );
   }
 
   void showSnackbar(BuildContext context) {
     getIt<SnackbarService>().notify(
-        S.of(context).screenSettingsYouChangedCriticalSettingsYouNeedToRestartTheApp, SnackbarNotificationType.info);
+        S
+            .of(context)
+            .screenSettingsYouChangedCriticalSettingsYouNeedToRestartTheApp,
+        SnackbarNotificationType.info);
   }
 
   void settingsServiceListener() {
@@ -1076,43 +1245,105 @@ class SettingsScreenState extends State<AppSettingsScreen> {
   Future<void> backupDatabase() async {
     try {
       var objectBox = getIt<ObjectBox>();
+      var profileService = getIt<ProfileService>();
       List<Uint8List> data = [];
       data.add(objectBox.getBackupData());
-      data.add(await getLoggerBackupData());
+      data.add(await profileService.getProfilesBackup());
 
-      var dateStr = DateTime.now().toLocal();
-      // var doc = DocumentFileSavePlus();
-      await DocumentFileSavePlus().saveMultipleFiles(dataList: data, fileNameList: [
-        "despresso_backup_$dateStr.bak",
-        "logs_$dateStr.zip"
-      ], mimeTypeList: [
-        "application/octet-stream",
-        "application/zip",
-      ]);
+      // combine data into one zip file
+      Directory tmpDir = await getTemporaryDirectory();
+      await tmpDir.create(recursive: true);
+      final zipFile = File("${tmpDir.path}/backup.zip");
+      final dbBak = File("${tmpDir.path}/dBBackup.bak");
+      final profileBak = File("${tmpDir.path}/profileBackup.bak");
+
+      await dbBak.writeAsBytes(data[0]);
+      await profileBak.writeAsBytes(data[1]);
+
+      await ZipFile.createFromFiles(
+          sourceDir: tmpDir, files: [dbBak, profileBak], zipFile: zipFile);
+
+      Uint8List backupData = await zipFile.readAsBytes();
+
+      await DocumentFileSavePlus().saveFile(backupData,
+          "rea_backup_${DateTime.now().toLocal()}", "application/zip");
+
       log.info("Backupdata saved ${data[0].length + data[1].length}");
       // ignore: use_build_context_synchronously
-      getIt<SnackbarService>().notify(S.of(context).screenSettingsSavedBackup, SnackbarNotificationType.info);
+      getIt<SnackbarService>().notify(S.of(context).screenSettingsSavedBackup,
+          SnackbarNotificationType.info);
     } catch (e) {
-      getIt<SnackbarService>().notify('Saving backup failed $e', SnackbarNotificationType.severe);
+      getIt<SnackbarService>()
+          .notify('Saving backup failed $e', SnackbarNotificationType.severe);
+      log.severe("Save database failed $e");
+    }
+  }
+
+  Future<void> exportLogs() async {
+    try {
+      List<Uint8List> data = [];
+      data.add(await getLoggerBackupData());
+      var dateStr = DateTime.now().toLocal();
+
+      await DocumentFileSavePlus()
+          .saveMultipleFiles(dataList: data, fileNameList: [
+        "logs_$dateStr.zip",
+      ], mimeTypeList: [
+        "application/zip",
+      ]);
+      // ignore: use_build_context_synchronously
+      getIt<SnackbarService>()
+          .notify("Logs exported", SnackbarNotificationType.info);
+    } catch (e) {
+      getIt<SnackbarService>()
+          .notify('Saving logs failed $e', SnackbarNotificationType.severe);
       log.severe("Save database failed $e");
     }
   }
 
   Future<void> restoreDatabase() async {
-    var filePickerResult = await FilePicker.platform.pickFiles(lockParentWindow: true, type: FileType.any);
+    var filePickerResult = await FilePicker.platform
+        .pickFiles(lockParentWindow: true, type: FileType.any);
 
     if (filePickerResult != null) {
-      var objectBox = getIt<ObjectBox>();
+      // extract zip to tmp, restore db and profiles
+      var file = File(filePickerResult.files.first.path!);
       try {
-        await objectBox.restoreBackupData(filePickerResult.files.single.path.toString());
+        Directory tmpDir = await getTemporaryDirectory();
+        await tmpDir.create(recursive: true);
+        await ZipFile.extractToDirectory(zipFile: file, destinationDir: tmpDir);
+
+        final dbBak = File("${tmpDir.path}/dBBackup.bak");
+        final profileBak = File("${tmpDir.path}/profileBackup.bak");
+
+        if (profileBak.existsSync()) {
+          log.info("found profile bak at: ${profileBak.path}");
+          Uint8List profilesMap = await profileBak.readAsBytes();
+          getIt<ProfileService>().setProfilesFromBackup(profilesMap);
+        }
+        if (!dbBak.existsSync()) {
+          throw Exception("Missing db backup file");
+        }
+        var objectBox = getIt<ObjectBox>();
+        await objectBox.restoreBackupData(dbBak.path);
         showRestartNowScreen();
         // ignore: use_build_context_synchronously
-        getIt<SnackbarService>().notify(S.of(context).screenSettingsRestoredBackup, SnackbarNotificationType.ok);
+        getIt<SnackbarService>().notify(
+            S.of(context).screenSettingsRestoredBackup,
+            SnackbarNotificationType.ok);
       } catch (e) {
-        log.severe("Store restored $e");
-        getIt<SnackbarService>()
-            // ignore: use_build_context_synchronously
-            .notify(S.of(context).screenSettingsFailedRestoringBackup, SnackbarNotificationType.severe);
+        log.severe("Restore with zip failed: $e");
+
+        try {
+          var objectBox = getIt<ObjectBox>();
+          await objectBox.restoreBackupData(file.path);
+          showRestartNowScreen();
+        } catch (e) {
+          getIt<SnackbarService>()
+              // ignore: use_build_context_synchronously
+              .notify(S.of(context).screenSettingsFailedRestoringBackup,
+                  SnackbarNotificationType.severe);
+        }
       }
     } else {
       // can perform some actions like notification etc
@@ -1120,8 +1351,8 @@ class SettingsScreenState extends State<AppSettingsScreen> {
   }
 
   Future<void> pickScreensaver() async {
-    var filePickerResult =
-        await FilePicker.platform.pickFiles(allowMultiple: true, lockParentWindow: true, type: FileType.image);
+    var filePickerResult = await FilePicker.platform.pickFiles(
+        allowMultiple: true, lockParentWindow: true, type: FileType.image);
 
     final Directory saver = await ScreenSaver.getDirectory();
 
@@ -1152,12 +1383,15 @@ class SettingsScreenState extends State<AppSettingsScreen> {
             Expanded(
               flex: 5,
               child: SizedBox.expand(
-                child: Image.asset("assets/logo.png"),
+                child: Image.asset("assets/rea.png"),
               ),
             ),
             Expanded(
               flex: 5,
-              child: Text(S.of(context).screenSettingsSettingsAreRestoredPleaseCloseAppAndRestart,
+              child: Text(
+                  S
+                      .of(context)
+                      .screenSettingsSettingsAreRestoredPleaseCloseAppAndRestart,
                   style: Theme.of(context).textTheme.bodyLarge),
             ),
             Padding(
@@ -1238,10 +1472,15 @@ class SettingsVisualizer extends StatelessWidget {
           ElevatedButton(
               onPressed: () async {
                 try {
-                  await visualizerService.createClient(settingsService.visualizerUser, settingsService.visualizerPwd);
-                  getIt<SnackbarService>().notify("Connection to visualizer established", SnackbarNotificationType.ok);
+                  await visualizerService.createClient(
+                      settingsService.visualizerUser,
+                      settingsService.visualizerPwd);
+                  getIt<SnackbarService>().notify(
+                      "Connection to visualizer established",
+                      SnackbarNotificationType.ok);
                 } catch (ex, _) {
-                  getIt<SnackbarService>().notify("Error: $ex", SnackbarNotificationType.severe);
+                  getIt<SnackbarService>()
+                      .notify("Error: $ex", SnackbarNotificationType.severe);
                 }
               },
               child: const Text("Login to Visualizer")),
@@ -1260,7 +1499,9 @@ class SettingsVisualizer extends StatelessWidget {
               if (username != null && username.length > 3) {
                 return null;
               }
-              return S.of(context).screenSettingsUserNameCantBeSmallerThan4Letters;
+              return S
+                  .of(context)
+                  .screenSettingsUserNameCantBeSmallerThan4Letters;
             },
           ),
           TextInputSettingsTile(
@@ -1271,9 +1512,11 @@ class SettingsVisualizer extends StatelessWidget {
               if (username != null && username.length > 3) {
                 return null;
               }
-              return S.of(context).screenSettingsUserNameCantBeSmallerThan4Letters;
+              return S
+                  .of(context)
+                  .screenSettingsUserNameCantBeSmallerThan4Letters;
             },
-            borderColor: Colors.blueAccent,
+            borderColor: Theme.of(context).colorScheme.primary,
             errorColor: Colors.deepOrangeAccent,
           ),
           TextInputSettingsTile(
@@ -1285,7 +1528,9 @@ class SettingsVisualizer extends StatelessWidget {
               if (password != null && password.length > 6) {
                 return null;
               }
-              return S.of(context).screenSettingsPasswordCantBeSmallerThan7Letters;
+              return S
+                  .of(context)
+                  .screenSettingsPasswordCantBeSmallerThan7Letters;
             },
             borderColor: Colors.blueAccent,
             errorColor: Colors.deepOrangeAccent,
@@ -1317,11 +1562,15 @@ class _DeviceAssignmentState extends State<DeviceAssignment> {
       children: [
         // scanned scales list
         ...widget.bleService.devices
-            .where((element) => widget.bleService.scales.firstWhereOrNull((scale) => scale.id == element.id) == null)
+            .where((element) =>
+                widget.bleService.scales
+                    .firstWhereOrNull((scale) => scale.id == element.id) ==
+                null)
             .map((e) {
           return deviceRow(e);
         }).toList(),
-        if (widget.bleService.scales.firstWhereOrNull((element) => element.id == widget.settingsService.scalePrimary) ==
+        if (widget.bleService.scales.firstWhereOrNull((element) =>
+                element.id == widget.settingsService.scalePrimary) ==
             null)
           deviceRow(bledevice.DiscoveredDevice(
             id: widget.settingsService.scalePrimary,
@@ -1331,8 +1580,8 @@ class _DeviceAssignmentState extends State<DeviceAssignment> {
             serviceUuids: const [],
             serviceData: const <ble.Uuid, Uint8List>{},
           )),
-        if (widget.bleService.scales
-                .firstWhereOrNull((element) => element.id == widget.settingsService.scaleSecondary) ==
+        if (widget.bleService.scales.firstWhereOrNull((element) =>
+                element.id == widget.settingsService.scaleSecondary) ==
             null)
           deviceRow(bledevice.DiscoveredDevice(
             id: widget.settingsService.scaleSecondary,
@@ -1358,7 +1607,9 @@ class _DeviceAssignmentState extends State<DeviceAssignment> {
             child: Row(
               children: [
                 Text(e.name),
-                if (widget.bleService.devices.firstWhereOrNull((element) => element.id == e.id) != null)
+                if (widget.bleService.devices
+                        .firstWhereOrNull((element) => element.id == e.id) !=
+                    null)
                   const Icon(Icons.bluetooth_connected),
               ],
             )),

@@ -438,7 +438,7 @@
     },
     {
       "id": "9:7693652674048295668",
-      "lastPropertyId": "28:488663740228280711",
+      "lastPropertyId": "29:133802416448563203",
       "name": "Recipe",
       "properties": [
         {
@@ -574,6 +574,11 @@
           "id": "28:488663740228280711",
           "name": "isShot",
           "type": 1
+        },
+        {
+          "id": "29:133802416448563203",
+          "name": "profileName",
+          "type": 9
         }
       ],
       "relations": []

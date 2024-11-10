@@ -1,22 +1,20 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import 'package:despresso/generated/l10n.dart';
 import 'package:despresso/model/services/state/notification_service.dart';
+import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/model/services/state/visualizer_service.dart';
 import 'package:despresso/model/shot.dart';
 import 'package:despresso/objectbox.dart';
 import 'package:despresso/objectbox.g.dart';
-import 'package:despresso/ui/widgets/legend_list.dart';
 import 'package:despresso/ui/widgets/progress_overlay.dart';
 import 'package:despresso/ui/widgets/shot_graph.dart';
 import 'package:logging/logging.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:flutter/material.dart';
-import 'package:despresso/ui/theme.dart' as theme;
 import 'package:intl/intl.dart';
 import 'package:reactive_flutter_rating_bar/reactive_flutter_rating_bar.dart';
 import 'package:share_plus/share_plus.dart';
@@ -35,9 +33,9 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
 
   late Box<Shot> shotBox;
 
-  List<int> selectedShots = [];
-
-  bool _overlay = false;
+  int selectedShot = 0;
+  final TextEditingController _searchController = TextEditingController();
+  late FocusNode _seachFocusNode;
 
   bool showPressure = true;
   bool showFlow = true;
@@ -56,9 +54,13 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
   @override
   void initState() {
     super.initState();
+    _seachFocusNode = FocusNode();
     shotBox = getIt<ObjectBox>().store.box<Shot>();
     visualizerService = getIt<VisualizerService>();
     settingsService = getIt<SettingsService>();
+    _searchController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -88,9 +90,10 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
               icon: const Icon(Icons.cloud_upload),
               label: const Text("Visualizer"),
               onPressed: () async {
-                if (selectedShots.isEmpty) {
-                  getIt<SnackbarService>()
-                      .notify(S.of(context).screenDiaryNoShotsToUploadSelected, SnackbarNotificationType.info);
+                if (selectedShot == 0) {
+                  getIt<SnackbarService>().notify(
+                      S.of(context).screenDiaryNoShotsToUploadSelected,
+                      SnackbarNotificationType.info);
 
                   return;
                 }
@@ -98,21 +101,23 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                   setState(() {
                     _busy = true;
                   });
-                  for (var element in selectedShots) {
-                    setState(() {
-                      _busyProgress += 1 / selectedShots.length;
-                    });
-                    var shot = shotBox.get(element);
-                    var id = await visualizerService.sendShotToVisualizer(shot!);
-                    shot.visualizerId = id;
-                    shotBox.put(shot);
-                  }
+                  setState(() {
+                    _busyProgress = 1;
+                  });
+                  var shot = shotBox.get(selectedShot);
+                  var id = await visualizerService.sendShotToVisualizer(shot!);
+                  shot.visualizerId = id;
+                  shotBox.put(shot);
                   getIt<SnackbarService>()
                       // ignore: use_build_context_synchronously
-                      .notify(S.of(context).screenDiarySuccessUploadingYourShots, SnackbarNotificationType.info);
+                      .notify(
+                          S.of(context).screenDiarySuccessUploadingYourShots,
+                          SnackbarNotificationType.info);
                 } catch (e) {
                   getIt<SnackbarService>().notify(
-                      S.of(context).screenDiaryErrorUploadingShots + e.toString(), SnackbarNotificationType.severe);
+                      S.of(context).screenDiaryErrorUploadingShots +
+                          e.toString(),
+                      SnackbarNotificationType.severe);
 
                   log.severe("Error uploading shots $e");
                 }
@@ -134,37 +139,45 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 445,
-              child: StreamBuilder<List<Shot>>(
-                  stream: getShots(),
-                  builder: (context, snapshot) => ListView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      itemCount: snapshot.hasData ? snapshot.data!.length : 0,
-                      itemBuilder: _shotListBuilder(snapshot.data ?? []))),
-            ),
+                width: 445,
+                child: Column(children: [
+                  TextField(
+                      focusNode: _seachFocusNode,
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        prefixIcon: const Icon(
+                          Icons.search,
+                        ),
+                        suffixIcon: IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _seachFocusNode.unfocus();
+                            }),
+                      )),
+                  Flexible(
+                      child: StreamBuilder<List<Shot>>(
+                          stream: getShots(),
+                          builder: (context, snapshot) => ListView.builder(
+                              shrinkWrap: true,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              itemCount:
+                                  snapshot.hasData ? snapshot.data!.length : 0,
+                              itemBuilder:
+                                  _shotListBuilder(snapshot.data ?? []))))
+                ])),
             Expanded(
-              child: selectedShots.isEmpty
+              child: selectedShot == 0
                   ? Text(S.of(context).screenDiaryNothingSelected)
                   : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(S.of(context).screenDiaryOverlaymode),
-                            Switch(
-                              value: _overlay,
-                              onChanged: (value) {
-                                setState(() {
-                                  _overlay = value;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
                         Expanded(
                           child: ListView.builder(
                             shrinkWrap: true,
-                            itemCount: _overlay ? min(selectedShots.length, 1) : selectedShots.length,
+                            itemCount: 1,
                             itemBuilder: (context, index) {
                               return ClipRRect(
                                 borderRadius: const BorderRadius.only(
@@ -174,8 +187,8 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                                 child: ListTile(
                                   title: ShotGraph(
                                       key: UniqueKey(),
-                                      id: selectedShots[index],
-                                      overlayIds: _overlay ? selectedShots : null,
+                                      id: selectedShot,
+                                      overlayIds: null,
                                       showFlow: showFlow,
                                       showPressure: showPressure,
                                       showWeight: showWeight,
@@ -184,50 +197,6 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                               );
                             },
                           ),
-                        ),
-                        LegendsListWidget(
-                          legends: [
-                            Legend(
-                              S.of(context).pressure,
-                              theme.ThemeColors.pressureColor,
-                              value: showPressure,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showPressure = p0;
-                                });
-                              },
-                            ),
-                            Legend(
-                              S.of(context).flow,
-                              theme.ThemeColors.flowColor,
-                              value: showFlow,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showFlow = p0;
-                                });
-                              },
-                            ),
-                            Legend(
-                              S.of(context).weight,
-                              theme.ThemeColors.weightColor,
-                              value: showWeight,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showWeight = p0;
-                                });
-                              },
-                            ),
-                            Legend(
-                              S.of(context).temp,
-                              theme.ThemeColors.tempColor,
-                              value: showTemp,
-                              onChanged: (p0) {
-                                setState(() {
-                                  showTemp = p0;
-                                });
-                              },
-                            ),
-                          ],
                         ),
                       ],
                     ),
@@ -244,10 +213,27 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
     final builder = shotBox.query().order(Shot_.date, flags: Order.descending);
     // Build and watch the query,
     // set triggerImmediately to emit the query immediately on listen.
-    return builder
-        .watch(triggerImmediately: true)
+    final String shotSearchFilter = _searchController.text;
+    return builder.watch(triggerImmediately: true).map((evt) {
+      Future.delayed(Duration(milliseconds: 800), () {
+        setState(() {});
+      });
+      return evt;
+    })
         // Map it to a list of notes to be used by a StreamBuilder.
-        .map((query) => query.find());
+        .map((query) => query.find().where((shot) {
+              return shot.recipe.target!.name
+                      .toLowerCase()
+                      .contains(shotSearchFilter) ||
+                  shot.coffee.target!.name
+                      .toLowerCase()
+                      .contains(shotSearchFilter) ||
+                  shot.coffee.target!.roaster.target!.name
+                      .toLowerCase()
+                      .contains(shotSearchFilter) ||
+                  shot.recipe.target!.profileName.contains(shotSearchFilter);
+              // etc etc
+            }).toList());
   }
 
   Dismissible Function(BuildContext, int) _shotListBuilder(List<Shot> shots) =>
@@ -257,7 +243,10 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
             onDismissed: (_) {
               setState(() {
                 var id = shots[index].id;
-                selectedShots.removeWhere((element) => element == id);
+                //selectedShots.removeWhere((element) => element == id);
+                if (id == selectedShot) {
+                  selectedShot = 0;
+                }
                 shotBox.remove(id);
               });
             },
@@ -276,65 +265,64 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
             child: Card(
               margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               child: ListTile(
-                key: Key('list_item_${shots[index].id}'),
-                title: Text(
-                  shots[index].profileId,
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(DateFormat().format(shots[index].date)),
-                    Text(
-                      '${shots[index].coffee.target?.name ?? 'no coffee'} (${shots[index].coffee.target?.roaster.target?.name ?? 'no roaster'})',
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${shots[index].pourWeight.toStringAsFixed(1)}g in ${shots[index].pourTime.toStringAsFixed(1)}s ',
-                        ),
-                        if (shots[index].enjoyment > 0)
-                          RatingBarIndicator(
-                            rating: shots[index].enjoyment,
-                            itemBuilder: (context, index) => const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            ),
-                            itemCount: 5,
-                            itemSize: 20.0,
-                            direction: Axis.horizontal,
+                  key: Key('list_item_${shots[index].id}'),
+                  title: Text(
+                    getIt<ProfileService>()
+                            .profiles
+                            .firstWhereOrNull(
+                                (e) => e.id == shots[index].profileId)
+                            ?.title ??
+                        shots[index].profileId,
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(DateFormat().format(shots[index].date)),
+                      Text(
+                        '${shots[index].coffee.target?.name ?? 'no coffee'} (${shots[index].coffee.target?.roaster.target?.name ?? 'no roaster'})',
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${shots[index].pourWeight.toStringAsFixed(1)}g in ${shots[index].pourTime.toStringAsFixed(1)}s ',
                           ),
-                      ],
-                    ),
-                  ],
-                ),
-                // trailing: OutlinedButton(
-                //   onPressed: () {},
-                //   child: Icon(Icons.delete_forever),
-                // ),
-                onTap: () {
-                  setSelection(shots[index].id);
-                },
-                selected: selectedShots.contains(shots[index].id),
-              ),
+                          if (shots[index].enjoyment > 0)
+                            RatingBarIndicator(
+                              rating: shots[index].enjoyment,
+                              itemBuilder: (context, index) => const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              itemCount: 5,
+                              itemSize: 20.0,
+                              direction: Axis.horizontal,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // trailing: OutlinedButton(
+                  //   onPressed: () {},
+                  //   child: Icon(Icons.delete_forever),
+                  // ),
+                  onTap: () {
+                    setSelection(shots[index].id);
+                  },
+                  selected: shots[index].id == selectedShot),
             ),
           );
 
   setSelection(int id) {
-    var found = selectedShots.firstWhereOrNull((element) => element == id);
-    if (found == null) {
-      selectedShots.add(id);
-    } else {
-      selectedShots.removeWhere((element) => element == id);
-    }
+    selectedShot = id;
     setState(() {});
   }
 
   _onShare(BuildContext context) async {
     // _onShare method:
-    if (selectedShots.isEmpty) return;
+    if (selectedShot == 0) return;
     final box = context.findRenderObject() as RenderBox?;
-    var shot = shotBox.get(selectedShots.first);
+    var shot = shotBox.get(selectedShot);
     var list = shot!.shotstates.toList().map((entry) {
       return [
         shot.date,

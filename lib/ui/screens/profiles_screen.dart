@@ -35,7 +35,8 @@ enum FilterModes {
 
 class ProfilesScreen extends StatefulWidget {
   final bool saveToRecipe;
-  const ProfilesScreen({Key? key, required this.saveToRecipe}) : super(key: key);
+  const ProfilesScreen({Key? key, required this.saveToRecipe})
+      : super(key: key);
 
   @override
   ProfilesScreenState createState() => ProfilesScreenState();
@@ -90,8 +91,10 @@ class ProfilesScreenState extends State<ProfilesScreen> {
   void dispose() {
     super.dispose();
 
-    if (widget.saveToRecipe) coffeeService.setSelectedRecipeProfile(_selectedProfile?.id ?? "Default");
-
+    if (widget.saveToRecipe) {
+      coffeeService.setSelectedRecipeProfile(_selectedProfile?.id ?? "Default",
+          _selectedProfile?.title ?? "Default");
+    }
     profileService.removeListener(profileListener);
     log.info('Disposed profile');
   }
@@ -157,7 +160,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                 try {
                   await profileService.delete(_selectedProfile!);
                 } catch (e) {
-                  getIt<SnackbarService>().notify("Error deleting profile: $e", SnackbarNotificationType.severe);
+                  getIt<SnackbarService>().notify("Error deleting profile: $e",
+                      SnackbarNotificationType.severe);
                   log.severe("Error deleting profile $e");
                 }
               },
@@ -180,18 +184,21 @@ class ProfilesScreenState extends State<ProfilesScreen> {
               if (shortCode == null || shortCode.isEmpty) return;
 
               try {
-                var profile = await profileService.getJsonProfileFromVisualizerShortCode(shortCode);
+                var profile = await profileService
+                    .getJsonProfileFromVisualizerShortCode(shortCode);
                 profile.isDefault = false;
                 profile.id = const Uuid().v1().toString();
                 log.info("Loaded Profile: ${profile.id} ${profile.title}");
                 setState(() {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProfilesEditScreen(profile)),
+                    MaterialPageRoute(
+                        builder: (context) => ProfilesEditScreen(profile)),
                   );
                 });
               } catch (e) {
-                getIt<SnackbarService>().notify("Error loading profile: $e", SnackbarNotificationType.severe);
+                getIt<SnackbarService>().notify("Error loading profile: $e",
+                    SnackbarNotificationType.severe);
 
                 log.severe("Error loading profile $e");
               }
@@ -214,18 +221,24 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                   if (_selectedProfile!.title.startsWith("!D-Flow")) {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => DFlowEditScreen(_selectedProfile!.clone())),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              DFlowEditScreen(_selectedProfile!.clone())),
                     );
                   } else {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AdvancedProfilesEditScreen(_selectedProfile!.clone())),
+                      MaterialPageRoute(
+                          builder: (context) => AdvancedProfilesEditScreen(
+                              _selectedProfile!.clone())),
                     );
                   }
                 } else {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProfilesEditScreen(_selectedProfile!.clone())),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            ProfilesEditScreen(_selectedProfile!.clone())),
                   );
                 }
               });
@@ -255,22 +268,45 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                             child: (_selectedProfile != null)
                                 ? Column(
                                     children: [
-                                      KeyValueWidget(label: "Notes", value: _selectedProfile?.shotHeader.notes ?? ""),
                                       KeyValueWidget(
-                                          label: "Beverage", value: _selectedProfile?.shotHeader.beverageType ?? ""),
-                                      KeyValueWidget(label: "Type", value: _selectedProfile?.shotHeader.type ?? ""),
+                                          label: "Notes",
+                                          value: _selectedProfile
+                                                  ?.shotHeader.notes ??
+                                              ""),
+                                      KeyValueWidget(
+                                          label: "Beverage",
+                                          value: _selectedProfile
+                                                  ?.shotHeader.beverageType ??
+                                              ""),
+                                      KeyValueWidget(
+                                          label: "Type",
+                                          value: _selectedProfile
+                                                  ?.shotHeader.type ??
+                                              ""),
                                       KeyValueWidget(
                                           label: "Max Flow",
-                                          value: _selectedProfile?.shotHeader.maximumFlow.toString() ?? ""),
+                                          value: _selectedProfile
+                                                  ?.shotHeader.maximumFlow
+                                                  .toString() ??
+                                              ""),
                                       KeyValueWidget(
                                           label: "Max Pressure",
-                                          value: _selectedProfile?.shotHeader.minimumPressure.toString() ?? ""),
+                                          value: _selectedProfile
+                                                  ?.shotHeader.minimumPressure
+                                                  .toString() ??
+                                              ""),
                                       KeyValueWidget(
                                           label: "Target Volume",
-                                          value: _selectedProfile?.shotHeader.targetVolume.toString() ?? ""),
+                                          value: _selectedProfile
+                                                  ?.shotHeader.targetVolume
+                                                  .toString() ??
+                                              ""),
                                       KeyValueWidget(
                                           label: "Target Weight",
-                                          value: _selectedProfile?.shotHeader.targetWeight.toString() ?? ""),
+                                          value: _selectedProfile
+                                                  ?.shotHeader.targetWeight
+                                                  .toString() ??
+                                              ""),
                                     ],
                                   )
                                 : const Text("Nothing selected"),
@@ -324,20 +360,38 @@ class ProfilesScreenState extends State<ProfilesScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   ElevatedButton.icon(
-                                    icon: const Icon(Icons.add),
+                                    icon: const Icon(Icons.arrow_upward),
                                     onPressed: () async {
                                       String result;
                                       try {
-                                        var r = await machineService.uploadProfile(_selectedProfile!);
+                                        var r = await machineService
+                                            .uploadProfile(_selectedProfile!);
                                         result = 'Profile is selected: $r';
                                       } catch (e) {
                                         result = 'Profile is not selected: $e';
                                       }
 
-                                      getIt<SnackbarService>().notify(result, SnackbarNotificationType.severe);
+                                      getIt<SnackbarService>().notify(result,
+                                          SnackbarNotificationType.severe);
                                     },
                                     label: const Text(
                                       "Save to Decent",
+                                    ),
+                                  ),
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () async {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                AdvancedProfilesEditScreen(
+                                                    De1ShotProfile
+                                                        .createNew())),
+                                      );
+                                    },
+                                    label: const Text(
+                                      "Create new Profile",
                                     ),
                                   )
                                 ],
@@ -434,8 +488,10 @@ class ProfilesScreenState extends State<ProfilesScreen> {
   // }
 
   getProfileFromFolder(context) async {
-    filePickerResult = await FilePicker.platform
-        .pickFiles(lockParentWindow: true, type: FileType.custom, allowedExtensions: ["json", "tcl"]);
+    filePickerResult = await FilePicker.platform.pickFiles(
+        lockParentWindow: true,
+        type: FileType.custom,
+        allowedExtensions: ["json", "tcl"]);
 
     if (filePickerResult != null) {
       pickedFile = File(filePickerResult!.files.single.path.toString());
@@ -487,7 +543,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
     // var profileAsString = jsonEncode(_selectedProfile!.toJson());
     // var encoder = const JsonEncoder.withIndent("  ");
     // var profileAsString = encoder.convert(_selectedProfile!.toJson());
-    var profileAsString = profileService.createProfileDefaultJson(_selectedProfile!);
+    var profileAsString =
+        profileService.createProfileDefaultJson(_selectedProfile!);
     await Share.share(
       profileAsString,
       subject: _selectedProfile!.title,
@@ -505,7 +562,8 @@ class ProfilesScreenState extends State<ProfilesScreen> {
           content: TextField(
             autofocus: true,
             controller: shortCodeController,
-            decoration: const InputDecoration(hintText: '4-digit visualizer short code'),
+            decoration: const InputDecoration(
+                hintText: '4-digit visualizer short code'),
             maxLength: 4,
           ),
           actions: <Widget>[

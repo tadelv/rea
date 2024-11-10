@@ -1,6 +1,8 @@
+import 'package:despresso/ui/screens/roaster_edit.dart';
 import 'package:despresso/ui/widgets/height_widget.dart';
 import 'package:despresso/ui/widgets/key_value.dart';
 import 'package:logging/logging.dart';
+import 'package:despresso/model/services/state/notification_service.dart';
 
 import 'package:despresso/model/coffee.dart';
 import 'package:despresso/model/services/state/coffee_service.dart';
@@ -29,6 +31,8 @@ class CoffeeEditState extends State<CoffeeEdit> {
   late CoffeeService coffeeService;
   late EspressoMachineService machineService;
 
+  GlobalKey roasterDropdownKey = GlobalKey(debugLabel: "roaster dropdown");
+
   Coffee _editedCoffee = Coffee();
   int selectedCoffeeId = 0;
 
@@ -36,18 +40,6 @@ class CoffeeEditState extends State<CoffeeEdit> {
   List<DropdownMenuItem<int>> roasters = [];
 
   int _selectedRoasterId = 0;
-
-  FormGroup get theForm2 => fb.group(<String, Object>{
-        'name': ['test', Validators.required],
-        'description': [''],
-        'type': [''],
-        'price': [''],
-        'taste': [''],
-        'origin': [''],
-        'intensityRating': [0.1],
-        'acidRating': [0.1],
-        'roastLevel': [0.1],
-      });
 
   late FormGroup theForm;
 
@@ -67,7 +59,8 @@ class CoffeeEditState extends State<CoffeeEdit> {
     } else {
       _editedCoffee = Coffee();
     }
-    if (_editedCoffee.roaster.targetId == 0) {
+    if (_editedCoffee.roaster.targetId == 0 &&
+        coffeeService.selectedRoasterId > 1) {
       _selectedRoasterId = coffeeService.selectedRoasterId;
     } else {
       _selectedRoasterId = _editedCoffee.roaster.targetId;
@@ -87,7 +80,7 @@ class CoffeeEditState extends State<CoffeeEdit> {
       "farm": [_editedCoffee.farm],
       "cropyear": [_editedCoffee.cropyear],
       "process": [_editedCoffee.process],
-      "elevation": [_editedCoffee.elevation, Validators.number],
+      "elevation": [_editedCoffee.elevation, Validators.number(allowNegatives: false)],
     });
   }
 
@@ -102,7 +95,9 @@ class CoffeeEditState extends State<CoffeeEdit> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: selectedCoffeeId == 0 ? const Text('Add new coffee beans') : const Text('Edit coffee beans'),
+        title: selectedCoffeeId == 0
+            ? const Text('Add new coffee beans')
+            : const Text('Edit coffee beans'),
         actions: <Widget>[
           ElevatedButton(
             child: const Text(
@@ -118,6 +113,25 @@ class CoffeeEditState extends State<CoffeeEdit> {
               }
             },
           ),
+          if (selectedCoffeeId != 0)
+            ElevatedButton(
+                onPressed: () {
+                  var currentCoffee =
+                      coffeeService.coffeeBox.get(selectedCoffeeId);
+                  if (currentCoffee != null) {
+                    try {
+                      coffeeService.deleteCoffee(currentCoffee);
+                      Navigator.pop(context);
+                    } catch (e) {
+                      getIt<SnackbarService>().notify(
+                          "Error deleting coffee: $e",
+                          SnackbarNotificationType.severe);
+
+                      log.severe("error deleting coffee: $e");
+                    }
+                  }
+                }, // trigger popup
+                child: const Text("Delete")),
         ],
       ),
       body: SingleChildScrollView(
@@ -148,12 +162,21 @@ class CoffeeEditState extends State<CoffeeEdit> {
         children: [
           const KeyValueWidget(label: "Roaster", value: ""),
           DropdownButton(
+            key: roasterDropdownKey,
             isExpanded: true,
             alignment: Alignment.centerLeft,
             value: _selectedRoasterId,
-            items: roasters,
+            items: loadRoasters(),
             onChanged: (value) async {
-              _selectedRoasterId = value!;
+              if (value == null || value == 0) {
+                // navigate to new roaster
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const RoasterEdit(0)));
+                return;
+              }
+              _selectedRoasterId = value;
               coffeeService.setSelectedRoaster(_selectedRoasterId);
             },
           ),
@@ -263,7 +286,8 @@ class CoffeeEditState extends State<CoffeeEdit> {
                   formControlName: 'cropyear',
                   initialDatePickerMode: DatePickerMode.year,
                   lastDate: DateTime.now(),
-                  firstDate: DateTime.now().subtract(const Duration(days: 20 * 365)),
+                  firstDate:
+                      DateTime.now().subtract(const Duration(days: 20 * 365)),
                   builder: (context, picker, child) {
                     return IconButton(
                       onPressed: picker.showPicker,
@@ -362,8 +386,8 @@ class CoffeeEditState extends State<CoffeeEdit> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(key, style: theme.TextStyles.tabHeading),
-          if (value != null) Text(value, style: theme.TextStyles.tabPrimary),
+          Text(key, style: Theme.of(context).textTheme.titleMedium),
+          if (value != null) Text(value),
         ],
       ),
     );
@@ -377,9 +401,11 @@ class CoffeeEditState extends State<CoffeeEdit> {
     _editedCoffee.origin = form.value["origin"] as String;
     _editedCoffee.region = form.value["region"] as String;
     _editedCoffee.farm = form.value["farm"] as String;
-    _editedCoffee.cropyear = form.value["cropyear"] as DateTime? ?? DateTime.now();
+    _editedCoffee.cropyear =
+        form.value["cropyear"] as DateTime? ?? DateTime.now();
     _editedCoffee.process = form.value["process"] as String;
-    _editedCoffee.roastDate = form.value["roastDate"] as DateTime? ?? DateTime.now();
+    _editedCoffee.roastDate =
+        form.value["roastDate"] as DateTime? ?? DateTime.now();
     _editedCoffee.description = form.value["description"] as String;
     _editedCoffee.intensityRating = form.value["intensityRating"] as double;
     _editedCoffee.acidRating = form.value["acidRating"] as double;
@@ -393,18 +419,50 @@ class CoffeeEditState extends State<CoffeeEdit> {
 
   void updateCoffee() {
     setState(
-      () {},
+      () {
+        // TODO: what else changes besides roasters?
+        _selectedRoasterId = coffeeService.selectedRoasterId;
+      },
     );
   }
 
   List<DropdownMenuItem<int>> loadRoasters() {
-    var roasters = coffeeService.roasterBox
-        .getAll()
-        .map((p) => DropdownMenuItem(
-              value: p.id,
-              child: Text(p.name),
-            ))
-        .toList();
+    var roasters = List<DropdownMenuItem<int>>.empty(growable: true);
+    roasters.add(
+        const DropdownMenuItem(value: 0, child: Text("<Add new Roaster>")));
+    final savedRoasters = coffeeService.roasterBox.getAll();
+    if (savedRoasters.isEmpty) {
+      return roasters;
+    }
+    roasters.insertAll(
+        1,
+        savedRoasters
+            .map((p) => DropdownMenuItem(
+                value: p.id,
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(p.name),
+                      if (p.id > 0 && p.id != _selectedRoasterId)
+                        ElevatedButton(
+                            onPressed: () {
+                              try {
+                                Roaster? r = coffeeService.roasterBox.get(p.id);
+                                if (r != null) {
+                                  coffeeService.deleteRoaster(r);
+                                  updateCoffee();
+                                  Navigator.pop(
+                                      roasterDropdownKey.currentContext!);
+                                }
+                              } catch (e) {
+                                getIt<SnackbarService>().notify(
+                                    "Failed to delete roaster: $e",
+                                    SnackbarNotificationType.severe);
+                              }
+                            },
+                            child: const Icon(Icons.delete)),
+                    ])))
+            .toList());
 
     return roasters;
   }

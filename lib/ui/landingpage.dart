@@ -19,7 +19,9 @@ import 'package:despresso/ui/screens/steam_screen.dart';
 import 'package:despresso/ui/screens/water_screen.dart';
 import 'package:despresso/ui/widgets/machine_footer.dart';
 import 'package:despresso/ui/widgets/screen_saver.dart';
+import 'package:despresso/utils/debounce.dart';
 import 'package:feedback_sentry/feedback_sentry.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +34,7 @@ import '../model/services/ble/ble_service.dart';
 import '../model/services/ble/machine_service.dart';
 import 'screens/flush_screen.dart';
 import 'package:despresso/generated/l10n.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 class IncrementIntent extends Intent {
   const IncrementIntent();
@@ -42,7 +45,7 @@ class DecrementIntent extends Intent {
 }
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({Key? key, required this.title}) : super(key: key);
+  const LandingPage({super.key, required this.title});
 
   final String title;
 
@@ -50,7 +53,8 @@ class LandingPage extends StatefulWidget {
   LandingPageState createState() => LandingPageState();
 }
 
-class LandingPageState extends State<LandingPage> with TickerProviderStateMixin {
+class LandingPageState extends State<LandingPage>
+    with TickerProviderStateMixin {
   final log = Logger('LandingPageState');
 
   bool available = false;
@@ -81,6 +85,10 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
   );
 
   late StreamSubscription<bool> _keyboardSubscription;
+  final FocusNode hwKbdFocus = FocusNode();
+  final FocusNode recipesFocus = FocusNode();
+  bool currentlyVisible = false;
+  final Debouncer _focusDebouncer = Debouncer(milliseconds: 900);
 
   @override
   void initState() {
@@ -88,7 +96,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
     _settings = getIt<SettingsService>();
     // var l = _settings.steamHeaterOff ? 3 : 4;
     // if (_settings.showFlushScreen) l++;
-    _tabController = TabController(length: calcTabs(), vsync: this, initialIndex: 1);
+    _tabController =
+        TabController(length: calcTabs(), vsync: this, initialIndex: 1);
     machineService = getIt<EspressoMachineService>();
     coffeeService = getIt<CoffeeService>();
 
@@ -105,8 +114,6 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
 
     _settings.addListener(updatedSettings);
 
-    ServicesBinding.instance.keyboard.addHandler(_onKey);
-
     Future.delayed(
       const Duration(seconds: 1),
       () {
@@ -115,7 +122,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
     );
 
     var keyboardVisibilityController = KeyboardVisibilityController();
-    _keyboardSubscription = keyboardVisibilityController.onChange.listen((bool visible) {
+    _keyboardSubscription =
+        keyboardVisibilityController.onChange.listen((bool visible) {
       if (visible == false) {
         Future.delayed(const Duration(milliseconds: 1100), () {
           log.info("Restore UIOverlays");
@@ -138,7 +146,6 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
             break;
           case SnackbarNotificationType.info:
             col = null;
-            Theme.of(context).primaryColor;
             log.info(n.text);
             break;
           case SnackbarNotificationType.warn:
@@ -190,19 +197,11 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
     profileService.removeListener(updatedProfile);
     _screensaver.removeListener(screenSaverEvent);
     _settings.removeListener(updatedSettings);
-    ServicesBinding.instance.keyboard.removeHandler(_onKey);
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 4,
-        child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              _screensaver.handleTap();
-            },
-            child: scaffoldNewLayout(context)));
+    return DefaultTabController(length: 4, child: scaffoldNewLayout(context));
   }
 
   openWhatsNew() async {
@@ -211,7 +210,7 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
       MaterialPageRoute(
         builder: (context) => const WhatsNewPage.changelog(
           title: Text(
-            "despresso What's New",
+            "What's New in REA",
             textAlign: TextAlign.center,
             style: TextStyle(
               // Text Style Needed to Look like iOS 11
@@ -226,6 +225,18 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
         fullscreenDialog: true,
       ),
     );
+  }
+
+  _processFocus(bool val) {
+    log.fine(
+        "mnt: $mounted, vis: $currentlyVisible, foc: ${hwKbdFocus.hasPrimaryFocus}, rcp:${recipesFocus.hasPrimaryFocus}, rcpf: ${recipesFocus.hasFocus}");
+    if (val || !mounted || !currentlyVisible || recipesFocus.hasPrimaryFocus) {
+      return;
+    }
+    if (!hwKbdFocus.hasPrimaryFocus && !recipesFocus.hasFocus) {
+      log.fine("refocusing");
+      hwKbdFocus.requestFocus();
+    }
   }
 
   Widget scaffoldNewLayout(BuildContext context) {
@@ -254,16 +265,44 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
               ],
             ),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  const RecipeScreen(),
-                  const EspressoScreen(),
-                  if (_settings.useSteam) const SteamScreen(),
-                  if (_settings.useWater) const WaterScreen(),
-                  if (_settings.showFlushScreen) const FlushScreen(),
-                ],
-              ),
+              child: VisibilityDetector(
+                  key: Key("landing-visibility"),
+                  onVisibilityChanged: (visibility) {
+                    log.fine("visibile: $visibility");
+                    bool visible = visibility.size.height ==
+                        visibility.visibleBounds.height;
+                    visible &= MediaQuery.sizeOf(context).height -
+                            visibility.visibleBounds.height <=
+                        145; // TODO: does this change?
+
+                    currentlyVisible = visible;
+                    if (visible &&
+                        !recipesFocus.hasPrimaryFocus &&
+                        !hwKbdFocus.hasFocus) {
+                      //hwKbdFocus.requestFocus();
+                      _focusDebouncer.run(_processFocus(false));
+                    }
+                  },
+                  child: Focus(
+                      focusNode: hwKbdFocus,
+                      onKeyEvent: _onKey,
+                      onFocusChange: (val) {
+                        log.fine("focus: $val");
+                        //log.fine(
+                        //    "mnt: $mounted, vis: $currentlyVisible, foc: ${hwKbdFocus.hasPrimaryFocus}, rcp:${recipesFocus.hasPrimaryFocus}, rcpf: ${recipesFocus.hasFocus}");
+                        _focusDebouncer.run(_processFocus(val));
+                      },
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          //const RecipeScreen(),
+                          Focus(focusNode: recipesFocus, child: RecipeScreen()),
+                          const EspressoScreen(),
+                          if (_settings.useSteam) const SteamScreen(),
+                          if (_settings.useWater) const WaterScreen(),
+                          if (_settings.showFlushScreen) const FlushScreen(),
+                        ],
+                      ))),
             ),
             const MachineFooter(),
           ],
@@ -278,33 +317,35 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color(0xFF4F378B),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
               ),
               child: Column(
                 children: [
-                  Image.asset("assets/iconStore.png", height: 80),
-                  const Text("despresso"),
+                  Image.asset("assets/rea.png", height: 80),
+                  Text(
+                    "REA",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ],
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.auto_graph_outlined),
+              leading: const Icon(Icons.library_books),
               title: Text(S.of(context).mainMenuEspressoDiary),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ShotSelectionTab()),
+                  MaterialPageRoute(
+                      builder: (context) => const ShotSelectionTab()),
                 ).then((value) => _screensaver.resume());
               },
             ),
             ListTile(
-              leading: const Icon(Icons.add),
+              leading: const Icon(Icons.auto_graph),
               title: Text(S.of(context).profiles),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -316,10 +357,9 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
               },
             ),
             ListTile(
-              leading: const Icon(Icons.coffee),
+              leading: const Icon(Icons.coffee_outlined),
               title: Text(S.of(context).beans),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
@@ -334,11 +374,11 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
               leading: const Icon(Icons.graphic_eq),
               title: Text(S.of(context).mainMenuStatistics),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const DashboardScreen()),
                 ).then((value) {
                   _screensaver.resume();
                 });
@@ -349,11 +389,11 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
               leading: const Icon(Icons.settings),
               title: Text(S.of(context).settings),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AppSettingsScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const AppSettingsScreen()),
                 ).then((value) {
                   _screensaver.resume();
                   machineService.updateFlush();
@@ -365,43 +405,43 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
               leading: const Icon(Icons.build),
               title: Text(S.of(context).mainMenuMaintenance),
               onTap: () {
-                _screensaver.pause();
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MaintenanceScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const MaintenanceScreen()),
                 ).then((value) {
-                  _screensaver.resume();
                   machineService.updateFlush();
                 });
                 // Then close the drawer
               },
             ),
 
-            ListTile(
-              leading: const Icon(Icons.feedback),
-              title: Text(S.of(context).mainMenuFeedback),
-              onTap: () async {
-                Navigator.pop(context);
-                var settings = getIt<SettingsService>();
-                if (!settings.useSentry) {
-                  _showMyDialog("Feedback currently disabled",
-                      "Please enable the option 'Feedback and crashreporting' in the Settings menu.");
-
-                  return;
-                }
-                BetterFeedback.of(context).showAndUploadToSentry(
-                  name: S.of(context).mainMenuDespressoFeedback, // optional
-                  email: 'foo_bar@example.com', // optional
-                );
-              },
-            ),
+            //ListTile(
+            //  leading: const Icon(Icons.feedback),
+            //  title: Text(S.of(context).mainMenuFeedback),
+            //  onTap: () async {
+            //    Navigator.pop(context);
+            //    var settings = getIt<SettingsService>();
+            //    if (!settings.useSentry) {
+            //      _showMyDialog("Feedback currently disabled",
+            //          "Please enable the option 'Feedback and crashreporting' in the Settings menu.");
+            //
+            //      return;
+            //    }
+            //    BetterFeedback.of(context).showAndUploadToSentry(
+            //      name: S.of(context).mainMenuDespressoFeedback, // optional
+            //      email: 'foo_bar@example.com', // optional
+            //    );
+            //  },
+            //),
             ListTile(
               leading: const Icon(Icons.privacy_tip),
               title: Text(S.of(context).privacy),
               onTap: () async {
                 Navigator.pop(context);
-                final Uri url = Uri.parse("https://obiwan007.github.io/myagbs/");
+                final Uri url =
+                    Uri.parse("https://obiwan007.github.io/myagbs/");
                 if (await canLaunchUrl(url)) {
                   await launchUrl(url, mode: LaunchMode.externalApplication);
                 } else {
@@ -424,16 +464,33 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
                   case ConnectionState.done:
                     return AboutListTile(
                         icon: const Icon(Icons.info),
-                        applicationIcon: Image.asset("assets/iconStore.png", height: 80),
-                        applicationName: 'despresso',
-                        applicationVersion: "Version ${snapshot.data!.version} (${snapshot.data!.buildNumber})",
-                        applicationLegalese: '\u{a9} 2024 MMMedia Markus Miertschink',
+                        applicationIcon:
+                            Image.asset("assets/rea.png", height: 80),
+                        applicationName: 'REA',
+                        applicationVersion:
+                            "Version ${snapshot.data!.version} (${snapshot.data!.buildNumber})",
+                        applicationLegalese:
+                            '\u{a9} ${DateTime.now().year} Vid Tadel',
                         aboutBoxChildren: [
                           TextButton(
                               onPressed: () {
                                 openWhatsNew();
                               },
-                              child: const Text("Show Changelog"))
+                              child: const Text("Show Changelog")),
+                          RichText(
+                              text: TextSpan(children: [
+                            TextSpan(text: "Based on the excellent "),
+                            TextSpan(
+                                text: "Despresso app from Markus",
+                                style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    launchUrl(Uri.parse(
+                                        "https://github.com/obiwan007/despresso"));
+                                  })
+                          ]))
                         ]
                         // aboutBoxChildren: aboutBoxChildren,
                         );
@@ -528,7 +585,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
       count--;
       log.info("No Flush");
     }
-    log.info("Number of Tabs $count ${_settings.useSteam} ${_settings.useWater} ${_settings.showFlushScreen}");
+    log.info(
+        "Number of Tabs $count ${_settings.useSteam} ${_settings.useWater} ${_settings.showFlushScreen}");
     return count;
   }
 
@@ -537,7 +595,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
 
     if (_tabController.length != newTabCount) {
       log.info("New tab size: $newTabCount");
-      _tabController = TabController(length: newTabCount, vsync: this, initialIndex: 0);
+      _tabController =
+          TabController(length: newTabCount, vsync: this, initialIndex: 0);
       setState(() {});
     }
   }
@@ -631,6 +690,11 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
       if (_saverContext != null) {
         Navigator.pop(_saverContext!);
         _saverContext = null;
+        Future.delayed(Duration(milliseconds: 500), () {
+          if (mounted) {
+            FocusScope.of(context).requestFocus(hwKbdFocus);
+          }
+        });
       }
     }
   }
@@ -641,51 +705,71 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
       pageBuilder: (context, animation, secondaryAnimation) {
         _saverContext = context;
         return Scaffold(
-          backgroundColor: Colors.black,
-          body: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                Navigator.pop(context);
-                _saverContext = null;
-                _screensaver.handleTap();
-              },
-              child: const Column(
-                children: [
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(child: ScreenSaver()),
-                      ],
-                    ),
-                  ),
-                ],
-              )),
-        );
+            backgroundColor: Colors.black,
+            body: Focus(
+              focusNode: hwKbdFocus,
+              autofocus: true,
+              onKeyEvent: _onKey,
+              child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    Navigator.pop(context);
+                    _saverContext = null;
+                    _screensaver.handleTap();
+                  },
+                  child: const Column(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(child: ScreenSaver()),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )),
+            ));
       },
     );
   }
 
-  bool _onKey(KeyEvent event) {
-    // final key = event.logicalKey.keyLabel;
-    final keys = RawKeyboard.instance.keysPressed;
-    if (event is KeyDownEvent && keys.contains(LogicalKeyboardKey.controlLeft)) {
-      if (event.logicalKey == LogicalKeyboardKey.keyB) {
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    log.fine("got $event from $node");
+    if (event is! KeyDownEvent || hwKbdFocus.hasPrimaryFocus == false) {
+      return KeyEventResult.ignored;
+    }
+    log.fine("handling event: $event");
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.keyE:
         log.info("Brewing");
         machineService.setState(EspressoMachineState.espresso);
-      } else if (event.logicalKey == LogicalKeyboardKey.keyW) {
+        break;
+      case LogicalKeyboardKey.keyW:
         log.info("Water");
         machineService.setState(EspressoMachineState.water);
-      } else if (event.logicalKey == LogicalKeyboardKey.keyS) {
+        break;
+      case LogicalKeyboardKey.keyS:
         log.info("Steam");
         machineService.setState(EspressoMachineState.steam);
-      } else if (event.logicalKey == LogicalKeyboardKey.keyF) {
+        break;
+      case LogicalKeyboardKey.keyF:
         log.info("Flush");
         machineService.setState(EspressoMachineState.flush);
-      } else if (event.logicalKey == LogicalKeyboardKey.space) {
+        break;
+      case LogicalKeyboardKey.keyP:
+        final machineState = machineService.lastState;
+        if (machineState == EspressoMachineState.sleep) {
+          machineService.setState(EspressoMachineState.idle);
+        } else if (machineState == EspressoMachineState.idle) {
+          machineService.setState(EspressoMachineState.sleep);
+        }
+        break;
+      case LogicalKeyboardKey.space:
         machineService.setState(EspressoMachineState.idle);
         log.info("stop");
-      } else {
+        break;
+      default:
         final digits = [
           LogicalKeyboardKey.digit1,
           LogicalKeyboardKey.digit2,
@@ -706,9 +790,8 @@ class LandingPageState extends State<LandingPage> with TickerProviderStateMixin 
             // setState(() {});
           }
         }
-      }
     }
 
-    return false;
+    return KeyEventResult.handled;
   }
 }

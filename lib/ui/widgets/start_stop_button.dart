@@ -136,24 +136,20 @@ class _StartStopButtonState extends State<StartStopButton> {
               title = S.of(context).switchOn;
               break;
 
-            case EspressoMachineState.idle:
-              break;
-            case EspressoMachineState.espresso:
-              break;
-            case EspressoMachineState.water:
-              break;
-            case EspressoMachineState.steam:
-              break;
             case EspressoMachineState.disconnected:
               mode = Colors.orange;
               title = S.of(context).reconnect;
               break;
+            case EspressoMachineState.idle:
+            case EspressoMachineState.espresso:
+            case EspressoMachineState.water:
+            case EspressoMachineState.steam:
             case EspressoMachineState.connecting:
-              break;
             case EspressoMachineState.refill:
-              break;
             case EspressoMachineState.flush:
-              break;
+						case EspressoMachineState.clean:
+						case EspressoMachineState.descale:
+						case EspressoMachineState.airPurge:
             case null:
               break;
           }

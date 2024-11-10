@@ -66,7 +66,8 @@ class CoffeeService extends ChangeNotifier {
   }
 
   Shot? getLastShot() {
-    final builder = shotBox.query().order(Shot_.id, flags: Order.descending).build();
+    final builder =
+        shotBox.query().order(Shot_.id, flags: Order.descending).build();
     var found = builder.findFirst();
     // var allshots = shotBox.getAll();
     selectedShotId = found?.id ?? 0;
@@ -79,13 +80,19 @@ class CoffeeService extends ChangeNotifier {
   }
 
   addRoaster(Roaster newRoaster) async {
-    roasterBox.put(newRoaster);
+    int newId = await roasterBox.putAsync(newRoaster);
 
+    selectedRoasterId = newId;
     // await save();
     notifyListeners();
   }
 
   deleteRoaster(Roaster r) async {
+    final builder = coffeeBox.query(Coffee_.roaster.equals(r.id)).build();
+    if (builder.findFirst() != null) {
+      throw "Can't delete roaster that has coffees - delete coffees first";
+    }
+		roasterBox.remove(r.id);
     await save();
     notifyListeners();
   }
@@ -99,6 +106,7 @@ class CoffeeService extends ChangeNotifier {
   }
 
   deleteCoffee(Coffee r) async {
+    coffeeBox.remove(r.id);
     notifyListeners();
   }
 
@@ -295,11 +303,16 @@ class CoffeeService extends ChangeNotifier {
 // code to return members
   }
 
-  int addRecipe({required String name, required int coffeeId, required String profileId}) {
+  int addRecipe(
+      {required String name,
+      required int coffeeId,
+      required String profileId,
+      required String profileName}) {
     var recipe = Recipe();
     recipe.name = name;
     recipe.coffee.targetId = coffeeId;
     recipe.profileId = profileId;
+    recipe.profileName = profileName;
     recipe.adjustedWeight = settings.targetEspressoWeight;
     var id = recipeBox.put(recipe);
 
@@ -348,6 +361,8 @@ class CoffeeService extends ChangeNotifier {
     int id = recipeBox.put(recipe);
     settings.targetEspressoWeight = recipe.adjustedWeight;
     settings.targetTempCorrection = recipe.adjustedTemp;
+    // recalculate temp and update de1 if needed
+    setSelectedRecipe(id);
     notifyListeners();
     _controllerRecipe.add(getRecipes());
     return id;
@@ -373,10 +388,11 @@ class CoffeeService extends ChangeNotifier {
     return data;
   }
 
-  void setSelectedRecipeProfile(String profileId) {
+  void setSelectedRecipeProfile(String profileId, String profileName) {
     var res = currentRecipe;
     if (res != null) {
       res.profileId = profileId;
+      res.profileName = profileName;
       updateRecipe(res);
       notifyListeners();
     }
