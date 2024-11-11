@@ -214,13 +214,8 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
     // Build and watch the query,
     // set triggerImmediately to emit the query immediately on listen.
     final String shotSearchFilter = _searchController.text;
-    return builder.watch(triggerImmediately: true).map((evt) {
-      Future.delayed(Duration(milliseconds: 800), () {
-        setState(() {});
-      });
-      return evt;
-    })
-        // Map it to a list of notes to be used by a StreamBuilder.
+    return builder
+        .watch(triggerImmediately: true)
         .map((query) => query.find().where((shot) {
               return shot.recipe.target!.name
                       .toLowerCase()
