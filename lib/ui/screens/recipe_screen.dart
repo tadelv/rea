@@ -8,9 +8,9 @@ import 'package:despresso/model/services/state/screen_saver.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:despresso/ui/screens/coffee_selection.dart';
-import 'package:despresso/ui/screens/profiles_screen.dart';
 import 'package:despresso/ui/screens/recipe_edit.dart';
 import 'package:despresso/ui/widgets/profile_graph.dart';
+import 'package:despresso/ui/widgets/profiles_list.dart';
 import 'package:despresso/utils/debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/flutter_spinbox.dart';
@@ -468,23 +468,15 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                         const Size.fromHeight(40), // NEW
                                   ),
                                   onPressed: () async {
-                                    var result = await Navigator.push(
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) =>
-                                              const ProfilesScreen(
-                                                saveToRecipe: false,
+                                              ProfilesList(
+                                                isBrowsingOnly: false,
+																								fromSelectedProfile: widget.profileService.currentProfile,
                                               )),
                                     );
-                                    log.info("New profile selected $result");
-                                    if (result == null) {
-                                      return;
-                                    }
-                                    widget.coffeeService
-                                        .setSelectedRecipeProfile(
-                                            result!.id, result!.title);
-                                    widget.coffeeService.setSelectedRecipe(
-                                        widget.coffeeService.currentRecipe!.id);
                                   },
                                   child: Text(widget.profileService
                                           .currentProfile?.title ??

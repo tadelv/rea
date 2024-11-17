@@ -13,7 +13,7 @@ import 'package:despresso/ui/screens/settings_screen.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:despresso/ui/screens/coffee_selection.dart';
 import 'package:despresso/ui/screens/espresso_screen.dart';
-import 'package:despresso/ui/screens/profiles_screen.dart';
+import 'package:despresso/ui/widgets/profiles_list.dart';
 import 'package:despresso/ui/screens/shot_selection.dart';
 import 'package:despresso/ui/screens/steam_screen.dart';
 import 'package:despresso/ui/screens/water_screen.dart';
@@ -350,10 +350,12 @@ class LandingPageState extends State<LandingPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ProfilesScreen(
-                            saveToRecipe: false,
+                      //builder: (context) => const ProfilesScreen(
+                      //      saveToRecipe: false,
+											builder: (context) => const ProfilesList(
+											isBrowsingOnly: true,
                           )),
-                ).then((value) => _screensaver.resume());
+                );
               },
             ),
             ListTile(

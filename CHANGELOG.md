@@ -1,5 +1,10 @@
 # What's new
 
+## v0.0.7
+
+Reimagined Profile browsing and selection screen
+
+
 ## Hello and welcome to REA!
 
 REA is an app to control your DE1, based on Despresso.
