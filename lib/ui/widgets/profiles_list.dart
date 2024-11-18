@@ -6,6 +6,8 @@ import 'package:despresso/ui/screens/profiles_advanced_edit_screen.dart';
 import 'package:despresso/ui/widgets/profile_graph.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:flutter/scheduler.dart';
 
 class ProfileDetailItem extends StatelessWidget {
   final De1ShotProfile profile;
@@ -64,6 +66,8 @@ class ProfileDetailItem extends StatelessWidget {
                           Text(
                               "Expected weight: ${profile.shotHeader.targetWeight}"),
                           Text(
+                              "Starting temperature: ${profile.shotFrames.first.temp.toStringAsFixed(1)}°C"),
+                          Text(
                             "Steps:",
                             style: Theme.of(context).textTheme.titleMedium,
                           )
@@ -102,7 +106,7 @@ class ProfileListItem extends StatelessWidget {
                 ? Theme.of(context).colorScheme.primaryContainer
                 : null,
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(8),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +118,7 @@ class ProfileListItem extends StatelessWidget {
                   Text(author),
                   Text(
                     description,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
@@ -127,8 +131,9 @@ class ProfileListItem extends StatelessWidget {
 class ProfilesList extends StatefulWidget {
   // discerns between picking a profile for the shot and browsing profiles
   final bool isBrowsingOnly;
-	final De1ShotProfile? fromSelectedProfile;
-  const ProfilesList({super.key, required this.isBrowsingOnly, this.fromSelectedProfile});
+  final De1ShotProfile? fromSelectedProfile;
+  const ProfilesList(
+      {super.key, required this.isBrowsingOnly, this.fromSelectedProfile});
 
   @override
   State<StatefulWidget> createState() {
@@ -144,6 +149,8 @@ class ProfilesListState extends State<ProfilesList> {
 
   List<De1ShotProfile> _filteredProfiles = [];
   final TextEditingController controller = TextEditingController();
+
+  final ItemScrollController _itemScrollController = ItemScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -207,7 +214,8 @@ class ProfilesListState extends State<ProfilesList> {
                                   icon: Icon(Icons.clear))),
                         ),
                         Flexible(
-                            child: ListView.builder(
+                            child: ScrollablePositionedList.builder(
+                                itemScrollController: _itemScrollController,
                                 itemCount: _filteredProfiles.length,
                                 itemBuilder: (context, index) {
                                   var profile = _filteredProfiles[index];
@@ -268,11 +276,14 @@ class ProfilesListState extends State<ProfilesList> {
   @override
   void initState() {
     super.initState();
-		_selectedProfile = widget.fromSelectedProfile;
+    _selectedProfile = widget.fromSelectedProfile;
     profileService = getIt<ProfileService>();
     profileService.addListener(loadAndSetProfiles);
     controller.addListener(loadAndSetProfiles);
     loadAndSetProfiles();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      setSelectedProfile();
+    });
   }
 
   void loadAndSetProfiles() {
@@ -288,5 +299,20 @@ class ProfilesListState extends State<ProfilesList> {
     setState(() {
       _filteredProfiles = filteredProfiles;
     });
+  }
+
+  void setSelectedProfile() {
+    log.shout("here");
+    if (_selectedProfile == null) {
+      return;
+    }
+    int idx = _filteredProfiles.indexOf(_selectedProfile!);
+    if (idx < 0) {
+      return;
+    }
+    log.shout("scrolling to: $idx");
+    _itemScrollController.jumpTo(index: idx, alignment: 0.5);
+    //_itemScrollController.scrollTo(
+    //    index: idx, duration: Duration(milliseconds: 200));
   }
 }

@@ -618,7 +618,7 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
             unit: "sec",
             title: "Time",
             min: 0,
-            max: 100,
+            max: 127,
             frame,
             frame.frameLen, (value, a, b) {
           setState(() => frame.frameLen = value);

@@ -65,7 +65,7 @@ dependencies:
   url_launcher: ^6.1.12
   fl_chart: ^0.69.0
   mqtt_client: ^10.0.0
-  collection: 1.18.0
+  collection: null
   battery_plus: ^6.2.0
   logging_appenders: ^1.2.0
   logging: ^1.2.0
@@ -99,6 +99,7 @@ dependencies:
   flutter_whatsnew: ^1.0.5+2
   dotenv: null
   visibility_detector: ^0.4.0+2
+  scrollable_positioned_list: null
 
 dev_dependencies:
   flutter_test:

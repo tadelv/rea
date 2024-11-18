@@ -20,7 +20,6 @@ import 'package:despresso/ui/screens/water_screen.dart';
 import 'package:despresso/ui/widgets/machine_footer.dart';
 import 'package:despresso/ui/widgets/screen_saver.dart';
 import 'package:despresso/utils/debounce.dart';
-import 'package:feedback_sentry/feedback_sentry.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -290,7 +289,7 @@ class LandingPageState extends State<LandingPage>
                         log.fine("focus: $val");
                         //log.fine(
                         //    "mnt: $mounted, vis: $currentlyVisible, foc: ${hwKbdFocus.hasPrimaryFocus}, rcp:${recipesFocus.hasPrimaryFocus}, rcpf: ${recipesFocus.hasFocus}");
-                        _focusDebouncer.run(_processFocus(val));
+                        _focusDebouncer.run(() {_processFocus(val);});
                       },
                       child: TabBarView(
                         controller: _tabController,
