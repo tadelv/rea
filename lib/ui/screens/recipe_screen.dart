@@ -263,13 +263,20 @@ class RecipeDescription extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         if (profileService.currentProfile != null)
-          AspectRatio(
-            aspectRatio: 1.3,
-            child: ProfileGraphWidget(
-                key: Key(profileService.currentProfile?.id ??
-                    UniqueKey().toString()),
-                selectedProfile: profileService.currentProfile!),
-          ),
+          Column(children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              Text(S.of(context).screenRecipeInitialTemp),
+              Text(
+                  "${(profileService.currentProfile!.firstFrame()!.temp.toDouble() + coffeeService.currentRecipe!.adjustedTemp.toDouble()).toStringAsFixed(1)} °C"),
+            ]),
+            AspectRatio(
+              aspectRatio: 1.3,
+              child: ProfileGraphWidget(
+                  key: Key(profileService.currentProfile?.id ??
+                      UniqueKey().toString()),
+                  selectedProfile: profileService.currentProfile!),
+            ),
+          ]),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(profileService.currentProfile?.shotHeader.notes ?? ""),
@@ -471,10 +478,11 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              ProfilesList(
+                                          builder: (context) => ProfilesList(
                                                 isBrowsingOnly: false,
-																								fromSelectedProfile: widget.profileService.currentProfile,
+                                                fromSelectedProfile: widget
+                                                    .profileService
+                                                    .currentProfile,
                                               )),
                                     );
                                   },
@@ -487,39 +495,6 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           ),
                         ],
                       ),
-                      // Row(
-                      //   crossAxisAlignment: CrossAxisAlignment.center,
-                      //   children: [
-                      //     const Expanded(child: Text("Suggested stop weight:")),
-                      //     Expanded(
-                      //       child: Column(
-                      //         crossAxisAlignment: CrossAxisAlignment.center,
-                      //         children: [
-                      //           Text(
-                      //               "${widget.profileService.currentProfile?.shotHeader.targetWeight.toStringAsFixed(1)} g"),
-                      //         ],
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                      if ((firstFrame?.temp ?? 0) > 0)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                                child: Text(
-                                    S.of(context).screenRecipeInitialTemp)),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                      "${firstFrame?.temp.toStringAsFixed(1)} °C"),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
                       Divider(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -580,13 +555,18 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                   onChanged: (value) {
                                     var r = widget.coffeeService.currentRecipe;
                                     if (r != null) {
-                                      r.grinderSettings = value;
+                                      r.grinderData.target!.grindSizeSetting =
+                                          value;
                                       widget.coffeeService.updateRecipe(r);
                                     }
                                   },
                                   max: 120.0,
-                                  value: widget.coffeeService.currentRecipe
-                                          ?.grinderSettings ??
+                                  value: widget
+                                          .coffeeService
+                                          .currentRecipe
+                                          ?.grinderData
+                                          .target
+                                          ?.grindSizeSetting ??
                                       0.0,
                                   decimals: 1,
                                   step: 0.1,
@@ -605,6 +585,80 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           ),
                         ],
                       ),
+                      if (widget.coffeeService.currentRecipe
+                              ?.showAdvancedMetaData ??
+                          false)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(flex: 3, child: Text("RPM:")),
+                            Expanded(
+                              flex: 2,
+                              child: Autocomplete<String>(
+                                key: Key(widget.coffeeService.selectedRecipeId
+                                    .toString()),
+                                optionsBuilder:
+                                    (TextEditingValue textEditingValue) {
+                                  var available = widget.coffeeService
+                                      .availableGrinderRPM();
+                                  if (textEditingValue.text == '') {
+                                    return available;
+                                  }
+                                  return [textEditingValue.text, ...available];
+                                },
+                                initialValue: TextEditingValue(
+                                    text:
+                                        "${widget.coffeeService.currentRecipe?.grinderData.target?.rpm ?? 0}"),
+                                onSelected: (val) {
+                                  Recipe r =
+                                      widget.coffeeService.currentRecipe!;
+                                  r.grinderData.target?.rpm = val;
+                                  widget.coffeeService.updateRecipe(r);
+                                },
+                              ),
+                            ),
+                            Spacer(),
+                            Expanded(flex: 3, child: Text("Feed rate:")),
+                            Expanded(
+                                flex: 2,
+                                child: Autocomplete(
+                                  key: Key(widget.coffeeService.selectedRecipeId
+                                      .toString()),
+                                  optionsBuilder:
+                                      (TextEditingValue textEditingValue) {
+                                    var available = widget.coffeeService
+                                        .availableGrinderFeedRates();
+                                    List<String> options = [];
+                                    return [
+                                      textEditingValue.text,
+                                      "fast",
+                                      "slow",
+                                      ...available
+                                    ].fold(options, (c, e) {
+                                      if (c.contains(e)) {
+                                        return c;
+                                      }
+                                      c.add(e);
+                                      return c;
+                                    });
+                                  },
+                                  initialValue: TextEditingValue(
+                                      text: widget.coffeeService.currentRecipe
+                                              ?.grinderData.target?.feedRate ??
+                                          ""),
+                                  onSelected: (val) {
+                                    Recipe r =
+                                        widget.coffeeService.currentRecipe!;
+                                    r.grinderData.target?.feedRate = val;
+                                    widget.coffeeService.updateRecipe(r);
+                                  },
+                                )),
+                          ],
+                        ),
+                      //Row(
+                      //  children: [
+                      //  ],
+                      //),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         //crossAxisAlignment: CrossAxisAlignment.center,
@@ -746,6 +800,40 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                             ),
                           ],
                         ),
+                      if (widget.coffeeService.currentRecipe
+                              ?.showAdvancedMetaData ??
+                          false)
+                        Row(children: [
+                          Text("Basket:"),
+                          Expanded(
+                              child: Autocomplete(
+                            key: Key(widget.coffeeService.selectedRecipeId
+                                .toString()),
+                            optionsBuilder:
+                                (TextEditingValue textEditingValue) {
+                              var available =
+                                  widget.coffeeService.availableBasketInfos();
+                              List<String> options = [];
+                              return [textEditingValue.text, ...available]
+                                  .fold(options, (c, e) {
+                                if (c.contains(e)) {
+                                  return c;
+                                }
+                                c.add(e);
+                                return c;
+                              });
+                            },
+                            initialValue: TextEditingValue(
+                                text: widget.coffeeService.currentRecipe
+                                        ?.doseData.target?.basket ??
+                                    ""),
+                            onSelected: (val) {
+                              Recipe r = widget.coffeeService.currentRecipe!;
+                              r.doseData.target?.basket = val;
+                              widget.coffeeService.updateRecipe(r);
+                            },
+                          )),
+                        ]),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [

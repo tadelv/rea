@@ -1,5 +1,7 @@
 import 'package:despresso/model/coffee.dart';
 import 'package:objectbox/objectbox.dart';
+import 'package:despresso/model/dose_data.dart';
+import 'package:despresso/model/grinder_data.dart';
 
 @Entity()
 class Recipe {
@@ -9,14 +11,20 @@ class Recipe {
 
   final coffee = ToOne<Coffee>();
   String profileId = "Default";
-	String profileName = "Default";
+  String profileName = "Default";
 
   double adjustedWeight = 36;
   double adjustedPressure = 0;
   double adjustedTemp = 0;
   double grinderDoseWeight = 18;
+	@Deprecated("Use grinderData")
   double grinderSettings = 0;
+	@Deprecated("Use grinderData")
   String grinderModel = "";
+
+  final doseData = ToOne<DoseData>();
+
+  final grinderData = ToOne<GrinderData>();
 
   double ratio1 = 1;
   double ratio2 = 2;
@@ -42,4 +50,6 @@ class Recipe {
   double timeSteam = 30;
   double weightMilk = 120;
   bool useSteam = false;
+
+	bool showAdvancedMetaData = true;
 }

@@ -319,8 +319,8 @@ class VisualizerService extends ChangeNotifier {
     }
     buffer.writeln("bean_type {${shot.coffee.target?.name ?? "unknown"}}");
 
-    buffer.writeln("grinder_model {${shot.grinderName}}");
-    buffer.writeln("grinder_setting {${shot.grinderSettings}}");
+    buffer.writeln("grinder_model {${shot.grinderData.target?.model ?? ""}}");
+    buffer.writeln("grinder_setting {${shot.grinderData.target?.grindSizeSetting ?? 0}}");
 
     buffer.writeln("grinder_dose_weight {${shot.doseWeight}}");
 

@@ -80,8 +80,12 @@ class RecipeEditState extends State<RecipeEdit> {
         Validators.min(0.0),
         Validators.max(5000.0),
       ],
-      'grinderSettings': [_editedRecipe.grinderSettings],
-      'grinderModel': [_editedRecipe.grinderModel],
+      'grinderSettings': [_editedRecipe.grinderData.target!.grindSizeSetting],
+      'grinderModel': [_editedRecipe.grinderData.target!.model],
+      'useAdvancedMetaData': [_editedRecipe.showAdvancedMetaData],
+      'grinderRPM': [_editedRecipe.grinderData.target!.rpm],
+      'grinderFeedRate': [_editedRecipe.grinderData.target!.feedRate],
+      'basketInfo': [_editedRecipe.doseData.target!.basket],
       'ratio1': [
         _editedRecipe.ratio1,
         Validators.min(0.0),
@@ -284,6 +288,56 @@ class RecipeEditState extends State<RecipeEdit> {
                   ),
                 ],
               ),
+              Row(
+                children: [
+                  Expanded(child: Text("Use advanced meta data")),
+                  SizedBox(
+                    width: 120,
+                    child: ReactiveSwitch(
+                      formControlName: 'useAdvancedMetaData',
+                      onChanged: (control) => setState(() {}),
+                    ),
+                  )
+                ],
+              ),
+              if (form.value['useAdvancedMetaData'] as bool)
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      child: ReactiveTextField<String>(
+                        formControlName: 'grinderRPM',
+                        decoration: InputDecoration(
+                          labelText: "Grinder RPM",
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    SizedBox(
+                      width: 200,
+                      child: ReactiveTextField<String>(
+                        formControlName: 'grinderFeedRate',
+                        decoration: InputDecoration(
+                          labelText: "Grinder feed rate",
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              if (form.value['useAdvancedMetaData'] as bool)
+                Row(
+                  children: [
+                    Expanded(
+                      child: ReactiveTextField<String>(
+                        formControlName: 'basketInfo',
+                        decoration:
+                            InputDecoration(labelText: "Basket information"),
+                      ),
+                    )
+                  ],
+                )
             ],
           ),
         )),
@@ -533,9 +587,16 @@ class RecipeEditState extends State<RecipeEdit> {
     _editedRecipe.adjustedWeight = form.value["adjustedWeight"] as double? ?? 0;
     _editedRecipe.grinderDoseWeight =
         form.value["grinderDoseWeight"] as double? ?? 0;
-    _editedRecipe.grinderSettings =
+    _editedRecipe.grinderData.target!.grindSizeSetting =
         form.value["grinderSettings"] as double? ?? 0;
-    _editedRecipe.grinderModel = form.value["grinderModel"] as String? ?? "";
+    _editedRecipe.grinderData.target!.model =
+        form.value["grinderModel"] as String? ?? "";
+    _editedRecipe.grinderData.target!.rpm =
+        form.value["grinderRPM"] as String? ?? "";
+    _editedRecipe.grinderData.target!.feedRate =
+        form.value["grinderFeedRate"] as String? ?? "";
+    _editedRecipe.showAdvancedMetaData =
+        form.value['useAdvancedMetaData'] as bool;
     _editedRecipe.ratio1 = form.value["ratio1"] as double? ?? 0;
     _editedRecipe.ratio2 = form.value["ratio2"] as double? ?? 0;
     _editedRecipe.tempSteam = form.value["tempSteam"] as double? ?? 0;

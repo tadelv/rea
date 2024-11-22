@@ -15,7 +15,7 @@ import 'package:despresso/ui/theme.dart' as theme;
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 
-class ShotGraph extends StatefulWidget  {
+class ShotGraph extends StatefulWidget {
   final int id;
   final List<int>? overlayIds;
 
@@ -103,7 +103,7 @@ class ShotGraphState extends State<ShotGraph> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                          '${e.recipe.target!.grinderModel.isNotEmpty ? e.recipe.target?.grinderModel : "Grinder set"} @ ${e.recipe.target?.grinderSettings}'),
+                          '${e.recipe.target!.grinderData.target!.model.isNotEmpty ? e.recipe.target!.grinderData.target!.model : "Grinder set"} @ ${e.recipe.target?.grinderData.target?.grindSizeSetting}'),
                       //Text('${getIt<ProfileService>().profiles.firstWhere((pr) => pr.id == e.recipe.target?.id)}')
                       Text(
                           'Profile: ${e.recipe.target!.profileName.isNotEmpty ? e.recipe.target?.profileName : "Unknown profile"}')
