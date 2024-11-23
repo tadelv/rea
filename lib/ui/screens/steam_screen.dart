@@ -265,6 +265,7 @@ class SteamScreenState extends State<SteamScreen> {
                         Expanded(
                           flex: 1,
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                   S.of(context).screenSteamFlowrate(settings
@@ -272,6 +273,22 @@ class SteamScreenState extends State<SteamScreen> {
                                       .toStringAsFixed(1)),
                                   style:
                                       Theme.of(context).textTheme.labelLarge),
+                              SizedBox(
+                                width: 200,
+                                child: SpinBox(
+                                  value: settings.targetSteamFlow,
+                                  max: 2.5,
+                                  min: 0.25,
+                                  step: 0.1,
+                                  decimals: 2,
+                                  onSubmitted: (value) {
+                                    setState(() {
+                                      settings.targetSteamFlow = value;
+                                      machineService.de1?.setSteamFlow(value);
+                                    });
+                                  },
+                                ),
+                              ),
                               Slider(
                                 value: settings.targetSteamFlow,
                                 max: 2.5,
