@@ -12,6 +12,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:despresso/ui/theme.dart' as theme;
 import 'package:despresso/generated/l10n.dart';
+import 'package:flutter_spinbox/flutter_spinbox.dart';
 import '../../model/shotstate.dart';
 import '../widgets/start_stop_button.dart';
 
@@ -84,13 +85,16 @@ class SteamScreenState extends State<SteamScreen> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(S.of(context).screenSteamTwotapMode,
-                                  style: Theme.of(context).textTheme.labelLarge),
+                                  style:
+                                      Theme.of(context).textTheme.labelLarge),
                             ),
                             Switch(
                               value: machineService.de1?.steamPurgeMode == 1,
                               onChanged: (value) {
-                                if (machineService.state.coffeeState != EspressoMachineState.steam) {
-                                  machineService.de1?.setSteamPurgeMode(value == true ? 1 : 0);
+                                if (machineService.state.coffeeState !=
+                                    EspressoMachineState.steam) {
+                                  machineService.de1?.setSteamPurgeMode(
+                                      value == true ? 1 : 0);
                                   setState(() {});
                                   machineService.notify();
                                 }
@@ -100,8 +104,12 @@ class SteamScreenState extends State<SteamScreen> {
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
                                 machineService.de1?.steamPurgeMode == 1
-                                    ? S.of(context).screenSteamOnSlowPurgeOn1stStop
-                                    : S.of(context).screenSteamOffNormalPurgeAfterStop,
+                                    ? S
+                                        .of(context)
+                                        .screenSteamOnSlowPurgeOn1stStop
+                                    : S
+                                        .of(context)
+                                        .screenSteamOffNormalPurgeAfterStop,
                                 style: Theme.of(context).textTheme.labelMedium,
                               ),
                             ),
@@ -116,21 +124,22 @@ class SteamScreenState extends State<SteamScreen> {
                       children: [
                         Column(
                           children: [
-                            Text(S.of(context).screenSteamTemperaturs(settings.targetSteamTemp),
+                            Text(
+                                S.of(context).screenSteamTemperaturs(
+                                    settings.targetSteamTemp),
                                 style: Theme.of(context).textTheme.labelLarge),
-                            Slider(
-                              value: settings.targetSteamTemp.toDouble(),
-                              max: 180,
-                              min: 100,
-                              divisions: 80,
-                              label: "${settings.targetSteamTemp} °C",
-                              onChanged: (double value) {
-                                setState(() {
-                                  settings.targetSteamTemp = value.toInt();
-                                  machineService.updateSettings();
-                                });
-                              },
-                            ),
+                            SizedBox(
+                                width: 200,
+                                child: SpinBox(
+                                  min: 100,
+                                  max: 180,
+                                  step: 5.0,
+                                  value: settings.targetSteamTemp.toDouble(),
+                                  onSubmitted: (val) {
+                                    settings.targetSteamTemp = val.toInt();
+                                    machineService.updateSettings();
+                                  },
+                                ))
                           ],
                         ),
                         SizedBox(
@@ -138,20 +147,27 @@ class SteamScreenState extends State<SteamScreen> {
                           width: 100,
                           child: Stack(
                             children: <Widget>[
-                              if (machineService.state.coffeeState == EspressoMachineState.steam) ...[
+                              if (machineService.state.coffeeState ==
+                                  EspressoMachineState.steam) ...[
                                 Center(
                                   child: SizedBox(
                                     width: 200,
                                     height: 200,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 15,
-                                      value: machineService.state.coffeeState == EspressoMachineState.steam
-                                          ? (machineService.state.shot?.steamTemp ?? 1) / settings.targetSteamTemp
+                                      value: machineService.state.coffeeState ==
+                                              EspressoMachineState.steam
+                                          ? (machineService
+                                                      .state.shot?.steamTemp ??
+                                                  1) /
+                                              settings.targetSteamTemp
                                           : 0,
                                     ),
                                   ),
                                 ),
-                                Center(child: Text("${machineService.state.shot?.steamTemp}°C")),
+                                Center(
+                                    child: Text(
+                                        "${machineService.state.shot?.steamTemp}°C")),
                               ]
                             ],
                           ),
@@ -166,47 +182,50 @@ class SteamScreenState extends State<SteamScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: [
-                              Text(S.of(context).screenSteamTimerS(settings.targetSteamLength.toInt()),
-                                  style: Theme.of(context).textTheme.labelLarge),
-                              Slider(
-                                value: settings.targetSteamLength.toDouble(),
-                                max: 200,
-                                min: 1,
-                                divisions: 200,
-                                label: "${settings.targetSteamLength} s",
-                                onChanged: (double value) {
-                                  setState(() {
-                                    settings.targetSteamLength = value.toInt();
+                        Column(
+                          children: [
+                            Text(
+                                S.of(context).screenSteamTimerS(
+                                    settings.targetSteamLength.toInt()),
+                                style: Theme.of(context).textTheme.labelLarge),
+                            SizedBox(
+                                width: 200,
+                                child: SpinBox(
+                                  min: 1,
+                                  max: 120,
+                                  step: 5.0,
+                                  value: settings.targetSteamLength.toDouble(),
+                                  onSubmitted: (val) {
+                                    settings.targetSteamLength = val.toInt();
                                     machineService.updateSettings();
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
+                                  },
+                                ))
+                          ],
                         ),
                         SizedBox(
                           height: 100,
                           width: 100,
                           child: Stack(
                             children: <Widget>[
-                              if (machineService.state.coffeeState == EspressoMachineState.steam) ...[
+                              if (machineService.state.coffeeState ==
+                                  EspressoMachineState.steam) ...[
                                 Center(
                                   child: SizedBox(
                                     width: 200,
                                     height: 200,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 15,
-                                      value: machineService.state.coffeeState == EspressoMachineState.steam
-                                          ? machineService.timer.inSeconds / settings.targetSteamLength
+                                      value: machineService.state.coffeeState ==
+                                              EspressoMachineState.steam
+                                          ? machineService.timer.inSeconds /
+                                              settings.targetSteamLength
                                           : 0,
                                     ),
                                   ),
                                 ),
-                                Center(child: Text("${machineService.timer.inSeconds.toStringAsFixed(0)}s")),
+                                Center(
+                                    child: Text(
+                                        "${machineService.timer.inSeconds.toStringAsFixed(0)}s")),
                               ]
                             ],
                           ),
@@ -217,7 +236,9 @@ class SteamScreenState extends State<SteamScreen> {
                   if (tempService.state == TempState.connected)
                     Column(
                       children: [
-                        Text(S.of(context).screenSteamStopAtTemperatur(settings.targetMilkTemperature),
+                        Text(
+                            S.of(context).screenSteamStopAtTemperatur(
+                                settings.targetMilkTemperature),
                             style: Theme.of(context).textTheme.labelLarge),
                         Slider(
                           value: settings.targetMilkTemperature.toDouble(),
@@ -245,14 +266,19 @@ class SteamScreenState extends State<SteamScreen> {
                           flex: 1,
                           child: Column(
                             children: [
-                              Text(S.of(context).screenSteamFlowrate(settings.targetSteamFlow.toStringAsFixed(1)),
-                                  style: Theme.of(context).textTheme.labelLarge),
+                              Text(
+                                  S.of(context).screenSteamFlowrate(settings
+                                      .targetSteamFlow
+                                      .toStringAsFixed(1)),
+                                  style:
+                                      Theme.of(context).textTheme.labelLarge),
                               Slider(
                                 value: settings.targetSteamFlow,
                                 max: 2.5,
                                 min: 0.25,
                                 divisions: 22,
-                                label: "${settings.targetSteamFlow.toStringAsFixed(2)} ml/s",
+                                label:
+                                    "${settings.targetSteamFlow.toStringAsFixed(2)} ml/s",
                                 onChanged: (double value) {
                                   setState(() {
                                     settings.targetSteamFlow = value;
@@ -303,11 +329,13 @@ class SteamScreenState extends State<SteamScreen> {
                             children: [
                               OutlinedButton(
                                   onLongPress: () {
-                                    settings.targetMilkTempPreset1 = settings.targetMilkTemperature;
+                                    settings.targetMilkTempPreset1 =
+                                        settings.targetMilkTemperature;
                                     showOk(context, "Saved");
                                   },
                                   onPressed: () {
-                                    settings.targetMilkTemperature = settings.targetMilkTempPreset1;
+                                    settings.targetMilkTemperature =
+                                        settings.targetMilkTempPreset1;
                                     machineService.updateSettings();
                                   },
                                   child: Column(
@@ -315,17 +343,21 @@ class SteamScreenState extends State<SteamScreen> {
                                       const Text("Stop 1"),
                                       Text(
                                         "${settings.targetMilkTempPreset1}°C",
-                                        style: Theme.of(context).textTheme.labelSmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall,
                                       ),
                                     ],
                                   )),
                               OutlinedButton(
                                   onLongPress: () {
-                                    settings.targetMilkTempPreset2 = settings.targetMilkTemperature;
+                                    settings.targetMilkTempPreset2 =
+                                        settings.targetMilkTemperature;
                                     showOk(context, "Saved");
                                   },
                                   onPressed: () {
-                                    settings.targetMilkTemperature = settings.targetMilkTempPreset2;
+                                    settings.targetMilkTemperature =
+                                        settings.targetMilkTempPreset2;
                                     machineService.updateSettings();
                                   },
                                   child: Column(
@@ -333,17 +365,21 @@ class SteamScreenState extends State<SteamScreen> {
                                       const Text("Stop 2"),
                                       Text(
                                         "${settings.targetMilkTempPreset2}°C",
-                                        style: Theme.of(context).textTheme.labelSmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall,
                                       ),
                                     ],
                                   )),
                               OutlinedButton(
                                   onLongPress: () {
-                                    settings.targetMilkTempPreset3 = settings.targetMilkTemperature;
+                                    settings.targetMilkTempPreset3 =
+                                        settings.targetMilkTemperature;
                                     showOk(context, "Saved");
                                   },
                                   onPressed: () {
-                                    settings.targetMilkTemperature = settings.targetMilkTempPreset3;
+                                    settings.targetMilkTemperature =
+                                        settings.targetMilkTempPreset3;
                                     machineService.updateSettings();
                                   },
                                   child: Column(
@@ -351,7 +387,9 @@ class SteamScreenState extends State<SteamScreen> {
                                       const Text("Stop 3"),
                                       Text(
                                         "${settings.targetMilkTempPreset3}°C",
-                                        style: Theme.of(context).textTheme.labelSmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall,
                                       ),
                                     ],
                                   )),
@@ -412,8 +450,10 @@ class SteamScreenState extends State<SteamScreen> {
           drawVerticalLine: true,
         ),
         lineBarsData: [
-          createChartLineDatapoints(data["temp1"]!, 4, theme.ThemeColors.tempColor),
-          createChartLineDatapoints(data["temp2"]!, 2, theme.ThemeColors.flowColor),
+          createChartLineDatapoints(
+              data["temp1"]!, 4, theme.ThemeColors.tempColor),
+          createChartLineDatapoints(
+              data["temp2"]!, 2, theme.ThemeColors.flowColor),
         ],
         titlesData: FlTitlesData(
           topTitles: const AxisTitles(
@@ -467,8 +507,10 @@ class SteamScreenState extends State<SteamScreen> {
                   height: 30,
                   child: LegendsListWidget(
                     legends: [
-                      Legend(S.of(context).screenSteamTempTip, theme.ThemeColors.tempColor),
-                      Legend(S.of(context).screenSteamAmbient, theme.ThemeColors.flowColor),
+                      Legend(S.of(context).screenSteamTempTip,
+                          theme.ThemeColors.tempColor),
+                      Legend(S.of(context).screenSteamAmbient,
+                          theme.ThemeColors.flowColor),
                     ],
                   ),
                 ),
@@ -492,7 +534,8 @@ class SteamScreenState extends State<SteamScreen> {
     );
   }
 
-  LineChartBarData createChartLineDatapoints(List<FlSpot> points, double barWidth, Color col) {
+  LineChartBarData createChartLineDatapoints(
+      List<FlSpot> points, double barWidth, Color col) {
     return LineChartBarData(
       spots: points,
       dotData: const FlDotData(

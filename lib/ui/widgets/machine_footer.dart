@@ -143,6 +143,18 @@ class _MachineFooterState extends State<MachineFooter> {
                               value:
                                   "${snapshot.data?.headTemp.toStringAsFixed(1)} °C",
                               label: S.of(context).footerGroup),
+                          if (machineService.state.coffeeState !=
+                                  EspressoMachineState.espresso &&
+                              machineService.state.coffeeState !=
+                                  EspressoMachineState.flush &&
+                              machineService.state.coffeeState !=
+                                  EspressoMachineState.steam &&
+                              machineService.state.coffeeState !=
+                                  EspressoMachineState.water)
+                          FooterValue(
+                              value:
+                                  "${snapshot.data?.steamTemp.toStringAsFixed(1)} °C",
+                              label: "Steam"),
                           if (machineService.currentFullState.state !=
                               EspressoMachineState.idle)
                             FooterValue(
