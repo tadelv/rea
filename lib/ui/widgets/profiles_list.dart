@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'package:despresso/model/de1shotclasses.dart';
 import 'package:despresso/model/services/state/coffee_service.dart';
+import 'package:despresso/model/services/state/notification_service.dart';
 import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:despresso/ui/screens/profiles_advanced_edit_screen.dart';
 import 'package:despresso/ui/widgets/profile_graph.dart';
+import 'package:despresso/utils/loading_indicator_dialog.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -237,20 +241,113 @@ class ProfilesListState extends State<ProfilesList> {
                                     },
                                   );
                                 })),
-                        TextButton(
-                          child: Text(
-                            "Add new profile",
+                        Row(children: [
+                          TextButton(
+                            child: Text(
+                              "Add new profile",
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        AdvancedProfilesEditScreen(
+                                            De1ShotProfile.createNew())),
+                              );
+                            },
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AdvancedProfilesEditScreen(
-                                          De1ShotProfile.createNew())),
-                            );
-                          },
-                        ),
+                          TextButton(
+                            child: Text("Import profile"),
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext buildContext) {
+                                    return AlertDialog(
+                                      title: Text("Import profile"),
+                                      content: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text("Enter visualizer short code"),
+                                          TextField(
+                                            onSubmitted: (value) async {
+                                              LoadingIndicatorDialog()
+                                                  .show(context);
+                                              try {
+                                                final val = await profileService
+                                                    .getJsonProfileFromVisualizerShortCode(
+                                                        value);
+
+                                                _selectedProfile = val;
+                                                profileService.saveAsNew(val);
+                                                LoadingIndicatorDialog()
+                                                    .dismiss();
+                                                if (context.mounted) {
+                                                  Navigator.pop(context);
+                                                }
+                                              } catch (e) {
+                                                LoadingIndicatorDialog()
+                                                    .dismiss();
+                                                if (context.mounted) {
+                                                  Navigator.pop(context);
+                                                }
+                                                getIt<SnackbarService>().notify(
+                                                    "Failed to get profile: $e",
+                                                    SnackbarNotificationType
+                                                        .severe);
+                                              }
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () async {
+                                              var result = await FilePicker
+                                                  .platform
+                                                  .pickFiles(
+                                                      type: FileType.custom,
+                                                      allowedExtensions: [
+                                                    'json'
+                                                  ]);
+                                              if (result == null ||
+                                                  result.paths.isEmpty) {
+                                                return;
+                                              }
+                                              try {
+                                                File file =
+                                                    File(result.paths.first!);
+                                                final fileJson =
+                                                    await file.readAsString();
+                                                final profile = profileService
+                                                    .parseDefaultProfile(
+                                                        fileJson, false);
+                                                _selectedProfile = profile;
+                                                profileService
+                                                    .saveAsNew(profile);
+                                                if (context.mounted) {
+                                                  Navigator.pop(context);
+                                                }
+                                              } catch (e) {
+                                                getIt<SnackbarService>().notify(
+                                                    "Failed to parse file: $e",
+                                                    SnackbarNotificationType
+                                                        .severe);
+                                              }
+                                            },
+                                            child: Text("Import from file")),
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Close"))
+                                      ],
+                                    );
+                                  });
+                            },
+                          )
+                        ]),
                       ],
                     )),
                 Expanded(
@@ -291,11 +388,13 @@ class ProfilesListState extends State<ProfilesList> {
     var items = profileService.profiles;
     final filteredProfiles = items.where((item) {
       return item.title.toLowerCase().contains(searchString) ||
-          item.id.toLowerCase().contains(searchString) ||
-          item.shotHeader.type.toLowerCase().contains(searchString) ||
-          item.shotHeader.notes.toLowerCase().contains(searchString) ||
-          item.shotHeader.author.toLowerCase().contains(searchString);
-    }).toList();
+          item.id.toLowerCase().contains(searchString);
+          //item.shotHeader.type.toLowerCase().contains(searchString) ||
+          //item.shotHeader.notes.toLowerCase().contains(searchString) ||
+          //item.shotHeader.author.toLowerCase().contains(searchString);
+    })
+		.toList();
+		filteredProfiles.sort((a, b) => a.title.compareTo(b.title));
     setState(() {
       _filteredProfiles = filteredProfiles;
     });
@@ -310,7 +409,7 @@ class ProfilesListState extends State<ProfilesList> {
     if (idx < 0) {
       return;
     }
-    log.shout("scrolling to: $idx");
+    log.fine("scrolling to: $idx");
     _itemScrollController.jumpTo(index: idx, alignment: 0.5);
     //_itemScrollController.scrollTo(
     //    index: idx, duration: Duration(milliseconds: 200));
