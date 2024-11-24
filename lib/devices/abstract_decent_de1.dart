@@ -28,4 +28,6 @@ abstract class IDe1 {
   Future<int> getSteamPurgeMode();
   Future<void> updateSettings();
   Future<void> writeWithResult(Endpoint e, Uint8List data);
+	Future<int> getTankTempThreshold();
+	Future<void> setTankTempThreshold(int temp);
 }
