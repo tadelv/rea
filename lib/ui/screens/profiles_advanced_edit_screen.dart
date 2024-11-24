@@ -332,7 +332,7 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
                                 },
                                 child: Row(
                                   children: [
-                                    Icon(Icons.store),
+                                    Icon(Icons.public),
                                     Text("Edit global data")
                                   ],
                                 )),

@@ -4,6 +4,7 @@
 
 - Reimagined Profile browsing and selection screen
 - Add option to display additional recipe metadata, such as grinder rpm and feed rate. Needs to be toggled on per-recipe in the recipe editing screen
+- Pre heat water in the tank, based on the profile data
 
 ## Hello and welcome to REA!
 
