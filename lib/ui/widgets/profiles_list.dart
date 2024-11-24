@@ -9,6 +9,7 @@ import 'package:despresso/ui/widgets/profile_graph.dart';
 import 'package:despresso/utils/loading_indicator_dialog.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter/scheduler.dart';
@@ -173,6 +174,16 @@ class ProfilesListState extends State<ProfilesList> {
                                         _selectedProfile!)));
                       },
                       icon: Icon(Icons.edit)),
+                  IconButton(
+                      onPressed: () {
+                        final jsonString = profileService
+                            .createProfileDefaultJson(_selectedProfile!);
+                        Clipboard.setData(ClipboardData(text: jsonString));
+                        getIt<SnackbarService>().notify(
+                            "Profile copied to clipboard",
+                            SnackbarNotificationType.info);
+                      },
+                      icon: Icon(Icons.share)),
                   IconButton(
                       onPressed: () => showDialog<void>(
                           context: context,
@@ -389,12 +400,11 @@ class ProfilesListState extends State<ProfilesList> {
     final filteredProfiles = items.where((item) {
       return item.title.toLowerCase().contains(searchString) ||
           item.id.toLowerCase().contains(searchString);
-          //item.shotHeader.type.toLowerCase().contains(searchString) ||
-          //item.shotHeader.notes.toLowerCase().contains(searchString) ||
-          //item.shotHeader.author.toLowerCase().contains(searchString);
-    })
-		.toList();
-		filteredProfiles.sort((a, b) => a.title.compareTo(b.title));
+      //item.shotHeader.type.toLowerCase().contains(searchString) ||
+      //item.shotHeader.notes.toLowerCase().contains(searchString) ||
+      //item.shotHeader.author.toLowerCase().contains(searchString);
+    }).toList();
+    filteredProfiles.sort((a, b) => a.title.compareTo(b.title));
     setState(() {
       _filteredProfiles = filteredProfiles;
     });
