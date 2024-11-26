@@ -147,6 +147,7 @@ class DE1Simulated extends ChangeNotifier implements IDe1 {
   double _setGroupPressure = 7;
   double _setGroupFlow = 7;
   int _frameNumber = 0;
+	int _tankTempThreshold = 0;
 
   // ignore: unused_field
   int _tick = 0;
@@ -483,6 +484,23 @@ class DE1Simulated extends ChangeNotifier implements IDe1 {
       default:
         return;
     }
+  }
+
+  @override
+  Future<int> getTankTempThreshold() async {
+    //var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.TankTemp]!, 0));
+    log.info("getTankTempThreshold");
+    return _tankTempThreshold;
+  }
+
+  @override
+  Future<void> setTankTempThreshold(int temp) async {
+    ByteData bytes = ByteData(4);
+    bytes.setUint32(0, temp, Endian.little);
+		log.info("setTankTempThreshold: $temp");
+		_tankTempThreshold = temp;
+    //return _mmrWrite(
+        //mmrAddrLookup[MMRAddrEnum.TankTemp]!, bytes.buffer.asUint8List());
   }
 
   void handleConnect() {}

@@ -118,8 +118,11 @@ class ShotEditState extends State<ShotEdit> {
       'totalDissolvedSolids': [_editedShot.totalDissolvedSolids],
       'extractionYield': [_editedShot.extractionYield],
       'enjoyment': [_editedShot.enjoyment],
-      'grinderSettings': [_editedShot.grinderSettings],
-      'grinderName': [_editedShot.grinderName],
+      'grinderSettings': [_editedShot.grinderData.target!.grindSizeSetting],
+      'grinderName': [_editedShot.grinderData.target!.model],
+      'grinderRPM': [_editedShot.grinderData.target!.rpm],
+      'grinderFeedRate': [_editedShot.grinderData.target!.feedRate],
+      'basket': [_editedShot.doseData.target!.basket],
       'doseWeight': [_editedShot.doseWeight],
       'drinkWeight': [_editedShot.drinkWeight],
       'pourWeight': [_editedShot.pourWeight],
@@ -424,6 +427,27 @@ class ShotEditState extends State<ShotEdit> {
                     labelText: S.of(context).screenShotEditGrinderSettings,
                   ),
                 ),
+                ReactiveTextField<String>(
+                  formControlName: 'grinderRPM',
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: "RPM",
+                  ),
+                ),
+                ReactiveTextField<String>(
+                  formControlName: 'grinderFeedRate',
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    labelText: "Feed rate",
+                  ),
+                ),
+                ReactiveTextField<String>(
+                  formControlName: 'basket',
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    labelText: "Basket data",
+                  ),
+                ),
               ]),
             ),
           ),
@@ -498,9 +522,13 @@ class ShotEditState extends State<ShotEdit> {
 
     _editedShot.extractionYield =
         form.value["extractionYield"] as double? ?? 0.0;
-    _editedShot.grinderName = form.value["grinderName"] as String;
-    _editedShot.grinderSettings =
+    _editedShot.grinderData.target!.model = form.value["grinderName"] as String;
+    _editedShot.grinderData.target!.grindSizeSetting =
         form.value["grinderSettings"] as double? ?? 0.0;
+    _editedShot.grinderData.target!.rpm = form.value["grinderRPM"] as String;
+    _editedShot.grinderData.target!.feedRate =
+        form.value["grinderFeedRate"] as String;
+    _editedShot.doseData.target!.basket = form.value["basket"] as String;
     _editedShot.pourTime = form.value["pourTime"] as double? ?? 0.0;
     _editedShot.pourWeight = form.value["pourWeight"] as double? ?? 0.0;
     _editedShot.targetEspressoWeight =

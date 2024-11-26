@@ -670,6 +670,14 @@ class EspressoMachineService extends ChangeNotifier {
       return "Error writing tail ${profile.title}";
     }
 
+    try {
+      await _uploadTankTemperature(
+          profileToBeUploaded.shotHeader.tankTemperature);
+    } catch (ex) {
+      log.severe("Error writing tank temperature: $ex");
+      return "Error writing tank temp ${profile.title}";
+    }
+
     return Future.value("${profile.title}");
   }
 
@@ -677,6 +685,23 @@ class EspressoMachineService extends ChangeNotifier {
     // stop at volume in the profile tail
     log.fine("Write Tail: ${data}");
     await de1!.writeWithResult(Endpoint.frameWrite, data);
+  }
+
+  Future<void> _uploadTankTemperature(double temp) async {
+    log.fine("sending tank temperature to de1: ${temp.toInt()}");
+    if (temp < 10) {
+      await de1!.setTankTempThreshold(temp.toInt());
+      return;
+    }
+    // same as de1app, if we need pre-heating, set a temp boost to 60 degrees
+    // to force circulation
+    int highTemp = 60;
+    await de1!.setTankTempThreshold(highTemp);
+
+    Future<void>.delayed(Duration(seconds: 4), () async {
+      log.fine("readjusting tank temp from $highTemp to $temp");
+      await de1!.setTankTempThreshold(temp.toInt());
+    });
   }
 
   Future<void> handleShotData() async {
@@ -1270,8 +1295,10 @@ class EspressoMachineService extends ChangeNotifier {
       cs.ratio1 = coffeeService.currentRecipe?.ratio1 ?? 1;
       cs.ratio2 = coffeeService.currentRecipe?.ratio2 ?? 1;
 
-      cs.grinderName = coffeeService.currentRecipe?.grinderModel ?? "";
-      cs.grinderSettings = coffeeService.currentRecipe?.grinderSettings ?? 0;
+      //cs.grinderName = coffeeService.currentRecipe?.grinderModel ?? "";
+      //cs.grinderSettings = coffeeService.currentRecipe?.grinderSettings ?? 0;
+      //cs.grinderData.targetId = coffeeService.currentRecipe?.grinderData.targetId;
+      //cs.doseData.targetId = coffeeService.currentRecipe?.doseData.targetId;
 
       cs.estimatedWeightReachedTime = currentShot.estimatedWeightReachedTime;
       cs.estimatedWeight_b = currentShot.estimatedWeight_b;

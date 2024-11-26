@@ -16,7 +16,10 @@ import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
 import 'helper/objectbox_cache_provider.dart';
 import 'model/coffee.dart';
+import 'model/db_version.dart';
+import 'model/dose_data.dart';
 import 'model/favorite.dart';
+import 'model/grinder_data.dart';
 import 'model/recipe.dart';
 import 'model/shot.dart';
 import 'model/shotstate.dart';
@@ -27,7 +30,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(3, 5050282589413394899),
       name: 'Shot',
-      lastPropertyId: const obx_int.IdUid(30, 8373679791166864541),
+      lastPropertyId: const obx_int.IdUid(32, 973395751178647228),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -173,7 +176,21 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(29, 7092783304172893944),
             name: 'ratio2',
             type: 8,
-            flags: 0)
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(31, 5868517259967133352),
+            name: 'doseDataId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(11, 6528518136591876951),
+            relationTarget: 'DoseData'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(32, 973395751178647228),
+            name: 'grinderDataId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(12, 7301716579382977401),
+            relationTarget: 'GrinderData')
       ],
       relations: <obx_int.ModelRelation>[
         obx_int.ModelRelation(
@@ -458,7 +475,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(9, 7693652674048295668),
       name: 'Recipe',
-      lastPropertyId: const obx_int.IdUid(29, 133802416448563203),
+      lastPropertyId: const obx_int.IdUid(32, 2112197673865657514),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -597,6 +614,25 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(29, 133802416448563203),
             name: 'profileName',
             type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(30, 7892951655081861609),
+            name: 'doseDataId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(9, 7995060139794490161),
+            relationTarget: 'DoseData'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(31, 6818594492673986528),
+            name: 'grinderDataId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(10, 3613750818366986737),
+            relationTarget: 'GrinderData'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(32, 2112197673865657514),
+            name: 'showAdvancedMetaData',
+            type: 1,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -645,6 +681,85 @@ final _entities = <obx_int.ModelEntity>[
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(12, 2914464572649089719),
+      name: 'DbVersion',
+      lastPropertyId: const obx_int.IdUid(2, 8151135056784733680),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 2532012977103494703),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 8151135056784733680),
+            name: 'version',
+            type: 6,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(13, 4470811546300594874),
+      name: 'DoseData',
+      lastPropertyId: const obx_int.IdUid(3, 1061333141273314703),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 4163464617863110377),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 8954753978213169795),
+            name: 'basket',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 1061333141273314703),
+            name: 'extra',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(14, 7349755893405077132),
+      name: 'GrinderData',
+      lastPropertyId: const obx_int.IdUid(5, 7220614877895916262),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 4363903393520277102),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 6069816108731468848),
+            name: 'model',
+            type: 9,
+            flags: 2048,
+            indexId: const obx_int.IdUid(13, 6401905311070772980)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 5500473849366367494),
+            name: 'grindSizeSetting',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 4244112943778364842),
+            name: 'feedRate',
+            type: 9,
+            flags: 2048,
+            indexId: const obx_int.IdUid(14, 3251717285495687983)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 7220614877895916262),
+            name: 'rpm',
+            type: 9,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -683,8 +798,8 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(11, 2746153146489174759),
-      lastIndexId: const obx_int.IdUid(8, 899743464370898125),
+      lastEntityId: const obx_int.IdUid(14, 7349755893405077132),
+      lastIndexId: const obx_int.IdUid(14, 3251717285495687983),
       lastRelationId: const obx_int.IdUid(1, 2516218059471133212),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
@@ -739,7 +854,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
   final bindings = <Type, obx_int.EntityDefinition>{
     Shot: obx_int.EntityDefinition<Shot>(
         model: _entities[0],
-        toOneRelations: (Shot object) => [object.coffee, object.recipe],
+        toOneRelations: (Shot object) =>
+            [object.coffee, object.recipe, object.doseData, object.grinderData],
         toManyRelations: (Shot object) =>
             {obx_int.RelInfo<Shot>.toMany(1, object.id): object.shotstates},
         getId: (Shot object) => object.id,
@@ -753,7 +869,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final barristaOffset = fbb.writeString(object.barrista);
           final drinkerOffset = fbb.writeString(object.drinker);
           final visualizerIdOffset = fbb.writeString(object.visualizerId);
-          fbb.startTable(31);
+          fbb.startTable(33);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.date.millisecondsSinceEpoch);
           fbb.addInt64(2, object.coffee.targetId);
@@ -782,6 +898,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addFloat64(26, object.estimatedWeight_tStart);
           fbb.addFloat64(27, object.ratio1);
           fbb.addFloat64(28, object.ratio2);
+          fbb.addInt64(30, object.doseData.targetId);
+          fbb.addInt64(31, object.grinderData.targetId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -847,6 +965,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.recipe.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
           object.recipe.attach(store);
+          object.doseData.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 64, 0);
+          object.doseData.attach(store);
+          object.grinderData.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 66, 0);
+          object.grinderData.attach(store);
           obx_int.InternalToManyAccess.setRelInfo<Shot>(object.shotstates,
               store, obx_int.RelInfo<Shot>.toMany(1, object.id));
           return object;
@@ -1108,7 +1232,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         }),
     Recipe: obx_int.EntityDefinition<Recipe>(
         model: _entities[5],
-        toOneRelations: (Recipe object) => [object.coffee],
+        toOneRelations: (Recipe object) =>
+            [object.coffee, object.doseData, object.grinderData],
         toManyRelations: (Recipe object) => {},
         getId: (Recipe object) => object.id,
         setId: (Recipe object, int id) {
@@ -1120,7 +1245,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionOffset = fbb.writeString(object.description);
           final grinderModelOffset = fbb.writeString(object.grinderModel);
           final profileNameOffset = fbb.writeString(object.profileName);
-          fbb.startTable(30);
+          fbb.startTable(33);
           fbb.addInt64(0, object.id);
           fbb.addInt64(1, object.coffee.targetId);
           fbb.addFloat64(2, object.adjustedWeight);
@@ -1148,6 +1273,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addBool(26, object.disableStopOnWeight);
           fbb.addBool(27, object.isShot);
           fbb.addOffset(28, profileNameOffset);
+          fbb.addInt64(29, object.doseData.targetId);
+          fbb.addInt64(30, object.grinderData.targetId);
+          fbb.addBool(31, object.showAdvancedMetaData);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -1206,10 +1334,18 @@ obx_int.ModelDefinition getObjectBoxModel() {
             ..isShot =
                 const fb.BoolReader().vTableGet(buffer, rootOffset, 58, false)
             ..profileName = const fb.StringReader(asciiOptimization: true)
-                .vTableGet(buffer, rootOffset, 60, '');
+                .vTableGet(buffer, rootOffset, 60, '')
+            ..showAdvancedMetaData =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 66, false);
           object.coffee.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
           object.coffee.attach(store);
+          object.doseData.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 62, 0);
+          object.doseData.attach(store);
+          object.grinderData.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 64, 0);
+          object.grinderData.attach(store);
           return object;
         }),
     SettingsEntry: obx_int.EntityDefinition<SettingsEntry>(
@@ -1253,6 +1389,102 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 .vTableGet(buffer, rootOffset, 14, '')
             ..type = const fb.StringReader(asciiOptimization: true)
                 .vTableGet(buffer, rootOffset, 16, '');
+
+          return object;
+        }),
+    DbVersion: obx_int.EntityDefinition<DbVersion>(
+        model: _entities[7],
+        toOneRelations: (DbVersion object) => [],
+        toManyRelations: (DbVersion object) => {},
+        getId: (DbVersion object) => object.id,
+        setId: (DbVersion object, int id) {
+          object.id = id;
+        },
+        objectToFB: (DbVersion object, fb.Builder fbb) {
+          fbb.startTable(3);
+          fbb.addInt64(0, object.id);
+          fbb.addInt64(1, object.version);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final versionParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0);
+          final object = DbVersion(version: versionParam)
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+
+          return object;
+        }),
+    DoseData: obx_int.EntityDefinition<DoseData>(
+        model: _entities[8],
+        toOneRelations: (DoseData object) => [],
+        toManyRelations: (DoseData object) => {},
+        getId: (DoseData object) => object.id,
+        setId: (DoseData object, int id) {
+          object.id = id;
+        },
+        objectToFB: (DoseData object, fb.Builder fbb) {
+          final basketOffset = fbb.writeString(object.basket);
+          final extraOffset = fbb.writeString(object.extra);
+          fbb.startTable(4);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, basketOffset);
+          fbb.addOffset(2, extraOffset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final basketParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final object = DoseData(basket: basketParam)
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+            ..extra = const fb.StringReader(asciiOptimization: true)
+                .vTableGet(buffer, rootOffset, 8, '');
+
+          return object;
+        }),
+    GrinderData: obx_int.EntityDefinition<GrinderData>(
+        model: _entities[9],
+        toOneRelations: (GrinderData object) => [],
+        toManyRelations: (GrinderData object) => {},
+        getId: (GrinderData object) => object.id,
+        setId: (GrinderData object, int id) {
+          object.id = id;
+        },
+        objectToFB: (GrinderData object, fb.Builder fbb) {
+          final modelOffset = fbb.writeString(object.model);
+          final feedRateOffset = fbb.writeString(object.feedRate);
+          final rpmOffset = fbb.writeString(object.rpm);
+          fbb.startTable(6);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, modelOffset);
+          fbb.addFloat64(2, object.grindSizeSetting);
+          fbb.addOffset(3, feedRateOffset);
+          fbb.addOffset(4, rpmOffset);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final modelParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final grindSizeSettingParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 8, 0);
+          final feedRateParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 10, '');
+          final rpmParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 12, '');
+          final object = GrinderData(
+              model: modelParam,
+              grindSizeSetting: grindSizeSettingParam,
+              feedRate: feedRateParam,
+              rpm: rpmParam)
+            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
           return object;
         })
@@ -1372,6 +1604,14 @@ class Shot_ {
   /// See [Shot.ratio2].
   static final ratio2 =
       obx.QueryDoubleProperty<Shot>(_entities[0].properties[27]);
+
+  /// See [Shot.doseData].
+  static final doseData =
+      obx.QueryRelationToOne<Shot, DoseData>(_entities[0].properties[28]);
+
+  /// See [Shot.grinderData].
+  static final grinderData =
+      obx.QueryRelationToOne<Shot, GrinderData>(_entities[0].properties[29]);
 
   /// see [Shot.shotstates]
   static final shotstates =
@@ -1687,6 +1927,18 @@ class Recipe_ {
   /// See [Recipe.profileName].
   static final profileName =
       obx.QueryStringProperty<Recipe>(_entities[5].properties[26]);
+
+  /// See [Recipe.doseData].
+  static final doseData =
+      obx.QueryRelationToOne<Recipe, DoseData>(_entities[5].properties[27]);
+
+  /// See [Recipe.grinderData].
+  static final grinderData =
+      obx.QueryRelationToOne<Recipe, GrinderData>(_entities[5].properties[28]);
+
+  /// See [Recipe.showAdvancedMetaData].
+  static final showAdvancedMetaData =
+      obx.QueryBooleanProperty<Recipe>(_entities[5].properties[29]);
 }
 
 /// [SettingsEntry] entity fields to define ObjectBox queries.
@@ -1718,4 +1970,53 @@ class SettingsEntry_ {
   /// See [SettingsEntry.type].
   static final type =
       obx.QueryStringProperty<SettingsEntry>(_entities[6].properties[6]);
+}
+
+/// [DbVersion] entity fields to define ObjectBox queries.
+class DbVersion_ {
+  /// See [DbVersion.id].
+  static final id =
+      obx.QueryIntegerProperty<DbVersion>(_entities[7].properties[0]);
+
+  /// See [DbVersion.version].
+  static final version =
+      obx.QueryIntegerProperty<DbVersion>(_entities[7].properties[1]);
+}
+
+/// [DoseData] entity fields to define ObjectBox queries.
+class DoseData_ {
+  /// See [DoseData.id].
+  static final id =
+      obx.QueryIntegerProperty<DoseData>(_entities[8].properties[0]);
+
+  /// See [DoseData.basket].
+  static final basket =
+      obx.QueryStringProperty<DoseData>(_entities[8].properties[1]);
+
+  /// See [DoseData.extra].
+  static final extra =
+      obx.QueryStringProperty<DoseData>(_entities[8].properties[2]);
+}
+
+/// [GrinderData] entity fields to define ObjectBox queries.
+class GrinderData_ {
+  /// See [GrinderData.id].
+  static final id =
+      obx.QueryIntegerProperty<GrinderData>(_entities[9].properties[0]);
+
+  /// See [GrinderData.model].
+  static final model =
+      obx.QueryStringProperty<GrinderData>(_entities[9].properties[1]);
+
+  /// See [GrinderData.grindSizeSetting].
+  static final grindSizeSetting =
+      obx.QueryDoubleProperty<GrinderData>(_entities[9].properties[2]);
+
+  /// See [GrinderData.feedRate].
+  static final feedRate =
+      obx.QueryStringProperty<GrinderData>(_entities[9].properties[3]);
+
+  /// See [GrinderData.rpm].
+  static final rpm =
+      obx.QueryStringProperty<GrinderData>(_entities[9].properties[4]);
 }

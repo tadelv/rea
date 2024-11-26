@@ -130,7 +130,7 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
         //Text('Profile Edit: ${_profile.shotHeader.title}'),
         actions: <Widget>[
           ElevatedButton(
-            child: const Text('Save as'),
+            child: const Text('Save as a copy'),
             onPressed: () {
               setState(() {
                 profileService.saveAsNew(_profile);
@@ -192,7 +192,8 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
                               initialValue:
                                   _profile.shotHeader.targetVolume.toString(),
                               decoration: InputDecoration(
-                                  labelText: "Desired shot volume (leave 0 to disable)",
+                                  labelText:
+                                      "Desired shot volume (leave 0 to disable)",
                                   suffixText: "ml"),
                               keyboardType: TextInputType.number,
                               inputFormatters: [
@@ -245,35 +246,96 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
                               autovalidateMode:
                                   AutovalidateMode.onUserInteraction,
                             ),
-                            // TODO: figure where to put this
-                            //TextFormField(
-                            //  initialValue:
-                            //      (_profile.shotHeader.tankTemperature)
-                            //          .toString(),
-                            //  decoration: InputDecoration(
-                            //      labelText: "Preheat water tank to", suffixText: "°C"),
-                            //  keyboardType: TextInputType.number,
-                            //  inputFormatters: [
-                            //    FilteringTextInputFormatter.digitsOnly
-                            //  ], // Only numbers can be entered
-                            //  onSaved: (value) {
-                            //    if (value == null) {
-                            //      return;
-                            //    }
-                            //    _profile.shotHeader.tankTemperature =
-                            //        double.parse(value);
-                            //  },
-                            //  validator: (value) {
-                            //    if (value == null || value.isEmpty) {
-                            //      return "Value is required";
-                            //    }
-                            //    double v = double.parse(value);
-                            //    return v >= 0 && v <= 40 // is 40 deg sensible?
-                            //        ? null
-                            //        : "Invalid temperature - set to zero to disable preheating";
-                            //  },
-                            //  autovalidateMode: AutovalidateMode.onUserInteraction,
-                            //),
+                            TextButton(
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext buildContext) {
+                                        return AlertDialog(
+                                          title: Text("Profile metadata"),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  if (buildContext.mounted) {
+                                                    Navigator.pop(buildContext);
+                                                  }
+                                                },
+                                                child: Text("Close")),
+                                          ],
+                                          content: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              TextFormField(
+                                                initialValue: (_profile
+                                                        .shotHeader
+                                                        .tankTemperature)
+                                                    .toString(),
+                                                decoration: InputDecoration(
+                                                    labelText:
+                                                        "Preheat water tank to",
+                                                    suffixText: "°C"),
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly
+                                                ], // Only numbers can be entered
+                                                onFieldSubmitted: (value) {
+                                                  _profile.shotHeader
+                                                          .tankTemperature =
+                                                      double.parse(value);
+                                                },
+                                                validator: (value) {
+                                                  if (value == null ||
+                                                      value.isEmpty) {
+                                                    return "Value is required";
+                                                  }
+                                                  double v =
+                                                      double.parse(value);
+                                                  return v >= 0 &&
+                                                          v <=
+                                                              40 // is 40 deg sensible?
+                                                      ? null
+                                                      : "Invalid temperature - set to zero to disable preheating";
+                                                },
+                                                autovalidateMode:
+                                                    AutovalidateMode
+                                                        .onUserInteraction,
+                                              ),
+                                              TextFormField(
+                                                initialValue:
+                                                    _profile.shotHeader.author,
+                                                decoration: InputDecoration(
+                                                    labelText:
+                                                        "Profile Author"),
+                                                onFieldSubmitted: (value) {
+                                                  _profile.shotHeader.author =
+                                                      value;
+                                                },
+                                              ),
+                                              TextFormField(
+                                                initialValue:
+                                                    _profile.shotHeader.notes,
+                                                //expands: true,
+                                                maxLines: 5,
+                                                decoration: InputDecoration(
+                                                    labelText: "Profile notes"),
+                                                onChanged: (value) {
+                                                  _profile.shotHeader.notes =
+                                                      value;
+                                                },
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      });
+                                },
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.public),
+                                    Text("Edit global data")
+                                  ],
+                                )),
                           ],
                         ))),
                 Expanded(
@@ -618,7 +680,7 @@ class AdvancedProfilesEditScreenState extends State<AdvancedProfilesEditScreen>
             unit: "sec",
             title: "Time",
             min: 0,
-            max: 100,
+            max: 127,
             frame,
             frame.frameLen, (value, a, b) {
           setState(() => frame.frameLen = value);

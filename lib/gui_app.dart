@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:despresso/model/migration.dart';
 import 'package:despresso/model/services/state/screen_saver.dart';
 import 'package:despresso/ui/screens/dashboard.dart';
 import 'package:flutter/material.dart';
@@ -18,13 +17,32 @@ import 'logger_util.dart';
 import 'dart:async';
 import 'package:despresso/devices/decent_de1_simulated.dart';
 import 'package:despresso/ui/screens/home_screen.dart';
+import 'package:despresso/model/db_version.dart';
 
 late ObjectBox objectbox;
 
 Future<void> initSettings() async {
+  await checkMigration();
   await Settings.init(
     cacheProvider: ObjectBoxPreferenceCache(),
   );
+}
+
+Future<void> checkMigration() async {
+  final log = Logger("migration");
+  final box = getIt<ObjectBox>();
+  final schemaBox = box.store.box<DbVersion>();
+
+  DbVersion? currentVersion =
+      schemaBox.getAll().isNotEmpty ? schemaBox.getAll().first : null;
+  log.info("got db version: ${currentVersion}");
+  if (currentVersion == null) {
+    // perform initial migration
+    performV1Migration(box.store);
+    // bump db_version
+    schemaBox.put(DbVersion(version: 1));
+  }
+  log.info("Migration complete");
 }
 
 Future<void> guiMain() async {
@@ -89,7 +107,7 @@ class _MyAppState extends State<MyApp> {
 
   Widget appRoot(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+      //debugShowCheckedModeBanner: false,
       title: 'REA',
       localizationsDelegates: const [
         S.delegate,

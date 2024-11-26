@@ -46,35 +46,19 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
     phases = _createPhases();
     const secondaryMeasureAxisId = 'secondaryMeasureAxisId';
     var data = _createSeriesData();
-    var isPressure = _selectedProfile!.shotHeader.type == "pressure";
-    var isFlow = _selectedProfile!.shotHeader.type == "flow";
-    var isAdvanced = _selectedProfile!.shotHeader.type == "advanced";
     List<charts.Series<dynamic, num>> view = [];
-    if (isPressure)
-      view = [
-        data[0],
-        data[1],
-        data[2]..setAttribute(charts.measureAxisIdKey, secondaryMeasureAxisId)
-      ];
-    if (isFlow)
-      view = [
-        data[0],
-        data[1],
-        data[2]..setAttribute(charts.measureAxisIdKey, secondaryMeasureAxisId)
-      ];
-    if (isAdvanced)
-      view = [
-        data[0],
-        data[1],
-        data[2]..setAttribute(charts.measureAxisIdKey, secondaryMeasureAxisId)
-      ];
+    view = [
+      data[0],
+      data[1],
+      data[2],
+      data[3],
+      data[4]..setAttribute(charts.measureAxisIdKey, secondaryMeasureAxisId)
+    ];
     var flowChart = charts.LineChart(
       view,
       animate: false,
       behaviors: [
         charts.SeriesLegend(),
-        // Define one domain and two measure annotations configured to render
-        // labels in the chart margins.
         charts.RangeAnnotation([...phases],
             defaultLabelPosition: charts.AnnotationLabelPosition.margin),
       ],
@@ -117,19 +101,9 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
       ),
     );
 
-    return Container(
-      // height: 100,
-      margin: const EdgeInsets.only(left: 10.0),
-      //width: MediaQuery.of(context).size.width - 105,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        shape: BoxShape.rectangle,
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: flowChart,
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: AbsorbPointer(absorbing: true, child: flowChart,)
     );
   }
 
@@ -144,6 +118,17 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
         strokeWidthPxFn: (_, __) => 3,
         data: shotList.entries,
       ),
+      charts.Series(
+        id: 'PressureLimit',
+				displayName: "",
+        domainFn: (ShotState point, _) => point.sampleTimeCorrected,
+        measureFn: (ShotState point, _) => point.setGroupPressure,
+        colorFn: (_, __) =>
+            charts.ColorUtil.fromDartColor(theme.ThemeColors.pressureColor),
+        strokeWidthPxFn: (_, __) => 3,
+        dashPatternFn: (_, __) => [0, 3, 0],
+        data: shotList.entries,
+      ),
       charts.Series<ShotState, double>(
         id: 'Flow',
         domainFn: (ShotState point, _) => point.sampleTimeCorrected,
@@ -151,6 +136,17 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
         colorFn: (_, __) =>
             charts.ColorUtil.fromDartColor(theme.ThemeColors.flowColor),
         strokeWidthPxFn: (_, __) => 3,
+        data: shotList.entries,
+      ),
+      charts.Series<ShotState, double>(
+        id: 'FlowLimit',
+				displayName: "",
+        domainFn: (ShotState point, _) => point.sampleTimeCorrected,
+        measureFn: (ShotState point, _) => point.setGroupFlow,
+        colorFn: (_, __) =>
+            charts.ColorUtil.fromDartColor(theme.ThemeColors.flowColor),
+        strokeWidthPxFn: (_, __) => 3,
+        dashPatternFn: (_, __) => [0, 3, 0],
         data: shotList.entries,
       ),
       charts.Series<ShotState, double>(
@@ -189,9 +185,6 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
     for (var frame in _selectedProfile!.shotFrames) {
       double defaultPressure = -1;
       double defaultFlow = -1;
-      if (frame.name == "preinfusion") {
-        defaultPressure = 1;
-      }
 
       if (frame.transition == De1Transition.fast) {
         ShotState shotState = ShotState(
@@ -199,20 +192,18 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
             time,
             frame.pump == De1PumpMode.pressure
                 ? lastValPressure
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultPressure,
-            frame.pump == De1PumpMode.flow
-                ? lastValFlow
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultFlow,
+                : defaultPressure,
+            frame.pump == De1PumpMode.flow ? lastValFlow : defaultFlow,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
-            0,
-            0,
+            frame.pump == De1PumpMode.flow && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultPressure,
+            frame.pump == De1PumpMode.pressure && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultFlow,
             0,
             0,
             0,
@@ -221,22 +212,18 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
         shotState = ShotState(
             time + 1.5,
             time + 1.5,
-            frame.pump == De1PumpMode.pressure
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultPressure,
-            frame.pump == De1PumpMode.flow
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultFlow,
+            frame.pump == De1PumpMode.pressure ? frame.setVal : defaultPressure,
+            frame.pump == De1PumpMode.flow ? frame.setVal : defaultFlow,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
-            0,
-            0,
+            frame.pump == De1PumpMode.flow && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultPressure,
+            frame.pump == De1PumpMode.pressure && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultFlow,
             0,
             0,
             0,
@@ -246,22 +233,18 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
         shotState = ShotState(
             time,
             time,
-            frame.pump == De1PumpMode.pressure
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultPressure,
-            frame.pump == De1PumpMode.flow
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultFlow,
+            frame.pump == De1PumpMode.pressure ? frame.setVal : defaultPressure,
+            frame.pump == De1PumpMode.flow ? frame.setVal : defaultFlow,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
-            0,
-            0,
+            frame.pump == De1PumpMode.flow && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultPressure,
+            frame.pump == De1PumpMode.pressure && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultFlow,
             0,
             0,
             0,
@@ -273,20 +256,18 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
             time,
             frame.pump == De1PumpMode.pressure
                 ? lastValPressure
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultPressure,
-            frame.pump == De1PumpMode.flow
-                ? lastValFlow
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultFlow,
+                : defaultPressure,
+            frame.pump == De1PumpMode.flow ? lastValFlow : defaultFlow,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
-            0,
-            0,
+            frame.pump == De1PumpMode.flow && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultPressure,
+            frame.pump == De1PumpMode.pressure && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultFlow,
             0,
             0,
             0,
@@ -295,22 +276,18 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
         shotState = ShotState(
             time + 2.5,
             time + 2.5,
-            frame.pump == De1PumpMode.pressure
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultPressure,
-            frame.pump == De1PumpMode.flow
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultFlow,
+            frame.pump == De1PumpMode.pressure ? frame.setVal : defaultPressure,
+            frame.pump == De1PumpMode.flow ? frame.setVal : defaultFlow,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
-            0,
-            0,
+            frame.pump == De1PumpMode.flow && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultPressure,
+            frame.pump == De1PumpMode.pressure && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultFlow,
             0,
             0,
             0,
@@ -319,22 +296,18 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
         shotState = ShotState(
             time,
             time,
-            frame.pump == De1PumpMode.pressure
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultPressure,
-            frame.pump == De1PumpMode.flow
-                ? frame.setVal
-                : frame.limiterValue > 0
-                    ? frame.limiterValue
-                    : defaultFlow,
+            frame.pump == De1PumpMode.pressure ? frame.setVal : defaultPressure,
+            frame.pump == De1PumpMode.flow ? frame.setVal : defaultFlow,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
             frame.temp + dt,
-            0,
-            0,
+            frame.pump == De1PumpMode.flow && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultPressure,
+            frame.pump == De1PumpMode.pressure && frame.limiterValue > 0
+                ? frame.limiterValue
+                : defaultFlow,
             0,
             0,
             0,
@@ -383,7 +356,7 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
       var col = i == widget.selectedPhase + 1
           ? Theme.of(context).colorScheme.surfaceContainerLow
           : Theme.of(context).colorScheme.surfaceContainerLow;
-               // theme.ThemeColors.statesColors[from.subState];
+      // theme.ThemeColors.statesColors[from.subState];
       var col2 = charts.ColorUtil.fromDartColor(col);
       // col == null ? col! : charts.Color(r: 0xff, g: 50, b: i * 19, a: 100);
       return charts.RangeAnnotationSegment(from.sampleTimeCorrected,
@@ -394,7 +367,8 @@ class ProfileGraphWidgetState extends State<ProfileGraphWidget> {
           labelStyleSpec: charts.TextStyleSpec(
               fontSize: 10,
               // color: charts.ColorUtil.fromDartColor(theme.ThemeColors.secondaryColor)),
-              color: charts.ColorUtil.fromDartColor(Theme.of(context).colorScheme.surface)),
+              color: charts.ColorUtil.fromDartColor(
+                  Theme.of(context).colorScheme.surface)),
           labelDirection: charts.AnnotationLabelDirection.vertical);
       // log.info("Phase ${element.subState}");
     });

@@ -101,8 +101,9 @@ enum MMRAddrEnum {
 class DE1 extends ChangeNotifier implements IDe1 {
   final log = l.Logger('DE1');
   // ignore: non_constant_identifier_names
-  static Uuid ServiceUUID =
-      useLongCharacteristics() ? Uuid.parse('0000A000-0000-1000-8000-00805F9B34FB') : Uuid.parse('A000');
+  static Uuid ServiceUUID = useLongCharacteristics()
+      ? Uuid.parse('0000A000-0000-1000-8000-00805F9B34FB')
+      : Uuid.parse('A000');
 
   static var cuuids = useLongCharacteristics()
       ? {
@@ -146,14 +147,19 @@ class DE1 extends ChangeNotifier implements IDe1 {
           'A012': Endpoint.calibration
         };
 
-  static Map<Endpoint, String> cuuidLookup =
-      LinkedHashMap.fromEntries(cuuids.entries.map((e) => MapEntry(e.value, e.key)));
+  static Map<Endpoint, String> cuuidLookup = LinkedHashMap.fromEntries(
+      cuuids.entries.map((e) => MapEntry(e.value, e.key)));
 
   static List<List<Object>> mmrList = [
     [0x00000000, MMRAddrEnum.ExternalFlash, 0xFFFFF, "Flash RW"],
     [0x00800000, MMRAddrEnum.HWConfig, 4, "HWConfig"],
     [0x00800004, MMRAddrEnum.Model, 4, "Model"],
-    [0x00800008, MMRAddrEnum.CPUBoardModel, 4, "CPU Board Model * 1000. eg: 1100 = 1.1"],
+    [
+      0x00800008,
+      MMRAddrEnum.CPUBoardModel,
+      4,
+      "CPU Board Model * 1000. eg: 1100 = 1.1"
+    ],
     [
       0x0080000C,
       MMRAddrEnum.v13Model,
@@ -178,12 +184,22 @@ class DE1 extends ChangeNotifier implements IDe1 {
       0x1000,
       "Last 4K of output. Zero terminated if buffer not full yet. Pauses BLE debug logging."
     ],
-    [0x00803804, MMRAddrEnum.DebugConfig, 4, "BLEDebugConfig. (Reading restarts logging into the BLE log)"],
+    [
+      0x00803804,
+      MMRAddrEnum.DebugConfig,
+      4,
+      "BLEDebugConfig. (Reading restarts logging into the BLE log)"
+    ],
     [0x00803808, MMRAddrEnum.FanThreshold, 4, "Fan threshold temp"],
     [0x0080380C, MMRAddrEnum.TankTemp, 4, "Tank water temp threshold."],
     [0x00803810, MMRAddrEnum.HeaterUp1Flow, 4, "HeaterUp Phase 1 Flow Rate"],
     [0x00803814, MMRAddrEnum.HeaterUp2Flow, 4, "HeaterUp Phase 2 Flow Rate"],
-    [0x00803818, MMRAddrEnum.WaterHeaterIdleTemp, 4, "Water Heater Idle Temperature"],
+    [
+      0x00803818,
+      MMRAddrEnum.WaterHeaterIdleTemp,
+      4,
+      "Water Heater Idle Temperature"
+    ],
     [
       0x0080381C,
       MMRAddrEnum.GHCInfo,
@@ -200,7 +216,12 @@ class DE1 extends ChangeNotifier implements IDe1 {
       "Seconds of high steam flow * 100. Valid range 0.0 - 4.0. 0 may result in an overheated heater. Be careful."
     ],
     [0x00803830, MMRAddrEnum.SerialN, 4, "Current serial number"],
-    [0x00803834, MMRAddrEnum.HeaterV, 4, "Nominal Heater Voltage (0, 120V or 230V). +1000 if it's a set value."],
+    [
+      0x00803834,
+      MMRAddrEnum.HeaterV,
+      4,
+      "Nominal Heater Voltage (0, 120V or 230V). +1000 if it's a set value."
+    ],
     [0x00803838, MMRAddrEnum.HeaterUp2Timeout, 4, "HeaterUp Phase 2 Timeout"],
     [0x0080383C, MMRAddrEnum.CalFlowEst, 4, "Flow Estimation Calibration"],
     [0x00803840, MMRAddrEnum.FlushFlowRate, 4, "Flush Flow Rate"],
@@ -213,13 +234,14 @@ class DE1 extends ChangeNotifier implements IDe1 {
     [0x0080385C, MMRAddrEnum.RefillKitPresent, 4, "Refill Kit Present"],
   ];
 
-  Map<MMRAddrEnum, int> mmrAddrLookup =
-      LinkedHashMap.fromEntries(mmrList.map((e) => MapEntry(e[1] as MMRAddrEnum, e[0] as int)));
+  Map<MMRAddrEnum, int> mmrAddrLookup = LinkedHashMap.fromEntries(
+      mmrList.map((e) => MapEntry(e[1] as MMRAddrEnum, e[0] as int)));
 
   static Map states = {
     0x00: 'sleep', // 0 Everything is off
     0x01: 'going_to_sleep', // 1 Going to sleep
-    0x02: 'idle', // 2 Heaters are controlled, tank water will be heated if required.
+    0x02:
+        'idle', // 2 Heaters are controlled, tank water will be heated if required.
     0x03:
         'busy', // 3 Firmware is doing something you can't interrupt (eg. cooling down water heater after a shot, calibrating sensors on startup).
     0x04: 'espresso', // 4 Making espresso
@@ -233,28 +255,36 @@ class DE1 extends ChangeNotifier implements IDe1 {
     0x0a: 'descale', // A Descale the whole bang-tooty
     0x0b: 'fatal_error', // B Something has gone horribly wrong
     0x0c: 'init', // C Machine has not been run yet
-    0x0d: 'no_request', // D State for T_RequestedState. Means nothing is specifically requested
-    0x0e: 'skip_to_next', // E In Espresso, skip to next frame. Others, go to Idle if possible
-    0x0f: 'hot_water_rinse', // F Produce hot water at whatever temperature is available
+    0x0d:
+        'no_request', // D State for T_RequestedState. Means nothing is specifically requested
+    0x0e:
+        'skip_to_next', // E In Espresso, skip to next frame. Others, go to Idle if possible
+    0x0f:
+        'hot_water_rinse', // F Produce hot water at whatever temperature is available
     0x10: 'steam_rinse', // 10 Produce a blast of steam
     0x11: 'refill', // 11 Attempting, or needs, a refill.
     0x12: 'clean', // 12 Clean group head
-    0x13: 'in_boot_loader', // 13 The main firmware has not run for some reason. Bootloader is active.
+    0x13:
+        'in_boot_loader', // 13 The main firmware has not run for some reason. Bootloader is active.
     0x14: 'air_purge', // 14 Air purge.
     0x15: 'sched_idle', // 15 Scheduled wake up idle state
   };
 
   static const Map<int, String> subStates = {
     0x00: 'no_state', // 0 State is not relevant
-    0x01: 'heat_water_tank', // 1 Cold water is not hot enough. Heating hot water tank.
+    0x01:
+        'heat_water_tank', // 1 Cold water is not hot enough. Heating hot water tank.
     0x02: 'heat_water_heater', // 2 Warm up hot water heater for shot.
-    0x03: 'stabilize_mix_temp', // 3 Stabilize mix temp and get entire water path up to temperature.
-    0x04: 'pre_infuse', // 4 Espresso only. Hot Water and Steam will skip this state.
+    0x03:
+        'stabilize_mix_temp', // 3 Stabilize mix temp and get entire water path up to temperature.
+    0x04:
+        'pre_infuse', // 4 Espresso only. Hot Water and Steam will skip this state.
     0x05: 'pour', // 5 Not used in Steam
     0x06: 'end', // 6 Espresso only, atm
     0x07: 'steaming', // 7 Steam only
     0x08: 'descale_int', // 8 Starting descale
-    0x09: 'descale_fill_group', // 9 get some descaling solution into the group and let it sit
+    0x09:
+        'descale_fill_group', // 9 get some descaling solution into the group and let it sit
     0x0a: 'descale_return', // A descaling internals
     0x0b: 'descale_group', // B descaling group
     0x0c: 'descale_steam', // C descaling steam
@@ -269,9 +299,12 @@ class DE1 extends ChangeNotifier implements IDe1 {
 
     200: 'error_nan', // 200 Something died with a NaN
     201: 'error_inf', // 201 Something died with an Inf
-    202: 'error_generic', // 202 An error for which we have no more specific description
-    203: 'error_acc', // 203 ACC not responding, unlocked, or incorrectly programmed
-    204: 'error_tsensor', // 204 We are getting an error that is probably a broken temperature sensor
+    202:
+        'error_generic', // 202 An error for which we have no more specific description
+    203:
+        'error_acc', // 203 ACC not responding, unlocked, or incorrectly programmed
+    204:
+        'error_tsensor', // 204 We are getting an error that is probably a broken temperature sensor
     205: 'error_psensor', // 205 Pressure sensor error
     206: 'error_wlevel', // 206 Water level sensor error
     207: 'error_dip', // 207 DIP switches told us to wait in the error state.
@@ -282,8 +315,10 @@ class DE1 extends ChangeNotifier implements IDe1 {
     212: 'error_oom', // 212 Could not allocate memory
     213: 'error_deadline', // 213 Realtime deadline missed
     214: 'error_hi_current', // 214 Measured a current that is out of bounds.
-    215: 'error_lo_current', // 215 Not enough current flowing, despite something being turned on
-    216: 'error_boot_fill', // 216 Could not get up to pressure during boot pressure test, possibly because no water
+    215:
+        'error_lo_current', // 215 Not enough current flowing, despite something being turned on
+    216:
+        'error_boot_fill', // 216 Could not get up to pressure during boot pressure test, possibly because no water
     217: 'error_no_ac' // 217 Front button off
   };
 
@@ -348,9 +383,11 @@ class DE1 extends ChangeNotifier implements IDe1 {
     _streamMMR = _controllerMmrStream.stream.asBroadcastStream();
 
     service.setState(EspressoMachineState.connecting);
-    _connectToDeviceSubscription = connection.connectToDevice(id: device.id).listen((connectionState) {
+    _connectToDeviceSubscription =
+        connection.connectToDevice(id: device.id).listen((connectionState) {
       // Handle connection state updates
-      log.info('DE1 Peripheral ${device.name} connection state is $connectionState');
+      log.info(
+          'DE1 Peripheral ${device.name} connection state is $connectionState');
       _onStateChange(connectionState.connectionState);
     }, onError: (Object error) {
       // Handle a possible error
@@ -363,8 +400,10 @@ class DE1 extends ChangeNotifier implements IDe1 {
   void _enableNotification(Endpoint e, Function(ByteData) callback) {
     log.info('enableNotification for $e (${getCharacteristic(e)})');
 
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: getCharacteristic(e), deviceId: device.id);
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: getCharacteristic(e),
+        deviceId: device.id);
     connection.subscribeToCharacteristic(characteristic).listen((data) {
       // Handle connection state updates
       try {
@@ -408,9 +447,12 @@ class DE1 extends ChangeNotifier implements IDe1 {
   }
 
   Future<List<int>> _read(Endpoint e) {
-    if (connection.status != BleStatus.ready) throw ("de1 not connected ${connection.status}");
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: getCharacteristic(e), deviceId: device.id);
+    if (connection.status != BleStatus.ready)
+      throw ("de1 not connected ${connection.status}");
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: getCharacteristic(e),
+        deviceId: device.id);
     var data = connection.readCharacteristic(characteristic);
     // return device.readCharacteristic(ServiceUUID, getCharacteristic(e));
     return data;
@@ -418,11 +460,16 @@ class DE1 extends ChangeNotifier implements IDe1 {
 
   Future<void> _write(Endpoint e, Uint8List data) {
     try {
-      if (connection.status != BleStatus.ready) throw ("de1 not connected ${connection.status}");
-      final characteristic =
-          QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: getCharacteristic(e), deviceId: device.id);
-      log.info("encode Sending: ${getCharacteristic(e)}: ${data.length} ${Helper.toHex(data)}");
-      return connection.writeCharacteristicWithResponse(characteristic, value: data);
+      if (connection.status != BleStatus.ready)
+        throw ("de1 not connected ${connection.status}");
+      final characteristic = QualifiedCharacteristic(
+          serviceId: ServiceUUID,
+          characteristicId: getCharacteristic(e),
+          deviceId: device.id);
+      log.info(
+          "encode Sending: ${getCharacteristic(e)}: ${data.length} ${Helper.toHex(data)}");
+      return connection.writeCharacteristicWithResponse(characteristic,
+          value: data);
     } catch (e) {
       log.severe("Failing BLE write $e");
       rethrow;
@@ -433,11 +480,16 @@ class DE1 extends ChangeNotifier implements IDe1 {
 
   @override
   Future<void> writeWithResult(Endpoint e, Uint8List data) {
-    if (connection.status != BleStatus.ready) throw ("de1 not connected ${connection.status}");
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: getCharacteristic(e), deviceId: device.id);
-    log.info("encode Sending: ${getCharacteristic(e)}: ${data.length} ${Helper.toHex(data)}");
-    return connection.writeCharacteristicWithResponse(characteristic, value: data);
+    if (connection.status != BleStatus.ready)
+      throw ("de1 not connected ${connection.status}");
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: getCharacteristic(e),
+        deviceId: device.id);
+    log.info(
+        "encode Sending: ${getCharacteristic(e)}: ${data.length} ${Helper.toHex(data)}");
+    return connection.writeCharacteristicWithResponse(characteristic,
+        value: data);
 
     // device.writeCharacteristic(ServiceUUID, getCharacteristic(e), data, false);
   }
@@ -554,7 +606,9 @@ class DE1 extends ChangeNotifier implements IDe1 {
       var groupPressure = r.getUint16(2) / (1 << 12);
       var groupFlow = r.getUint16(4) / (1 << 12);
       var mixTemp = r.getUint16(6) / (1 << 8);
-      var headTemp = ((r.getUint8(8) << 16) + (r.getUint8(9) << 8) + (r.getUint8(10))) / (1 << 16);
+      var headTemp =
+          ((r.getUint8(8) << 16) + (r.getUint8(9) << 8) + (r.getUint8(10))) /
+              (1 << 16);
       var setMixTemp = r.getUint16(11) / (1 << 8);
       var setHeadTemp = r.getUint16(13) / (1 << 8);
       var setGroupPressure = r.getUint8(15) / (1 << 4);
@@ -564,8 +618,21 @@ class DE1 extends ChangeNotifier implements IDe1 {
       // log.info("$headTemp $setHeadTemp $mixTemp $setMixTemp");
       sampleTime = DateTime.now().millisecondsSinceEpoch / 1000.0;
       // log.info('Sample ' + sampleTime.toString() + " " + frameNumber.toString());
-      service.setShot(ShotState(sampleTime, 0, groupPressure, groupFlow, mixTemp, headTemp, setMixTemp, setHeadTemp,
-          setGroupPressure, setGroupFlow, frameNumber, steamTemp, 0, ""));
+      service.setShot(ShotState(
+          sampleTime,
+          0,
+          groupPressure,
+          groupFlow,
+          mixTemp,
+          headTemp,
+          setMixTemp,
+          setHeadTemp,
+          setGroupPressure,
+          setGroupFlow,
+          frameNumber,
+          steamTemp,
+          0,
+          ""));
     } catch (e) {
       log.severe("shotSampleNotification $e");
     }
@@ -623,7 +690,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
     log.info('TargetGroupTemp = $targetGroupTemp');
   }
 
-  String toHexString(int number) => '0x${number.toRadixString(16).padLeft(2, '0')}';
+  String toHexString(int number) =>
+      '0x${number.toRadixString(16).padLeft(2, '0')}';
 
   void _mmrNotification(ByteData value) {
     var list = value.buffer.asUint8List();
@@ -636,7 +704,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
   @override
   Future<int> getGhcMode() async {
     log.info('Reading group head control mode');
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.PrefGHCMCI]!, 0));
+    var data =
+        _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.PrefGHCMCI]!, 0));
     log.info("ghc controll mode: ${toHexString(data)}");
     return data;
   }
@@ -651,7 +720,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
     ghcTouchPresent = data & 0x2 == 0x2;
     ghcActive = data & 0x4 == 0x4;
 
-    log.info("ghc Info: LED:$ghcLEDPresent Touch:$ghcTouchPresent Active:$ghcActive ${toHexString(data)}");
+    log.info(
+        "ghc Info: LED:$ghcLEDPresent Touch:$ghcTouchPresent Active:$ghcActive ${toHexString(data)}");
     return data;
   }
 
@@ -666,30 +736,49 @@ class DE1 extends ChangeNotifier implements IDe1 {
   @override
   Future<int> getFirmwareBuild() async {
     log.info('getFirmwareBuild');
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.CPUFirmwareBuild]!, 0));
+    var data = _getInt(
+        await _mmrRead(mmrAddrLookup[MMRAddrEnum.CPUFirmwareBuild]!, 0));
     log.info("Firmware Version: $data ${toHexString(data)}");
     return data;
   }
 
   @override
   Future<int> getFanThreshhold() async {
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.FanThreshold]!, 0));
+    var data =
+        _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.FanThreshold]!, 0));
     log.info("getFanThreshold: $data ${toHexString(data)}");
     return data;
   }
 
   @override
   Future<double> getSteamFlow() async {
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.TargetSteamFlow]!, 0));
+    var data =
+        _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.TargetSteamFlow]!, 0));
     log.info("TargetSteamFlow: $data ${toHexString(data)}");
     return data / 100;
   }
 
   @override
   Future<double> getFlowEstimation() async {
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.CalFlowEst]!, 0));
+    var data =
+        _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.CalFlowEst]!, 0));
     log.info("getFlowEstimation: $data ${toHexString(data)}");
     return data / 1000;
+  }
+
+  @override
+  Future<int> getTankTempThreshold() async {
+    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.TankTemp]!, 0));
+    log.info("getTankTempThreshold: $data ${toHexString(data)}");
+    return data;
+  }
+
+  @override
+  Future<void> setTankTempThreshold(int temp) async {
+    ByteData bytes = ByteData(4);
+    bytes.setUint32(0, temp, Endian.little);
+    return _mmrWrite(
+        mmrAddrLookup[MMRAddrEnum.TankTemp]!, bytes.buffer.asUint8List());
   }
 
   @override
@@ -699,7 +788,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
     bytes.setUint32(0, data, Endian.little);
 
     steamFlow = newFlow;
-    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.CalFlowEst]!, bytes.buffer.asUint8List());
+    return _mmrWrite(
+        mmrAddrLookup[MMRAddrEnum.CalFlowEst]!, bytes.buffer.asUint8List());
   }
 
   @override
@@ -707,14 +797,16 @@ class DE1 extends ChangeNotifier implements IDe1 {
     ByteData bytes = ByteData(4);
     var data = (newTimeout * 10).toInt();
     bytes.setUint32(0, data, Endian.little);
-    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.FlushTimeout]!, bytes.buffer.asUint8List());
+    return _mmrWrite(
+        mmrAddrLookup[MMRAddrEnum.FlushTimeout]!, bytes.buffer.asUint8List());
   }
 
   @override
   Future<void> setFanThreshhold(int t) {
     ByteData bytes = ByteData(4);
     bytes.setUint32(0, t, Endian.little);
-    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.FanThreshold]!, bytes.buffer.asUint8List());
+    return _mmrWrite(
+        mmrAddrLookup[MMRAddrEnum.FanThreshold]!, bytes.buffer.asUint8List());
   }
 
   @override
@@ -723,25 +815,29 @@ class DE1 extends ChangeNotifier implements IDe1 {
     bytes.setUint32(0, (newFlow * 100).toInt(), Endian.little);
 
     steamFlow = newFlow;
-    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.TargetSteamFlow]!, bytes.buffer.asUint8List());
+    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.TargetSteamFlow]!,
+        bytes.buffer.asUint8List());
   }
 
   @override
   Future<int> getUsbChargerMode() async {
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.AllowUSBCharging]!, 0));
+    var data = _getInt(
+        await _mmrRead(mmrAddrLookup[MMRAddrEnum.AllowUSBCharging]!, 0));
     log.info("getUsbChargerMode: $data ${toHexString(data)}");
     usbChargerMode = data;
     return data;
   }
 
   Future<int> getExternalFlash() async {
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.ExternalFlash]!, 0));
+    var data =
+        _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.ExternalFlash]!, 0));
     log.info("getExternalFlash: $data ${toHexString(data)}");
     return data;
   }
 
   Future<int> getMaxShotPres() async {
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.MaxShotPres]!, 0));
+    var data =
+        _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.MaxShotPres]!, 0));
     log.info("getMaxShotPres: $data ${toHexString(data)}");
     return data;
   }
@@ -752,7 +848,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
     bytes.setUint32(0, t, Endian.little);
 
     usbChargerMode = t;
-    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.AllowUSBCharging]!, bytes.buffer.asUint8List());
+    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.AllowUSBCharging]!,
+        bytes.buffer.asUint8List());
   }
 
   @override
@@ -761,12 +858,14 @@ class DE1 extends ChangeNotifier implements IDe1 {
     bytes.setUint32(0, t, Endian.little);
 
     steamPurgeMode = t;
-    return _mmrWrite(mmrAddrLookup[MMRAddrEnum.SteamPurgeMode]!, bytes.buffer.asUint8List());
+    return _mmrWrite(
+        mmrAddrLookup[MMRAddrEnum.SteamPurgeMode]!, bytes.buffer.asUint8List());
   }
 
   @override
   Future<int> getSteamPurgeMode() async {
-    var data = _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.SteamPurgeMode]!, 0));
+    var data =
+        _getInt(await _mmrRead(mmrAddrLookup[MMRAddrEnum.SteamPurgeMode]!, 0));
     log.info("getSteamPurgeMode: $data ${toHexString(data)}");
     steamPurgeMode = data;
     return data;
@@ -785,7 +884,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
   Future<List<int>> _mmrRead(int address, int length) async {
     for (var element in mmrList) {
       if (element[0] == address) {
-        log.info("MMR Read  ${toHexString(address)} = ${element[1]} : ${element[3]}");
+        log.info(
+            "MMR Read  ${toHexString(address)} = ${element[1]} : ${element[3]}");
         break;
       }
     }
@@ -810,7 +910,9 @@ class DE1 extends ChangeNotifier implements IDe1 {
       (element) {
         // log.info("listen where event  ${element.map(toHexString).toList()}");
 
-        if (buffer[1] == element[1] && buffer[2] == element[2] && buffer[3] == element[3]) {
+        if (buffer[1] == element[1] &&
+            buffer[2] == element[2] &&
+            buffer[3] == element[3]) {
           return true;
         } else {
           return false;
@@ -850,15 +952,19 @@ class DE1 extends ChangeNotifier implements IDe1 {
         // await device.discoverAllServicesAndCharacteristics();
         // Enable notification
         service.setSubState("5");
-        _parseVersion(ByteData.sublistView(Uint8List.fromList((await _read(Endpoint.versions)))));
-        _stateNotification(ByteData.sublistView(Uint8List.fromList((await _read(Endpoint.stateInfo)))));
-        _waterLevelNotification(ByteData.sublistView(Uint8List.fromList((await _read(Endpoint.waterLevels)))));
-        _parseShotSetting(ByteData.sublistView(Uint8List.fromList((await _read(Endpoint.shotSettings)))));
+        _parseVersion(ByteData.sublistView(
+            Uint8List.fromList((await _read(Endpoint.versions)))));
+        _stateNotification(ByteData.sublistView(
+            Uint8List.fromList((await _read(Endpoint.stateInfo)))));
+        _waterLevelNotification(ByteData.sublistView(
+            Uint8List.fromList((await _read(Endpoint.waterLevels)))));
+        _parseShotSetting(ByteData.sublistView(
+            Uint8List.fromList((await _read(Endpoint.shotSettings)))));
         service.setSubState("7");
         // parseShotMapRequest(ByteData.sublistView(
         //     Uint8List.fromList((await read(Endpoint.ShotMapRequest)))));
-        var header =
-            _parseShotHeaderSettings(ByteData.sublistView(Uint8List.fromList((await _read(Endpoint.headerWrite)))));
+        var header = _parseShotHeaderSettings(ByteData.sublistView(
+            Uint8List.fromList((await _read(Endpoint.headerWrite)))));
         log.info("loaded header ${header.numberOfFrames} $header");
         // for (var f = 0; f < header.numberOfFrames; f++) {
         //   var frame = parseFrameWrite(ByteData.sublistView(Uint8List.fromList((await read(Endpoint.frameWrite)))));
@@ -906,7 +1012,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
 
           flowEstimation = await getFlowEstimation();
 
-          await setFlushTimeout(max(_settings.targetFlushTime, _settings.targetFlushTime2));
+          await setFlushTimeout(
+              max(_settings.targetFlushTime, _settings.targetFlushTime2));
 
           if (_settings.launchWake) {
             await switchOn();
@@ -915,7 +1022,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
           var coffeeService = getIt<CoffeeService>();
           await coffeeService.setSelectedRecipe(_settings.selectedRecipe);
           service.setSubState("100%");
-          Future.delayed(const Duration(seconds: 10), () => service.setSubState(""));
+          Future.delayed(
+              const Duration(seconds: 10), () => service.setSubState(""));
           log.info(
               "Fan:$fan GHCInfo:$ghcInfo GHCMode:$ghcMode Firmware:$firmware Serial:$machineSerial SteamFlow: $steamFlow SteamPurgeMode: $steamPurgeMode FlowEstimation> $flowEstimation");
         } catch (e) {
@@ -959,7 +1067,8 @@ class DE1 extends ChangeNotifier implements IDe1 {
     int index = 0;
     data[index] = settingsService.steamSettings;
     index++;
-    data[index] = settingsService.steamHeaterOff ? 0 : settingsService.targetSteamTemp;
+    data[index] =
+        settingsService.steamHeaterOff ? 0 : settingsService.targetSteamTemp;
     log.info("Set steam to temp: ${data[index]}");
     index++;
     data[index] = settingsService.targetSteamLength;
@@ -975,7 +1084,10 @@ class DE1 extends ChangeNotifier implements IDe1 {
 
     data[index] = settingsService.targetGroupTemp.toInt();
     index++;
-    data[index] = ((settingsService.targetGroupTemp - settingsService.targetGroupTemp.floor()) * 256.0).toInt();
+    data[index] = ((settingsService.targetGroupTemp -
+                settingsService.targetGroupTemp.floor()) *
+            256.0)
+        .toInt();
     index++;
 
     return data;

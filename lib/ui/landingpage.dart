@@ -13,14 +13,13 @@ import 'package:despresso/ui/screens/settings_screen.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:despresso/ui/screens/coffee_selection.dart';
 import 'package:despresso/ui/screens/espresso_screen.dart';
-import 'package:despresso/ui/screens/profiles_screen.dart';
+import 'package:despresso/ui/widgets/profiles_list.dart';
 import 'package:despresso/ui/screens/shot_selection.dart';
 import 'package:despresso/ui/screens/steam_screen.dart';
 import 'package:despresso/ui/screens/water_screen.dart';
 import 'package:despresso/ui/widgets/machine_footer.dart';
 import 'package:despresso/ui/widgets/screen_saver.dart';
 import 'package:despresso/utils/debounce.dart';
-import 'package:feedback_sentry/feedback_sentry.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -290,7 +289,7 @@ class LandingPageState extends State<LandingPage>
                         log.fine("focus: $val");
                         //log.fine(
                         //    "mnt: $mounted, vis: $currentlyVisible, foc: ${hwKbdFocus.hasPrimaryFocus}, rcp:${recipesFocus.hasPrimaryFocus}, rcpf: ${recipesFocus.hasFocus}");
-                        _focusDebouncer.run(_processFocus(val));
+                        _focusDebouncer.run(() {_processFocus(val);});
                       },
                       child: TabBarView(
                         controller: _tabController,
@@ -350,10 +349,12 @@ class LandingPageState extends State<LandingPage>
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ProfilesScreen(
-                            saveToRecipe: false,
+                      //builder: (context) => const ProfilesScreen(
+                      //      saveToRecipe: false,
+											builder: (context) => const ProfilesList(
+											isBrowsingOnly: true,
                           )),
-                ).then((value) => _screensaver.resume());
+                );
               },
             ),
             ListTile(

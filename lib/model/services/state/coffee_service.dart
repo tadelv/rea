@@ -6,6 +6,8 @@ import 'dart:io';
 
 import 'package:despresso/logger_util.dart';
 import 'package:despresso/model/coffee.dart';
+import 'package:despresso/model/dose_data.dart';
+import 'package:despresso/model/grinder_data.dart';
 import 'package:despresso/model/recipe.dart';
 import 'package:despresso/model/services/ble/machine_service.dart';
 import 'package:despresso/model/services/state/profile_service.dart';
@@ -18,6 +20,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:objectbox/internal.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:synchronized/extension.dart';
 import 'dart:async';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
@@ -33,6 +36,8 @@ class CoffeeService extends ChangeNotifier {
   late Box<Roaster> roasterBox;
   late Box<Recipe> recipeBox;
   late Box<Shot> shotBox;
+  late Box<GrinderData> grinderDataBox;
+  late Box<DoseData> doseDataBox;
 
   int selectedRoasterId = 0;
   int selectedCoffeeId = 0;
@@ -59,7 +64,9 @@ class CoffeeService extends ChangeNotifier {
     coffeeBox = objectBox.store.box<Coffee>();
     roasterBox = objectBox.store.box<Roaster>();
     shotBox = objectBox.store.box<Shot>();
+    grinderDataBox = objectBox.store.box<GrinderData>();
     recipeBox = objectBox.store.box<Recipe>();
+    doseDataBox = objectBox.store.box<DoseData>();
 
     await load();
     notifyListeners();
@@ -92,7 +99,7 @@ class CoffeeService extends ChangeNotifier {
     if (builder.findFirst() != null) {
       throw "Can't delete roaster that has coffees - delete coffees first";
     }
-		roasterBox.remove(r.id);
+    roasterBox.remove(r.id);
     await save();
     notifyListeners();
   }
@@ -287,6 +294,7 @@ class CoffeeService extends ChangeNotifier {
 // code to return members
   }
 
+  // TODO: this is getting called multiple times during shot
   Recipe? get currentRecipe {
     if (selectedRecipeId > 0) {
       return recipeBox.get(selectedRecipeId);
@@ -353,11 +361,17 @@ class CoffeeService extends ChangeNotifier {
   }
 
   void updateShot(Shot shot) {
+    shot.grinderData.targetId = grinderDataBox.put(shot.grinderData.target!);
+		shot.doseData.targetId = doseDataBox.put(shot.doseData.target!);
+
     shotBox.put(shot);
     notifyListeners();
   }
 
   int updateRecipe(Recipe recipe) {
+    recipe.grinderData.targetId =
+        grinderDataBox.put(recipe.grinderData.target!);
+    recipe.doseData.targetId = doseDataBox.put(recipe.doseData.target!);
     int id = recipeBox.put(recipe);
     settings.targetEspressoWeight = recipe.adjustedWeight;
     settings.targetTempCorrection = recipe.adjustedTemp;
@@ -415,6 +429,10 @@ class CoffeeService extends ChangeNotifier {
   /// Shot is added to database and
   /// to visualizer if enabled in settings
   Future<int> addNewShot(Shot currentShot) async {
+    currentShot.doseData.targetId =
+        doseDataBox.put(currentRecipe!.doseData.target!);
+    currentShot.grinderData.targetId =
+        grinderDataBox.put(currentRecipe!.grinderData.target!);
     var id = shotBox.put(currentShot);
     await setLastShotId(id);
     if (settings.visualizerUpload) {
@@ -429,4 +447,38 @@ class CoffeeService extends ChangeNotifier {
     notifyListeners();
     return id;
   }
+
+  List<String> availableGrinderRPM() {
+    final dataBox = objectBox.store.box<GrinderData>();
+    return dataBox.getAll().map((e) => e.rpm).fold([], (c, e) {
+      if (c.contains(e)) {
+        return c;
+      }
+      c.add(e);
+      return c;
+    });
+  }
+
+  List<String> availableGrinderFeedRates() {
+    final dataBox = objectBox.store.box<GrinderData>();
+    return dataBox.getAll().map((e) => e.feedRate).fold([], (c, e) {
+      if (c.contains(e)) {
+        return c;
+      }
+      c.add(e);
+      return c;
+    });
+  }
+
+	List<String> availableBasketInfos() {
+    final dataBox = objectBox.store.box<DoseData>();
+
+    return dataBox.getAll().map((e) => e.basket).fold([], (c, e) {
+      if (c.contains(e)) {
+        return c;
+      }
+      c.add(e);
+      return c;
+    });
+	}
 }

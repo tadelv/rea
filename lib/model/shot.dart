@@ -1,4 +1,6 @@
 import 'package:despresso/model/coffee.dart';
+import 'package:despresso/model/dose_data.dart';
+import 'package:despresso/model/grinder_data.dart';
 import 'package:despresso/model/recipe.dart';
 import 'package:despresso/model/shotstate.dart';
 import 'package:objectbox/objectbox.dart';
@@ -30,6 +32,10 @@ class Shot {
   double drinkWeight = 0;
 
   double grinderSettings = 0;
+
+	final doseData = ToOne<DoseData>();
+
+	final grinderData = ToOne<GrinderData>();
 
   String description = "";
   String grinderName = "";
