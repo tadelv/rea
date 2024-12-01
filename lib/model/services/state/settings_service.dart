@@ -106,13 +106,7 @@ enum SettingKeys {
   visualizerRefreshToken,
   visualizerExpiring,
   currentVersion,
-  uploadTailMethod,
-}
-
-enum UploadTailMethod {
-  none,
-  targetVolume,
-  empty,
+  experimentalSAW,
 }
 
 class SettingsService extends ChangeNotifier {
@@ -566,25 +560,10 @@ class SettingsService extends ChangeNotifier {
   set scaleSecondary(String value) =>
       Settings.setValue<String>(SettingKeys.scaleSecondary.name, value);
 
-  UploadTailMethod get uploadTailMethod {
-    String? stringRep =
-        Settings.getValue<String>(SettingKeys.uploadTailMethod.name);
-    switch (stringRep) {
-      case "targetVolume":
-        return UploadTailMethod.targetVolume;
-      case "empty":
-        return UploadTailMethod.empty;
-      case "none":
-        return UploadTailMethod.none;
-      default:
-        return UploadTailMethod.targetVolume;
-    }
-  }
-
-  set uploadTailMethod(UploadTailMethod value) {
-    log.shout("Setting uploadTailMethod to ${value.name}");
-    Settings.setValue<String>(SettingKeys.uploadTailMethod.name, value.name);
-  }
+  bool get experimentalSAW =>
+      Settings.getValue(SettingKeys.experimentalSAW.name) ?? false;
+  set experimentalSAW(bool value) =>
+      Settings.setValue(SettingKeys.experimentalSAW.name, value);
 
   void notifyDelayed() {
     Future.delayed(
