@@ -333,10 +333,10 @@ class EspressoMachineService extends ChangeNotifier {
     // rate to drop off before canceling
     weightSubscriptionShouldCancel = true;
 
-    // wait up to 2 seconds for flow rate to drop to near-zero, so our weight data
+    // wait up to 4 seconds for flow rate to drop to near-zero, so our weight data
     // captures any additional weight flow after the machine goes into the idle
     // state.
-    final fallback = Future.delayed(const Duration(seconds: 2));
+    final fallback = Future.delayed(const Duration(seconds: 4));
     await Future.any([weightCompleter.future, fallback]);
 
     // resolve a new list holding the shot's weights
@@ -885,7 +885,8 @@ class EspressoMachineService extends ChangeNotifier {
                       timeToWeight > 0 && timeToWeight < 100 ? timeToWeight : 0;
                   log.info(
                       "Time to weight: $timeToWeight ${shot.weight} ${shot.flowWeight}");
-                  if (timeToWeight > 0 &&
+                  if (settingsService.experimentalSAW == false &&
+                      timeToWeight > 0 &&
                       timeToWeight < 2.5 &&
                       (settingsService.targetEspressoWeight - shot.weight <
                           5)) {
@@ -903,6 +904,24 @@ class EspressoMachineService extends ChangeNotifier {
                         triggerEndOfShot();
                       },
                     );
+                  }
+                  if (settingsService.experimentalSAW) {
+                    if (timeToWeight < 5.0) {
+                      log.info("setting TTW timer: $timeToWeight");
+                      _delayedStop = Timer(
+                        Duration(
+                            milliseconds: ((timeToWeight -
+                                        settingsService
+                                            .targetEspressoWeightTimeAdjust) *
+                                    1000)
+                                .toInt()),
+                        () {
+                          log.info(
+                              "Shot weight reached now!, stopping ${state.shot!.weight}");
+                          triggerEndOfShot();
+                        },
+                      );
+                    }
                   }
                 }
                 // if (weight > 1 && shot.weight + 1 > weight) {
