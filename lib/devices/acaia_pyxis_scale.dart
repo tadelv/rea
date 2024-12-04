@@ -117,9 +117,11 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
   }
 
   init() async {
-    _deviceListener = connection.connectToDevice(id: device.id).listen((connectionState) {
+    _deviceListener =
+        connection.connectToDevice(id: device.id).listen((connectionState) {
       // Handle connection state updates
-      log.info('Peripheral ${device.name} connection state is $connectionState');
+      log.info(
+          'Peripheral ${device.name} connection state is $connectionState');
       _onStateChange(connectionState.connectionState);
     }, onError: (Object error) {
       // Handle a possible error
@@ -179,7 +181,8 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
             scaleService.setTara(index);
             if (payload[0] == 0 && payload[1] == 5) {
               var weight = decodeWeight(payload.sublist(2));
-              log.info("Tare received $weight ${Helper.toHex(Uint8List.fromList(payload))}");
+              log.info(
+                  "Tare received $weight ${Helper.toHex(Uint8List.fromList(payload))}");
             }
 
             break;
@@ -199,7 +202,8 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
             }
             // if (payload[3] == 7) time = decodeTime(payload.sublist(3));
 
-            log.fine("Heartbeat Response: PL3: ${payload[3]} ${payload.sublist(3)}");
+            log.fine(
+                "Heartbeat Response: PL3: ${payload[3]} ${payload.sublist(3)}");
 
             break;
           default:
@@ -209,7 +213,8 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
 
         break;
       case 7:
-        log.info("Tare 7 received: ${Helper.toHex(Uint8List.fromList(payload))}");
+        log.info(
+            "Tare 7 received: ${Helper.toHex(Uint8List.fromList(payload))}");
 
         break;
       // General Status including battery
@@ -232,8 +237,10 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
 
   double? decodeWeight(List<int> payload) {
     if (payload.length < 7) return null;
-    var temp =
-        ((payload[4] & 0xff) << 24) + ((payload[3] & 0xff) << 16) + ((payload[2] & 0xff) << 8) + (payload[1] & 0xff);
+    var temp = ((payload[4] & 0xff) << 24) +
+        ((payload[3] & 0xff) << 16) +
+        ((payload[2] & 0xff) << 8) +
+        (payload[1] & 0xff);
     var unit = payload[5] & 0xFF;
 
     var weight = temp / pow(10, unit);
@@ -248,7 +255,8 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
     commandBuffer.addAll(notification);
     // log.info("received: ${Helper.toHex(Uint8List.fromList(commandBuffer))}");
     // remove broken half commands
-    if (commandBuffer.length > 2 && (commandBuffer[0] != header1 || commandBuffer[1] != header2)) {
+    if (commandBuffer.length > 2 &&
+        (commandBuffer[0] != header1 || commandBuffer[1] != header2)) {
       commandBuffer.clear();
       return;
     }
@@ -288,8 +296,11 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
       log.info("Send Heartbeat");
       // await _sendIdent();
       final characteristic = QualifiedCharacteristic(
-          serviceId: ServiceUUID, characteristicId: characteristicCommandUUID, deviceId: device.id);
-      await connection.writeCharacteristicWithResponse(characteristic, value: encode(0x00, _heartbeatPayload));
+          serviceId: ServiceUUID,
+          characteristicId: characteristicCommandUUID,
+          deviceId: device.id);
+      await connection.writeCharacteristicWithResponse(characteristic,
+          value: encode(0x00, _heartbeatPayload));
     } catch (e) {
       log.severe("Heartbeat failure $e");
     }
@@ -304,8 +315,11 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
     }
 
     final characteristic = QualifiedCharacteristic(
-        serviceId: ServiceUUID, characteristicId: characteristicCommandUUID, deviceId: device.id);
-    await connection.writeCharacteristicWithoutResponse(characteristic, value: encode(0x0b, _identPayload));
+        serviceId: ServiceUUID,
+        characteristicId: characteristicCommandUUID,
+        deviceId: device.id);
+    await connection.writeCharacteristicWithoutResponse(characteristic,
+        value: encode(0x0b, _identPayload));
   }
 
   Future<void> _sendConfig() async {
@@ -316,8 +330,11 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
     }
     log.info('Send config');
     final characteristic = QualifiedCharacteristic(
-        serviceId: ServiceUUID, characteristicId: characteristicCommandUUID, deviceId: device.id);
-    await connection.writeCharacteristicWithoutResponse(characteristic, value: encode(0x0c, _configPayload));
+        serviceId: ServiceUUID,
+        characteristicId: characteristicCommandUUID,
+        deviceId: device.id);
+    await connection.writeCharacteristicWithoutResponse(characteristic,
+        value: encode(0x0c, _configPayload));
   }
 
   @override
@@ -365,9 +382,12 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
     ];
 
     final characteristic = QualifiedCharacteristic(
-        serviceId: ServiceUUID, characteristicId: characteristicCommandUUID, deviceId: device.id);
+        serviceId: ServiceUUID,
+        characteristicId: characteristicCommandUUID,
+        deviceId: device.id);
     try {
-      await connection.writeCharacteristicWithoutResponse(characteristic, value: encode(0x04, list));
+      await connection.writeCharacteristicWithoutResponse(characteristic,
+          value: encode(0x04, list));
       await ack();
       log.info("tara send Ok");
     } catch (e) {
@@ -446,7 +466,8 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
             log.info("Heartbeat watchdog started");
             if (_state == DeviceConnectionState.connected) {
               _lastResponse = DateTime.now();
-              _heartBeatTimer = Timer.periodic(_heartbeatTime, (Timer t) => _heartbeat());
+              _heartBeatTimer =
+                  Timer.periodic(_heartbeatTime, (Timer t) => _heartbeat());
             }
 
             //
@@ -488,10 +509,13 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
       log.info("UnRegister for notifications");
     }
     final characteristic = QualifiedCharacteristic(
-        serviceId: ServiceUUID, characteristicId: characteristicStatusUUID, deviceId: device.id);
+        serviceId: ServiceUUID,
+        characteristicId: characteristicStatusUUID,
+        deviceId: device.id);
 
     log.info("Register for notifications");
-    _characteristicsSubscription = connection.subscribeToCharacteristic(characteristic).listen((data) {
+    _characteristicsSubscription =
+        connection.subscribeToCharacteristic(characteristic).listen((data) {
       // code to handle incoming data
       try {
         _notificationCallback(data);
@@ -513,7 +537,9 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
   @override
   Future<void> timer(TimerMode start) async {
     final characteristic = QualifiedCharacteristic(
-        serviceId: ServiceUUID, characteristicId: characteristicCommandUUID, deviceId: device.id);
+        serviceId: ServiceUUID,
+        characteristicId: characteristicCommandUUID,
+        deviceId: device.id);
     try {
       switch (start) {
         case TimerMode.reset:
@@ -552,5 +578,10 @@ class AcaiaPyxisScale extends ChangeNotifier implements AbstractScale {
   @override
   Future<void> power(PowerMode start) {
     return Future(() => null);
+  }
+
+  @override
+  double sensorLag() {
+    return 0.69;
   }
 }

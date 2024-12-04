@@ -906,21 +906,27 @@ class EspressoMachineService extends ChangeNotifier {
                     );
                   }
                   if (settingsService.experimentalSAW) {
-                    if (timeToWeight < 5.0) {
-                      log.info("setting TTW timer: $timeToWeight");
-                      _delayedStop = Timer(
-                        Duration(
-                            milliseconds: ((timeToWeight -
-                                        settingsService
-                                            .targetEspressoWeightTimeAdjust) *
-                                    1000)
-                                .toInt()),
-                        () {
-                          log.info(
-                              "Shot weight reached now!, stopping ${state.shot!.weight}");
-                          triggerEndOfShot();
-                        },
-                      );
+                    var weightPrediction = shot.weight + (2 * shot.flowWeight);
+                    if (weightPrediction >=
+                        settingsService.targetEspressoWeight) {
+                      log.info(
+                          "setting TTW timer: $weightPrediction predicted at ${shot.weight}");
+                      log.info(
+                          "with flow: ${shot.flowWeight} and ttw: $timeToWeight");
+                      int timeout = ((timeToWeight -
+                                  settingsService
+                                      .targetEspressoWeightTimeAdjust -
+                                  (scaleService.scaleInstances.first
+                                          ?.sensorLag() ??
+                                      0)) *
+                              1000)
+                          .toInt();
+                      log.info("setting timeout: $timeout");
+                      timeout = max(timeout, 0);
+                      _delayedStop = Timer(Duration(milliseconds: timeout), () {
+                        log.info("triggering end of shot now!");
+                        triggerEndOfShot();
+                      });
                     }
                   }
                 }

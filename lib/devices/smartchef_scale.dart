@@ -14,11 +14,13 @@ class SmartchefScale extends ChangeNotifier implements AbstractScale {
   final log = l.Logger('SmartchefScale');
 
   // ignore: non_constant_identifier_names
-  static Uuid ServiceUUID =
-      useLongCharacteristics() ? Uuid.parse('0000fff0-0000-1000-8000-00805f9b34fb') : Uuid.parse('fff0');
+  static Uuid ServiceUUID = useLongCharacteristics()
+      ? Uuid.parse('0000fff0-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('fff0');
   // ignore: non_constant_identifier_names
-  static Uuid DataUUID =
-      useLongCharacteristics() ? Uuid.parse('0000fff1-0000-1000-8000-00805f9b34fb') : Uuid.parse('fff1');
+  static Uuid DataUUID = useLongCharacteristics()
+      ? Uuid.parse('0000fff1-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('fff1');
 
   late ScaleService scaleService;
 
@@ -27,7 +29,8 @@ class SmartchefScale extends ChangeNotifier implements AbstractScale {
   final DiscoveredDevice device;
 
   List<int> commandBuffer = [];
-  double weightAtTare = 0.00; // this is a workaround for the missing taring function
+  double weightAtTare =
+      0.00; // this is a workaround for the missing taring function
   double weightFromScale = 0.00;
 
   late StreamSubscription<ConnectionStateUpdate> _deviceListener;
@@ -40,7 +43,8 @@ class SmartchefScale extends ChangeNotifier implements AbstractScale {
     scaleService = getIt<ScaleService>();
     index = getScaleIndex(device.id);
     scaleService.setScaleInstance(this, index);
-    _deviceListener = connection.connectToDevice(id: device.id).listen((connectionState) {
+    _deviceListener =
+        connection.connectToDevice(id: device.id).listen((connectionState) {
       _onStateChange(connectionState.connectionState);
     }, onError: (Object error) {
       // Handle a possible error
@@ -59,14 +63,18 @@ class SmartchefScale extends ChangeNotifier implements AbstractScale {
   writeTare() {
     weightAtTare = weightFromScale;
     // return writeToSmartchef([cmdTare]);
-    return Future(() => null); // the smartchef scale doesn't seem to support ble taring
+    return Future(
+        () => null); // the smartchef scale doesn't seem to support ble taring
   }
 
   Future<void> writeToSmartchef(List<int> payload) async {
     log.info("Sending to Smartchef");
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: DataUUID, deviceId: device.id);
-    return await connection.writeCharacteristicWithResponse(characteristic, value: Uint8List.fromList(payload));
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: DataUUID,
+        deviceId: device.id);
+    return await connection.writeCharacteristicWithResponse(characteristic,
+        value: Uint8List.fromList(payload));
   }
 
   void _onStateChange(DeviceConnectionState state) async {
@@ -82,10 +90,13 @@ class SmartchefScale extends ChangeNotifier implements AbstractScale {
         log.info('Connected');
         scaleService.setState(ScaleState.connected, index);
         // await device.discoverAllServicesAndCharacteristics();
-        final characteristic =
-            QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: DataUUID, deviceId: device.id);
+        final characteristic = QualifiedCharacteristic(
+            serviceId: ServiceUUID,
+            characteristicId: DataUUID,
+            deviceId: device.id);
 
-        _characteristicsSubscription = connection.subscribeToCharacteristic(characteristic).listen((data) {
+        _characteristicsSubscription =
+            connection.subscribeToCharacteristic(characteristic).listen((data) {
           _notificationCallback(data);
         }, onError: (dynamic error) {
           log.severe("Subscribe to $characteristic failed: $error");
@@ -125,5 +136,10 @@ class SmartchefScale extends ChangeNotifier implements AbstractScale {
   @override
   Future<void> power(PowerMode start) {
     return Future(() => null);
+  }
+
+  @override
+  double sensorLag() {
+    return 0.38;
   }
 }

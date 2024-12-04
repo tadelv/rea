@@ -15,11 +15,17 @@ class BookooScale extends ChangeNotifier implements AbstractScale {
   final log = l.Logger('BookooScale');
 
   // ignore: non_constant_identifier_names
-  static Uuid ServiceUUID = useLongCharacteristics() ? Uuid.parse('00000ffe-0000-1000-8000-00805f9b34fb') : Uuid.parse('0ffe');
+  static Uuid ServiceUUID = useLongCharacteristics()
+      ? Uuid.parse('00000ffe-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('0ffe');
   // ignore: non_constant_identifier_names
-  static Uuid DataUUID = useLongCharacteristics() ? Uuid.parse('0000ff11-0000-1000-8000-00805f9b34fb') : Uuid.parse('ff11');
+  static Uuid DataUUID = useLongCharacteristics()
+      ? Uuid.parse('0000ff11-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('ff11');
   // ignore: non_constant_identifier_names
-  static Uuid CmdUUID = useLongCharacteristics() ? Uuid.parse('0000ff12-0000-1000-8000-00805f9b34fb') : Uuid.parse('ff12');
+  static Uuid CmdUUID = useLongCharacteristics()
+      ? Uuid.parse('0000ff12-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('ff12');
 
   late ScaleService scaleService;
 
@@ -37,7 +43,8 @@ class BookooScale extends ChangeNotifier implements AbstractScale {
     scaleService = getIt<ScaleService>();
     index = getScaleIndex(device.id);
     scaleService.setScaleInstance(this, index);
-    _deviceListener = connection.connectToDevice(id: device.id).listen((connectionState) {
+    _deviceListener =
+        connection.connectToDevice(id: device.id).listen((connectionState) {
       _onStateChange(connectionState.connectionState);
     }, onError: (Object error) {
       // Handle a possible error
@@ -74,8 +81,10 @@ class BookooScale extends ChangeNotifier implements AbstractScale {
 
   Future<void> writeToBokooScale(List<int> payload) async {
     log.info("Sending to Bookoo Scale");
-    final characteristic = QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: CmdUUID, deviceId: device.id);
-    return await connection.writeCharacteristicWithResponse(characteristic, value: Uint8List.fromList(payload));
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID, characteristicId: CmdUUID, deviceId: device.id);
+    return await connection.writeCharacteristicWithResponse(characteristic,
+        value: Uint8List.fromList(payload));
   }
 
   void _onStateChange(DeviceConnectionState state) async {
@@ -91,9 +100,13 @@ class BookooScale extends ChangeNotifier implements AbstractScale {
         log.info('Connected');
         scaleService.setState(ScaleState.connected, index);
         // await device.discoverAllServicesAndCharacteristics();
-        final characteristic = QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: DataUUID, deviceId: device.id);
+        final characteristic = QualifiedCharacteristic(
+            serviceId: ServiceUUID,
+            characteristicId: DataUUID,
+            deviceId: device.id);
 
-        _characteristicsSubscription = connection.subscribeToCharacteristic(characteristic).listen((data) {
+        _characteristicsSubscription =
+            connection.subscribeToCharacteristic(characteristic).listen((data) {
           _notificationCallback(data);
         }, onError: (dynamic error) {
           log.severe("Subscribe to $characteristic failed: $error");
@@ -148,5 +161,10 @@ class BookooScale extends ChangeNotifier implements AbstractScale {
   @override
   Future<void> power(PowerMode start) {
     return Future(() => null);
+  }
+
+  @override
+  double sensorLag() {
+    return 0.50;
   }
 }

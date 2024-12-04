@@ -168,4 +168,8 @@ class EurekaScale extends ChangeNotifier implements AbstractScale {
   Future<void> power(PowerMode start) {
     return Future(() => null);
   }
+	@override
+	  double sensorLag() {
+	    return 0.38;
+	  }
 }

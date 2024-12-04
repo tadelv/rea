@@ -12,14 +12,17 @@ import 'package:logging/logging.dart' as l;
 class DecentScale extends ChangeNotifier implements AbstractScale {
   final log = l.Logger('DecentScale');
   // ignore: non_constant_identifier_names
-  static Uuid ServiceUUID =
-      useLongCharacteristics() ? Uuid.parse('0000fff0-0000-1000-8000-00805f9b34fb') : Uuid.parse('fff0');
+  static Uuid ServiceUUID = useLongCharacteristics()
+      ? Uuid.parse('0000fff0-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('fff0');
 // ignore: non_constant_identifier_names
-  static Uuid ReadCharacteristicUUID =
-      useLongCharacteristics() ? Uuid.parse('0000fff4-0000-1000-8000-00805f9b34fb') : Uuid.parse('fff4');
+  static Uuid ReadCharacteristicUUID = useLongCharacteristics()
+      ? Uuid.parse('0000fff4-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('fff4');
 // ignore: non_constant_identifier_names
-  static Uuid WriteCharacteristicUUID =
-      useLongCharacteristics() ? Uuid.parse('000036f5-0000-1000-8000-00805f9b34fb') : Uuid.parse('36f5');
+  static Uuid WriteCharacteristicUUID = useLongCharacteristics()
+      ? Uuid.parse('000036f5-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('36f5');
 
   late ScaleService scaleService;
 
@@ -40,7 +43,8 @@ class DecentScale extends ChangeNotifier implements AbstractScale {
     scaleService = getIt<ScaleService>();
     index = getScaleIndex(device.id);
     scaleService.setScaleInstance(this, index);
-    _deviceListener = connection.connectToDevice(id: device.id).listen((connectionState) {
+    _deviceListener =
+        connection.connectToDevice(id: device.id).listen((connectionState) {
       _onStateChange(connectionState.connectionState);
     }, onError: (Object error) {
       // Handle a possible error
@@ -89,7 +93,12 @@ class DecentScale extends ChangeNotifier implements AbstractScale {
   }
 
   int getXOR(payload) {
-    return payload[0] ^ payload[1] ^ payload[2] ^ payload[3] ^ payload[4] ^ payload[5];
+    return payload[0] ^
+        payload[1] ^
+        payload[2] ^
+        payload[3] ^
+        payload[4] ^
+        payload[5];
   }
 
   @override
@@ -165,9 +174,12 @@ class DecentScale extends ChangeNotifier implements AbstractScale {
   Future<void> writeToDecentScale(List<int> payload) async {
     // Uint8List command = Uint8List.fromList(payload.add(getXOR(payload)));
     log.info("Sending to Decent");
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: WriteCharacteristicUUID, deviceId: device.id);
-    return await connection.writeCharacteristicWithResponse(characteristic, value: Uint8List.fromList(payload));
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: WriteCharacteristicUUID,
+        deviceId: device.id);
+    return await connection.writeCharacteristicWithResponse(characteristic,
+        value: Uint8List.fromList(payload));
   }
 
   void _onStateChange(DeviceConnectionState state) async {
@@ -202,10 +214,13 @@ class DecentScale extends ChangeNotifier implements AbstractScale {
   }
 
   subscribeToNotifications() {
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: ReadCharacteristicUUID, deviceId: device.id);
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: ReadCharacteristicUUID,
+        deviceId: device.id);
 
-    _characteristicsSubscription = connection.subscribeToCharacteristic(characteristic).listen((data) {
+    _characteristicsSubscription =
+        connection.subscribeToCharacteristic(characteristic).listen((data) {
       _notificationCallback(data);
     }, onError: (dynamic error) {
       log.severe("Subscribe to $characteristic failed: $error");
@@ -256,5 +271,10 @@ class DecentScale extends ChangeNotifier implements AbstractScale {
   @override
   Future<void> power(PowerMode start) {
     return Future(() => null);
+  }
+
+  @override
+  double sensorLag() {
+    return 0.38;
   }
 }

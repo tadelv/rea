@@ -25,6 +25,7 @@ abstract class AbstractScale {
   Future<void> display(DisplayMode start);
   Future<void> power(PowerMode start);
   Future<void> beep();
+  double sensorLag();
 }
 
 int getScaleIndex(String deviceId) {
