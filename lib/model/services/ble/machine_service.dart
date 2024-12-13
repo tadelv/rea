@@ -906,27 +906,31 @@ class EspressoMachineService extends ChangeNotifier {
                     );
                   }
                   if (settingsService.experimentalSAW) {
-                    var weightPrediction = shot.weight + (2 * shot.flowWeight);
+// Calculate predicted weight based on current shot data
+                    final weightPrediction =
+                        shot.weight + (1 * shot.flowWeight);
+
+                    // Calculate a dynamic threshold based on target weight adjustment and current flow weight
+                    final stopThreshold =
+                        settingsService.targetEspressoWeightTimeAdjust *
+                            shot.flowWeight;
+
+                    // If predicted weight exceeds target minus the stop threshold, proceed with stopping logic
                     if (weightPrediction >=
-                        settingsService.targetEspressoWeight) {
+                        (settingsService.targetEspressoWeight -
+                            stopThreshold)) {
                       log.info(
-                          "setting TTW timer: $weightPrediction predicted at ${shot.weight}");
+                          "Predicted weight: ${weightPrediction}g at current weight: ${shot.weight}g");
                       log.info(
-                          "with flow: ${shot.flowWeight} and ttw: $timeToWeight");
-                      int timeout = ((timeToWeight -
-                                  settingsService
-                                      .targetEspressoWeightTimeAdjust -
-                                  (scaleService.scaleInstances.first
-                                          ?.sensorLag() ??
-                                      0)) *
-                              1000)
-                          .toInt();
-                      log.info("setting timeout: $timeout");
-                      timeout = max(timeout, 0);
-                      _delayedStop = Timer(Duration(milliseconds: timeout), () {
-                        log.info("triggering end of shot now!");
-                        triggerEndOfShot();
-                      });
+                          "Flow weight: ${shot.flowWeight}g/s, Stop threshold: ${stopThreshold}g");
+
+                      // Add delayedStop just in case, to not trigger this again.
+                      _delayedStop = Timer(Duration(seconds: 1), () {});
+
+                      // Directly stop the shot with a log message
+                      log.info(
+                          "Stopping shot before reaching target to account for water already in the system.");
+                      triggerEndOfShot();
                     }
                   }
                 }
