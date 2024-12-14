@@ -906,9 +906,8 @@ class EspressoMachineService extends ChangeNotifier {
                     );
                   }
                   if (settingsService.experimentalSAW) {
-// Calculate predicted weight based on current shot data
-                    final weightPrediction =
-                        shot.weight + (1 * shot.flowWeight);
+                    // Calculate predicted weight based on current shot data
+                    final weightPrediction = shot.weight;
 
                     // Calculate a dynamic threshold based on target weight adjustment and current flow weight
                     final stopThreshold =

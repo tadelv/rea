@@ -545,7 +545,7 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                     defaultValue:
                         settingsService.targetEspressoWeightTimeAdjust,
                     min: 0.05,
-                    max: 0.95,
+                    max: 2.00,
                     step: 0.05,
                     leading: const Icon(Icons.timer),
                     onChange: (value) {},
