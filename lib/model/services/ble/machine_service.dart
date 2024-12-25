@@ -337,7 +337,7 @@ class EspressoMachineService extends ChangeNotifier {
     // captures any additional weight flow after the machine goes into the idle
     // state.
     final fallback = Future.delayed(const Duration(seconds: 4));
-    await Future.any([weightCompleter.future, fallback]);
+		await Future.any([fallback]);
 
     // resolve a new list holding the shot's weights
     final measurementsToResolve = [...weightMeasurementsDuringShot];
@@ -919,7 +919,7 @@ class EspressoMachineService extends ChangeNotifier {
                         (settingsService.targetEspressoWeight -
                             stopThreshold)) {
                       log.info(
-                          "Predicted weight: ${weightPrediction}g at current weight: ${shot.weight}g");
+                          "Predicted weight: ${settingsService.targetEspressoWeight}g at current weight: ${shot.weight}g");
                       log.info(
                           "Flow weight: ${shot.flowWeight}g/s, Stop threshold: ${stopThreshold}g");
 
@@ -933,13 +933,6 @@ class EspressoMachineService extends ChangeNotifier {
                     }
                   }
                 }
-                // if (weight > 1 && shot.weight + 1 > weight) {
-                //   log.info("Shot Weight reached ${shot.weight} > $weight Portime: $lastPourTime");
-
-                //   if (settingsService.shotStopOnWeight) {
-                //     triggerEndOfShot();
-                //   }
-                // }
               }
             }
           }
