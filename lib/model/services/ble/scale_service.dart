@@ -7,6 +7,7 @@ import 'package:despresso/model/services/cafehub/ch_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:simple_kalman/simple_kalman.dart';
 
 import '../../../devices/abstract_scale.dart';
 import '../../../service_locator.dart';
@@ -94,6 +95,11 @@ class ScaleService extends ChangeNotifier {
 
   List<List<double>> averaging = [[], []];
 
+  List<SimpleKalman> kalmans = [
+    SimpleKalman(errorMeasure: 0.1, errorEstimate: 0.1, q: 0.01),
+    SimpleKalman(errorMeasure: 0.1, errorEstimate: 0.1, q: 0.01)
+  ];
+
   ScaleService() {
     _controller0 = StreamController<WeightMeassurement>();
     _stream0 = _controller0.stream.asBroadcastStream();
@@ -163,6 +169,8 @@ class ScaleService extends ChangeNotifier {
   void setTara(int index) {
     log.info("Tara done");
     averaging[index].clear();
+    kalmans[index] =
+        SimpleKalman(errorMeasure: 0.1, errorEstimate: 0.1, q: 0.01);
   }
 
   void setWeight(double weight, index) {
@@ -179,9 +187,13 @@ class ScaleService extends ChangeNotifier {
     if (timeDiff == 0) return;
     var n = math.min(10.0, (weight - _weight[index]).abs() / (timeDiff / 1000));
 
-    averaging[index].add(n);
+    if (false) {
+      averaging[index].add(n);
 
-    flow = averaging[index].average;
+      flow = averaging[index].average;
+    } else {
+      flow = kalmans[index].filtered(n);
+    }
 
     if (averaging[index].length > 10) {
       averaging[index].removeAt(0);
