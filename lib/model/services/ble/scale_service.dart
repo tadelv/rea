@@ -101,8 +101,6 @@ class ScaleService extends ChangeNotifier {
   late StreamController<BatteryLevel> _controllerBattery1;
   late Stream<BatteryLevel> _streamBattery1;
 
-  List<List<double>> averaging = [[], []];
-
   List<SimpleKalman> kalmans = [initKalman(), initKalman()];
 
   ScaleService() {
@@ -124,6 +122,7 @@ class ScaleService extends ChangeNotifier {
       setWeight(0, index);
       tareInProgress = true;
       await _scale[index]?.writeTare();
+      kalmans[index] = initKalman();
       Future.delayed(const Duration(milliseconds: 500), () {
         tareInProgress = false;
         // setWeight(0);
@@ -173,7 +172,6 @@ class ScaleService extends ChangeNotifier {
 
   void setTara(int index) {
     log.info("Tara done");
-    averaging[index].clear();
     kalmans[index] = initKalman();
   }
 
@@ -191,17 +189,8 @@ class ScaleService extends ChangeNotifier {
     if (timeDiff == 0) return;
     var n = math.min(10.0, (weight - _weight[index]).abs() / (timeDiff / 1000));
 
-    if (false) {
-      averaging[index].add(n);
+    flow = kalmans[index].filtered(n);
 
-      flow = averaging[index].average;
-    } else {
-      flow = kalmans[index].filtered(n);
-    }
-
-    if (averaging[index].length > 10) {
-      averaging[index].removeAt(0);
-    }
     _weight[index] = weight;
     _flow[index] = flow;
     last = now;
