@@ -1206,8 +1206,7 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                   Padding(
                       padding: EdgeInsets.all(16.0),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        SizedBox(
-                          width: 400,
+                        Expanded(
                           child: SpinBox(
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.done,
@@ -1221,8 +1220,8 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             },
                           ),
                         ),
-                        SizedBox(
-                          width: 400,
+												SizedBox(width: 10,),
+                        Expanded(
                           child: SpinBox(
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.done,
@@ -1236,8 +1235,8 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             },
                           ),
                         ),
-                        SizedBox(
-                          width: 400,
+												SizedBox(width: 10,),
+                        Expanded(
                           child: SpinBox(
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.done,
