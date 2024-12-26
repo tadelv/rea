@@ -107,6 +107,9 @@ enum SettingKeys {
   visualizerExpiring,
   currentVersion,
   experimentalSAW,
+  weightKalmanErrorMeasure,
+  weightKalmanErrorEstimate,
+  weightKalmanQ
 }
 
 class SettingsService extends ChangeNotifier {
@@ -564,6 +567,23 @@ class SettingsService extends ChangeNotifier {
       Settings.getValue(SettingKeys.experimentalSAW.name) ?? false;
   set experimentalSAW(bool value) =>
       Settings.setValue(SettingKeys.experimentalSAW.name, value);
+
+  double get weightKalmanErrorMeasure =>
+      Settings.getValue<double>(SettingKeys.weightKalmanErrorMeasure.name) ??
+      0.1;
+  set weightKalmanErrorMeasure(double value) => Settings.setValue<double>(
+      SettingKeys.weightKalmanErrorMeasure.name, value);
+
+  double get weightKalmanErrorEstimate =>
+      Settings.getValue<double>(SettingKeys.weightKalmanErrorEstimate.name) ??
+      0.1;
+  set weightKalmanErrorEstimate(double value) => Settings.setValue<double>(
+      SettingKeys.weightKalmanErrorEstimate.name, value);
+
+  double get weightKalmanQ =>
+      Settings.getValue<double>(SettingKeys.weightKalmanQ.name) ?? 0.1;
+  set weightKalmanQ(double value) =>
+      Settings.setValue<double>(SettingKeys.weightKalmanQ.name, value);
 
   void notifyDelayed() {
     Future.delayed(

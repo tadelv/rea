@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as ble;
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
+import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:logging/logging.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
@@ -1202,6 +1203,55 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                       settingsService.notifyDelayed();
                     },
                   ),
+                  Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        SizedBox(
+                          width: 400,
+                          child: SpinBox(
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            step: 0.01,
+                            decimals: 2,
+                            decoration: InputDecoration(
+                                label: Text("Kalman Error measure")),
+                            value: settingsService.weightKalmanErrorMeasure,
+                            onSubmitted: (val) {
+                              settingsService.weightKalmanErrorMeasure = val;
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 400,
+                          child: SpinBox(
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            step: 0.01,
+                            decimals: 2,
+                            decoration: InputDecoration(
+                                label: Text("Kalman Error estimate")),
+                            value: settingsService.weightKalmanErrorEstimate,
+                            onSubmitted: (val) {
+                              settingsService.weightKalmanErrorEstimate = val;
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 400,
+                          child: SpinBox(
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            step: 0.01,
+                            decimals: 2,
+                            decoration:
+                                InputDecoration(label: Text("Kalman Q")),
+                            value: settingsService.weightKalmanQ,
+                            onSubmitted: (val) {
+                              settingsService.weightKalmanQ = val;
+                            },
+                          ),
+                        ),
+                      ])),
                   //TextInputSettingsTile(
                   //  title:
                   //      "CafeHub Websocket Endpoint (Usually: ws://IP_OF_YOUR_TABLET_RUNNING_CAFEHUB:8765)",

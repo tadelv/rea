@@ -100,6 +100,7 @@ dependencies:
   dotenv: null
   visibility_detector: ^0.4.0+2
   scrollable_positioned_list: null
+  simple_kalman: ^1.0.2
 
 dev_dependencies:
   flutter_test:

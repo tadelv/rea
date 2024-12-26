@@ -41,6 +41,14 @@ class BatteryLevel {
   BatteryLevel(this.level, this.index);
 }
 
+SimpleKalman initKalman() {
+  final settings = getIt<SettingsService>();
+  return SimpleKalman(
+      errorMeasure: settings.weightKalmanErrorMeasure,
+      errorEstimate: settings.weightKalmanErrorEstimate,
+      q: settings.weightKalmanQ);
+}
+
 class ScaleService extends ChangeNotifier {
   final log = Logger('ScaleService');
 
@@ -95,10 +103,7 @@ class ScaleService extends ChangeNotifier {
 
   List<List<double>> averaging = [[], []];
 
-  List<SimpleKalman> kalmans = [
-    SimpleKalman(errorMeasure: 0.1, errorEstimate: 0.1, q: 0.01),
-    SimpleKalman(errorMeasure: 0.1, errorEstimate: 0.1, q: 0.01)
-  ];
+  List<SimpleKalman> kalmans = [initKalman(), initKalman()];
 
   ScaleService() {
     _controller0 = StreamController<WeightMeassurement>();
@@ -169,8 +174,7 @@ class ScaleService extends ChangeNotifier {
   void setTara(int index) {
     log.info("Tara done");
     averaging[index].clear();
-    kalmans[index] =
-        SimpleKalman(errorMeasure: 0.1, errorEstimate: 0.1, q: 0.01);
+    kalmans[index] = initKalman();
   }
 
   void setWeight(double weight, index) {
