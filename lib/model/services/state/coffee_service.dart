@@ -362,7 +362,7 @@ class CoffeeService extends ChangeNotifier {
 
   void updateShot(Shot shot) {
     shot.grinderData.targetId = grinderDataBox.put(shot.grinderData.target!);
-		shot.doseData.targetId = doseDataBox.put(shot.doseData.target!);
+    shot.doseData.targetId = doseDataBox.put(shot.doseData.target!);
 
     shotBox.put(shot);
     notifyListeners();
@@ -386,7 +386,7 @@ class CoffeeService extends ChangeNotifier {
     var r = recipeBox.get(id);
     if (r != null) {
       r.isDeleted = true;
-      updateRecipe(r);
+      recipeBox.put(r);
     }
 
     notifyListeners();
@@ -470,7 +470,7 @@ class CoffeeService extends ChangeNotifier {
     });
   }
 
-	List<String> availableBasketInfos() {
+  List<String> availableBasketInfos() {
     final dataBox = objectBox.store.box<DoseData>();
 
     return dataBox.getAll().map((e) => e.basket).fold([], (c, e) {
@@ -480,5 +480,5 @@ class CoffeeService extends ChangeNotifier {
       c.add(e);
       return c;
     });
-	}
+  }
 }
