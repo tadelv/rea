@@ -1254,7 +1254,7 @@ class EspressoMachineService extends ChangeNotifier {
       currentRecipe.id = 0;
       currentRecipe.isShot = true;
 
-      cs.recipe.targetId = coffeeService.addRecipeFromRecipe(currentRecipe);
+      cs.recipe.target = await coffeeService.addRecipeFromRecipe(currentRecipe);
       var currentCoffee = coffeeService.currentCoffee!;
       currentCoffee.id = 0;
       currentCoffee.isShot = true;

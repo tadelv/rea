@@ -332,9 +332,24 @@ class CoffeeService extends ChangeNotifier {
     return id;
   }
 
-  int addRecipeFromRecipe(Recipe r) {
-    var id = recipeBox.put(r);
-    return id;
+  Future<Recipe> addRecipeFromRecipe(Recipe r) async {
+    var cloned = await compute((e) => e, r);
+    cloned.id = 0;
+    recipeBox.put(cloned, mode: PutMode.insert);
+    if (r.grinderData.target != null) {
+		var gData = await compute((e) => e, cloned.grinderData.target!);
+			gData.id = 0;
+      cloned.grinderData.target = gData;
+			grinderDataBox.put(cloned.grinderData.target!, mode: PutMode.insert);
+    }
+    if (r.doseData.target != null) {
+		var dData = await compute((e) => e, cloned.doseData.target!);
+      dData.id = 0;
+			cloned.doseData.target = dData;
+			doseDataBox.put(cloned.doseData.target!, mode: PutMode.insert);
+    }
+    recipeBox.put(cloned);
+    return cloned;
   }
 
   List<Recipe> getRecipes() {

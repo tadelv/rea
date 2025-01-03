@@ -103,7 +103,7 @@ class ShotGraphState extends State<ShotGraph> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                          '${e.recipe.target!.grinderData.target!.model.isNotEmpty ? e.recipe.target!.grinderData.target!.model : "Grinder set"} @ ${e.recipe.target?.grinderData.target?.grindSizeSetting}'),
+                          '${e.recipe.target!.grinderData.target!.model.isNotEmpty ? e.recipe.target!.grinderData.target!.model : "Grinder set"} @ ${e.recipe.target!.grinderData.target!.grindSizeSetting}'),
                       //Text('${getIt<ProfileService>().profiles.firstWhere((pr) => pr.id == e.recipe.target?.id)}')
                       Text(
                           'Profile: ${e.recipe.target!.profileName.isNotEmpty ? e.recipe.target?.profileName : "Unknown profile"}')
