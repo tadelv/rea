@@ -61,10 +61,11 @@ class VisualizerService extends ChangeNotifier {
 
   final FlutterAppAuth appAuth = FlutterAppAuth();
 
-  final AuthorizationServiceConfiguration _serviceConfiguration = const AuthorizationServiceConfiguration(
-      authorizationEndpoint: 'https://visualizer.coffee/oauth/authorize',
-      tokenEndpoint: 'https://visualizer.coffee/oauth/token',
-      endSessionEndpoint: null);
+  final AuthorizationServiceConfiguration _serviceConfiguration =
+      const AuthorizationServiceConfiguration(
+          authorizationEndpoint: 'https://visualizer.coffee/oauth/authorize',
+          tokenEndpoint: 'https://visualizer.coffee/oauth/token',
+          endSessionEndpoint: null);
 
   setRefreshTimer() {
     if (settingsService.visualizerRefreshToken.isEmpty) {
@@ -96,7 +97,8 @@ class VisualizerService extends ChangeNotifier {
 
   Future<void> createClient(String username, String password) async {
     try {
-      final AuthorizationTokenResponse? response = await appAuth.authorizeAndExchangeCode(
+      final AuthorizationTokenResponse? response =
+          await appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
           identifier,
           redirectUrl,
@@ -108,10 +110,12 @@ class VisualizerService extends ChangeNotifier {
       if (response != null) {
         _accessToken = response.accessToken!;
         _refreshToken = response.refreshToken!;
-        _accessTokenExpiration = response.accessTokenExpirationDateTime!.toIso8601String();
+        _accessTokenExpiration =
+            response.accessTokenExpirationDateTime!.toIso8601String();
         settingsService.visualizerAccessToken = _accessToken;
         settingsService.visualizerRefreshToken = response.refreshToken!;
-        settingsService.visualizerExpiring = response.accessTokenExpirationDateTime!.toIso8601String();
+        settingsService.visualizerExpiring =
+            response.accessTokenExpirationDateTime!.toIso8601String();
 
         setRefreshTimer();
       }
@@ -124,7 +128,8 @@ class VisualizerService extends ChangeNotifier {
 
   refreshToken() async {
     log.info("Requesting visualizer refresh token");
-    final TokenResponse? response = await appAuth.token(TokenRequest(identifier, redirectUrl,
+    final TokenResponse? response = await appAuth.token(TokenRequest(
+        identifier, redirectUrl,
         clientSecret: secret,
         serviceConfiguration: _serviceConfiguration,
         refreshToken: settingsService.visualizerRefreshToken,
@@ -133,10 +138,12 @@ class VisualizerService extends ChangeNotifier {
     if (response != null) {
       _accessToken = response.accessToken!;
       _refreshToken = response.refreshToken!;
-      _accessTokenExpiration = response.accessTokenExpirationDateTime!.toIso8601String();
+      _accessTokenExpiration =
+          response.accessTokenExpirationDateTime!.toIso8601String();
       settingsService.visualizerAccessToken = _accessToken;
       settingsService.visualizerRefreshToken = response.refreshToken!;
-      settingsService.visualizerExpiring = response.accessTokenExpirationDateTime!.toIso8601String();
+      settingsService.visualizerExpiring =
+          response.accessTokenExpirationDateTime!.toIso8601String();
       setRefreshTimer();
     }
   }
@@ -144,15 +151,18 @@ class VisualizerService extends ChangeNotifier {
   Future<String> sendShotToVisualizer(Shot shot) async {
     String id = '';
     try {
-      if (settingsService.visualizerUpload && settingsService.visualizerAccessToken.isNotEmpty) {
+      if (settingsService.visualizerUpload &&
+          settingsService.visualizerAccessToken.isNotEmpty) {
         String url = 'https://visualizer.coffee/api/shots/upload';
         id = await uploadShot(url, null, null, shot);
-        getIt<SnackbarService>().notify("Uploaded shot to Visualizer", SnackbarNotificationType.ok);
+        getIt<SnackbarService>()
+            .notify("Uploaded shot to Visualizer", SnackbarNotificationType.ok);
       } else {
         throw ("No visualizer access configured configured in settings");
       }
     } catch (e) {
-      getIt<SnackbarService>().notify("Error uploading shot to Visualizer: $e", SnackbarNotificationType.severe);
+      getIt<SnackbarService>().notify("Error uploading shot to Visualizer: $e",
+          SnackbarNotificationType.severe);
     }
 
     try {
@@ -166,26 +176,30 @@ class VisualizerService extends ChangeNotifier {
         }
       }
     } catch (e) {
-      getIt<SnackbarService>().notify("Error uploading shot to custom site: $e", SnackbarNotificationType.severe);
+      getIt<SnackbarService>().notify("Error uploading shot to custom site: $e",
+          SnackbarNotificationType.severe);
     }
 
     return id;
   }
 
-  Future<dynamic> uploadShot(String url, String? username, String? password, Shot shot) async {
+  Future<dynamic> uploadShot(
+      String url, String? username, String? password, Shot shot) async {
     String auth = username != null
         ? 'Basic ${base64.encode(utf8.encode('$username:$password'))}'
         : 'Bearer ${settingsService.visualizerAccessToken}';
 
     var headers = <String, String>{
       'authorization': auth,
-      'Content-Type': 'text/plain',
+      'Content-Type': 'application/json',
     };
 
     var body = createShotJson(shot);
+    log.shout(body);
 
     var request = http.MultipartRequest("POST", Uri.parse(url));
-    request.files.add(http.MultipartFile.fromString("file", body, filename: "shot.tcl"));
+    request.files.add(
+        http.MultipartFile.fromString("file", body, filename: "shot.json"));
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -196,6 +210,7 @@ class VisualizerService extends ChangeNotifier {
         var err = jsonDecode(resBody);
         throw ("Error in uploading: ${err['error']}");
       } else {
+        log.severe("${response}");
         throw ("Error in uploading: ${response.statusCode}");
       }
     }
@@ -231,113 +246,74 @@ class VisualizerService extends ChangeNotifier {
   String createShotJson(Shot shot) {
     var prof = profileService.getProfile(shot.profileId);
 
-    // var data = <String, dynamic>{
-    //   'profile_title': prof!.title,
-    //   "drink_tds": shot.totalDissolvedSolids,
-    //   "drink_ey": shot.extractionYield,
-    //   "espresso_enjoyment": shot.enjoyment,
-    //   "bean_weight": shot.doseWeight,
-    //   "drink_weight": shot.drinkWeight,
-    //   "grinder_model": shot.grinderName,
-    //   "grinder_setting": shot.grinderSettings,
-    //   "bean_brand": shot.coffee.target?.roaster.target?.name ?? "unknown",
-    //   "bean_type": shot.coffee.target?.name ?? "unknonw",
-    //   "roast_date": null,
-    //   "espresso_notes": shot.description,
-    //   "roast_level": shot.coffee.target?.roastLevel ?? 0,
-    //   "bean_notes": shot.coffee.target?.description ?? "",
-    //   "start_time": shot.date.toIso8601String(),
-    //   "duration": shot.shotstates.last.sampleTimeCorrected,
-    // };
-    var times = shot.shotstates.map((e) => e.sampleTimeCorrected.toStringAsFixed(4)).join(" ");
-    var stateChanges = getStateChanges(shot.shotstates).join(" ");
-    // var espressoFlow = shot.shotstates.map(
-    //   (element) => element.groupFlow,
-    // );
+    var data = <String, dynamic>{
+      "timestamp": (shot.date.millisecondsSinceEpoch / 1000).toStringAsFixed(0),
+    };
+    var settings = <String, dynamic>{
+      "app_name": "REA",
+      'profile_title': prof!.title,
+      "drink_tds": shot.totalDissolvedSolids,
+      "drink_ey": shot.extractionYield,
+      "espresso_enjoyment": shot.enjoyment,
+      "bean_weight": shot.doseWeight,
+      "drink_weight": shot.drinkWeight,
+      "grinder_model": '${shot.grinderData.target?.model ?? ""} '
+          '${shot.doseData.target?.basket != "unknown" ? "with ${shot.doseData.target?.basket}" : ""} ',
+      "grinder_setting": '${shot.grinderData.target?.grindSizeSetting ?? ""}'
+          '${shot.grinderData.target?.rpm.isEmpty == false ? " - ${shot.grinderData.target!.rpm}RPM" : ""}'
+          '${shot.grinderData.target?.feedRate.isEmpty == false ? ", feed:${shot.grinderData.target!.feedRate}" : ""}',
+      "bean_brand": shot.coffee.target?.roaster.target?.name ?? "unknown",
+      "bean_type": shot.coffee.target?.name ?? "unknown",
+      "roast_date": null,
+      "espresso_notes": shot.description,
+      "roast_level": shot.coffee.target?.roastLevel ?? 0,
+      "bean_notes": shot.coffee.target?.description ?? "",
+      "start_time": shot.date.toIso8601String(),
+      "duration": shot.shotstates.last.sampleTimeCorrected,
+    };
+    data["app"] = <String, dynamic>{
+      "data": <String, dynamic>{"settings": settings}
+    };
 
-    // data["timeframe"] = times;
+    var times = shot.shotstates
+        .map((e) => e.sampleTimeCorrected.abs().toStringAsFixed(4))
+        .toList();
+    var stateChanges =
+        getStateChanges(shot.shotstates).map((e) => e.toString()).toList();
+    data["state_change"] = stateChanges;
 
-    // data["data"] = <String, dynamic>{
-    //   "espresso_flow": shot.shotstates.map((element) => element.groupFlow).toList(),
-    //   "espresso_flow_weight": shot.shotstates.map((element) => element.flowWeight).toList(),
-    //   "espresso_pressure": shot.shotstates.map((element) => element.groupPressure).toList(),
-    //   "espresso_pressure_goal": shot.shotstates.map((element) => element.setGroupPressure).toList(),
-    //   "espresso_flow_goal": shot.shotstates.map((element) => element.setGroupFlow).toList(),
-    //   "espresso_weight": shot.shotstates.map((element) => element.weight).toList(),
-    //   "espresso_temperature_mix": shot.shotstates.map((element) => element.mixTemp).toList(),
-    //   "espresso_temperature_goal": shot.shotstates.map((element) => element.setMixTemp).toList(),
-    //   "espresso_temperature_basket": shot.shotstates.map((element) => element.headTemp).toList(),
-    // };
+    data["elapsed"] = times;
+    data["pressure"] = <String, dynamic>{
+      "pressure": shot.shotstates
+          .map((e) => e.groupPressure.toStringAsFixed(2))
+          .toList(),
+      "goal": shot.shotstates
+          .map((e) => e.setGroupPressure.toStringAsFixed(2))
+          .toList()
+    };
+    data["flow"] = <String, dynamic>{
+      "flow":
+          shot.shotstates.map((e) => e.groupFlow.toStringAsFixed(2)).toList(),
+      "goal": shot.shotstates
+          .map((e) => e.setGroupFlow.toStringAsFixed(2))
+          .toList(),
+      "by_weight":
+          shot.shotstates.map((e) => e.flowWeight.toStringAsFixed(2)).toList()
+    };
 
-    var buffer = StringBuffer();
-    // buffer.writeln("local_time {${shot.date.toIso8601String()}}");
+    data["temperature"] = <String, dynamic>{
+      "basket":
+          shot.shotstates.map((e) => e.headTemp.toStringAsFixed(2)).toList(),
+      "mix": shot.shotstates.map((e) => e.mixTemp.toStringAsFixed(2)).toList(),
+      "goal":
+          shot.shotstates.map((e) => e.setMixTemp.toStringAsFixed(2)).toList()
+    };
 
-    buffer.writeln("clock ${shot.date.millisecondsSinceEpoch ~/ 1000}");
-    // buffer.writeln("app_version {1.39.0}");
-    // buffer.writeln("local_time {Thu Jun 23 16:57:46 CST 2022}");
-    buffer.writeln("espresso_elapsed {$times}");
-    buffer.writeln("espresso_state_change {$stateChanges}");
-    buffer.writeln("espresso_pressure {${shot.shotstates.map((e) => e.groupPressure.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln(
-        "espresso_pressure_goal {${shot.shotstates.map((e) => e.setGroupPressure.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln("espresso_weight {${shot.shotstates.map((e) => e.weight.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln("espresso_flow {${shot.shotstates.map((e) => e.groupFlow.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln("espresso_flow_goal {${shot.shotstates.map((e) => e.setGroupFlow.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln("espresso_flow_weight {${shot.shotstates.map((e) => e.flowWeight.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln(
-        "espresso_temperature_basket {${shot.shotstates.map((e) => e.headTemp.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln("espresso_temperature_mix {${shot.shotstates.map((e) => e.mixTemp.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln(
-        "espresso_temperature_basket {${shot.shotstates.map((e) => e.headTemp.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln(
-        "espresso_temperature_basket {${shot.shotstates.map((e) => e.headTemp.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln(
-        "espresso_temperature_basket {${shot.shotstates.map((e) => e.headTemp.toStringAsFixed(4)).join(" ")}}");
-    buffer.writeln(
-        "espresso_temperature_goal {${shot.shotstates.map((e) => e.setHeadTemp.toStringAsFixed(4)).join(" ")}}");
+    data["totals"] = <String, dynamic>{
+      "weight": shot.shotstates.map((e) => e.weight.toStringAsFixed(2)).toList()
+    };
 
-    // buffer.writeln("timers(espresso_stop) 1655974708631");
-    // buffer.writeln("timers(espresso_start) 1655974677760");
-    // buffer.writeln("timers(espresso_pour_stop) 1655974708631");
-    // buffer.writeln("timers(espresso_pour_start) 1655974689010");
-    // buffer.writeln("timers(espresso_preinfusion_stop) 1655974689010");
-    // buffer.writeln("timers(espresso_preinfusion_start) 1655974677760");
-
-    buffer.writeln("settings {");
-    buffer.writeln("drink_ey ${shot.extractionYield}");
-    buffer.writeln("drink_tds ${shot.totalDissolvedSolids}");
-    buffer.writeln("drink_weight ${shot.pourWeight}");
-
-    buffer.writeln("drinker_name ${shot.drinker}");
-    buffer.writeln("my_name ${shot.barrista}");
-
-    buffer.writeln("bean_brand {${shot.coffee.target?.roaster.target?.name ?? "unknown"}}");
-    buffer.writeln("bean_notes {${shot.coffee.target?.description ?? ""}}");
-    if (shot.coffee.target?.roastDate != null) {
-      var d = DateFormat.yMMMMd().format(shot.coffee.target!.roastDate);
-      buffer.writeln("roast_date {$d}");
-    }
-    buffer.writeln("bean_type {${shot.coffee.target?.name ?? "unknown"}}");
-
-    buffer.writeln("grinder_model {${shot.grinderData.target?.model ?? ""}}");
-    buffer.writeln("grinder_setting {${shot.grinderData.target?.grindSizeSetting ?? 0}}");
-
-    buffer.writeln("grinder_dose_weight {${shot.doseWeight}}");
-
-    buffer.writeln("profile_title {${prof!.title}}");
-    buffer.writeln("profile_notes  {${prof.shotHeader.notes}}");
-
-    buffer.writeln("roast_level {${shot.coffee.target?.roastLevel ?? 0}}");
-    buffer.writeln("running_weight {${shot.pourWeight}}");
-
-    buffer.writeln("espresso_notes {${shot.description}}");
-    buffer.writeln("espresso_enjoyment {${shot.enjoyment * 20}}");
-
-    // buffer.writeln("beverage_type espresso");
-
-    buffer.writeln("}");
-
-    var ret = buffer.toString();
-    return ret;
+    data["profile"] = jsonDecode(profileService.createProfileDefaultJson(prof));
+    return jsonEncode(data);
   }
 }
