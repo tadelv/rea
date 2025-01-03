@@ -1217,10 +1217,13 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             value: settingsService.weightKalmanErrorMeasure,
                             onSubmitted: (val) {
                               settingsService.weightKalmanErrorMeasure = val;
+                              settingsService.notifyDelayed();
                             },
                           ),
                         ),
-												SizedBox(width: 10,),
+                        SizedBox(
+                          width: 10,
+                        ),
                         Expanded(
                           child: SpinBox(
                             keyboardType: TextInputType.number,
@@ -1232,21 +1235,25 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                             value: settingsService.weightKalmanErrorEstimate,
                             onSubmitted: (val) {
                               settingsService.weightKalmanErrorEstimate = val;
+                              settingsService.notifyDelayed();
                             },
                           ),
                         ),
-												SizedBox(width: 10,),
+                        SizedBox(
+                          width: 10,
+                        ),
                         Expanded(
                           child: SpinBox(
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.done,
-                            step: 0.01,
-                            decimals: 2,
+                            step: 0.001,
+                            decimals: 3,
                             decoration:
                                 InputDecoration(label: Text("Kalman Q")),
                             value: settingsService.weightKalmanQ,
                             onSubmitted: (val) {
                               settingsService.weightKalmanQ = val;
+                              settingsService.notifyDelayed();
                             },
                           ),
                         ),
