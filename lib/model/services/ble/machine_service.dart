@@ -1316,6 +1316,11 @@ class EspressoMachineService extends ChangeNotifier {
       cs.ratio1 = coffeeService.currentRecipe?.ratio1 ?? 1;
       cs.ratio2 = coffeeService.currentRecipe?.ratio2 ?? 1;
 
+			cs.doseData.target = currentRecipe.doseData.target;
+			cs.doseData.target?.id = 0;
+			cs.grinderData.target = currentRecipe.grinderData.target;
+			cs.grinderData.target?.id = 0;
+
       //cs.grinderName = coffeeService.currentRecipe?.grinderModel ?? "";
       //cs.grinderSettings = coffeeService.currentRecipe?.grinderSettings ?? 0;
       //cs.grinderData.targetId = coffeeService.currentRecipe?.grinderData.targetId;

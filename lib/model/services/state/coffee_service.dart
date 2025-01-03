@@ -337,16 +337,16 @@ class CoffeeService extends ChangeNotifier {
     cloned.id = 0;
     recipeBox.put(cloned, mode: PutMode.insert);
     if (r.grinderData.target != null) {
-		var gData = await compute((e) => e, cloned.grinderData.target!);
-			gData.id = 0;
+      var gData = await compute((e) => e, cloned.grinderData.target!);
+      gData.id = 0;
       cloned.grinderData.target = gData;
-			grinderDataBox.put(cloned.grinderData.target!, mode: PutMode.insert);
+      grinderDataBox.put(cloned.grinderData.target!, mode: PutMode.insert);
     }
     if (r.doseData.target != null) {
-		var dData = await compute((e) => e, cloned.doseData.target!);
+      var dData = await compute((e) => e, cloned.doseData.target!);
       dData.id = 0;
-			cloned.doseData.target = dData;
-			doseDataBox.put(cloned.doseData.target!, mode: PutMode.insert);
+      cloned.doseData.target = dData;
+      doseDataBox.put(cloned.doseData.target!, mode: PutMode.insert);
     }
     recipeBox.put(cloned);
     return cloned;
@@ -444,10 +444,8 @@ class CoffeeService extends ChangeNotifier {
   /// Shot is added to database and
   /// to visualizer if enabled in settings
   Future<int> addNewShot(Shot currentShot) async {
-    currentShot.doseData.targetId =
-        doseDataBox.put(currentRecipe!.doseData.target!);
-    currentShot.grinderData.targetId =
-        grinderDataBox.put(currentRecipe!.grinderData.target!);
+    doseDataBox.put(currentShot.doseData.target!);
+    grinderDataBox.put(currentShot.grinderData.target!);
     var id = shotBox.put(currentShot);
     await setLastShotId(id);
     if (settings.visualizerUpload) {
