@@ -403,9 +403,11 @@ class CoffeeService extends ChangeNotifier {
       r.isDeleted = true;
       recipeBox.put(r);
     }
+    var remaining = getRecipes();
 
     notifyListeners();
     _controllerRecipe.add(getRecipes());
+    setSelectedRecipe(remaining.first.id);
   }
 
   getBackupData() {

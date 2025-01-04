@@ -372,7 +372,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => RecipeEdit(
-                                id,
+                                0,
                                 title: "Add Recipe",
                               )),
                     );

@@ -250,13 +250,12 @@ class VisualizerService extends ChangeNotifier {
       "timestamp": (shot.date.millisecondsSinceEpoch / 1000).toStringAsFixed(0),
     };
     var settings = <String, dynamic>{
-      "app_name": "REA",
       'profile_title': prof!.title,
       "drink_tds": shot.totalDissolvedSolids,
       "drink_ey": shot.extractionYield,
       "espresso_enjoyment": shot.enjoyment,
       "bean_weight": shot.doseWeight,
-      "drink_weight": shot.drinkWeight,
+      "drink_weight": shot.pourWeight,
       "grinder_model": '${shot.grinderData.target?.model ?? ""} '
           '${shot.doseData.target?.basket != "unknown" ? "with ${shot.doseData.target?.basket}" : ""} ',
       "grinder_setting": '${shot.grinderData.target?.grindSizeSetting ?? ""}'
@@ -272,6 +271,7 @@ class VisualizerService extends ChangeNotifier {
       "duration": shot.shotstates.last.sampleTimeCorrected,
     };
     data["app"] = <String, dynamic>{
+      "app_name": "REA",
       "data": <String, dynamic>{"settings": settings}
     };
 
