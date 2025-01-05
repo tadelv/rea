@@ -330,15 +330,17 @@ class VisualizerService extends ChangeNotifier {
 
     final json = jsonDecode(response.body);
 
-		final enjoyment = json["espresso_enjoyment"] as int?;
-		if (enjoyment != null) {
-		log.shout("enj: $enjoyment");
-    shot.enjoyment = enjoyment.toDouble() / 20;
-		log.shout("a: ${shot.enjoyment}");
-		}
-
+    final enjoyment = json["espresso_enjoyment"] as int?;
+    if (enjoyment != null) {
+      shot.enjoyment = enjoyment.toDouble() / 20;
+    }
 
     shot.description = json["espresso_notes"] as String? ?? shot.description;
+
+    final coffee = shot.coffee.target;
+    if (coffee != null) {
+      coffee.name = json["bean_type"] ?? coffee.name;
+    }
 
     return shot;
   }

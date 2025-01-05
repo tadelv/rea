@@ -111,7 +111,7 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                     log.severe("Error syncing shots $e");
                   }
                 },
-                child: Text("he")),
+                child: const Icon(Icons.cloud_download)),
           TextButton.icon(
             icon: const Icon(Icons.cloud_upload),
             label: const Text("Visualizer"),
