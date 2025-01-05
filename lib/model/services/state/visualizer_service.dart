@@ -6,6 +6,7 @@ import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:despresso/model/shot.dart';
 import 'package:despresso/model/shotstate.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import 'package:logging/logging.dart';
@@ -253,7 +254,7 @@ class VisualizerService extends ChangeNotifier {
       'profile_title': prof!.title,
       "drink_tds": shot.totalDissolvedSolids,
       "drink_ey": shot.extractionYield,
-      "espresso_enjoyment": shot.enjoyment,
+      "espresso_enjoyment": shot.enjoyment * 20,
       "bean_weight": shot.doseWeight,
       "drink_weight": shot.pourWeight,
       "grinder_model": '${shot.grinderData.target?.model ?? ""} '
@@ -315,5 +316,30 @@ class VisualizerService extends ChangeNotifier {
 
     data["profile"] = jsonDecode(profileService.createProfileDefaultJson(prof));
     return jsonEncode(data);
+  }
+
+  Future<Shot> syncShotFromVisualizer(Shot shot) async {
+    if (shot.visualizerId.isEmpty) {
+      return shot;
+    }
+
+    String url = 'https://visualizer.coffee/api/shots/${shot.visualizerId}';
+
+    final response = await http.get(Uri.parse(url));
+    throwIf(response.statusCode != 200, response);
+
+    final json = jsonDecode(response.body);
+
+		final enjoyment = json["espresso_enjoyment"] as int?;
+		if (enjoyment != null) {
+		log.shout("enj: $enjoyment");
+    shot.enjoyment = enjoyment.toDouble() / 20;
+		log.shout("a: ${shot.enjoyment}");
+		}
+
+
+    shot.description = json["espresso_notes"] as String? ?? shot.description;
+
+    return shot;
   }
 }

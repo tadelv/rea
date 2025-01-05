@@ -86,47 +86,71 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
             },
           ),
           if (settingsService.visualizerUpload)
-            TextButton.icon(
-              icon: const Icon(Icons.cloud_upload),
-              label: const Text("Visualizer"),
-              onPressed: () async {
-                if (selectedShot == 0) {
-                  getIt<SnackbarService>().notify(
-                      S.of(context).screenDiaryNoShotsToUploadSelected,
-                      SnackbarNotificationType.info);
-
-                  return;
-                }
-                try {
-                  setState(() {
-                    _busy = true;
-                  });
-                  setState(() {
-                    _busyProgress = 1;
-                  });
+            TextButton(
+                onPressed: () async {
                   var shot = shotBox.get(selectedShot);
-                  var id = await visualizerService.sendShotToVisualizer(shot!);
-                  shot.visualizerId = id;
-                  shotBox.put(shot);
-                  getIt<SnackbarService>()
-                      // ignore: use_build_context_synchronously
-                      .notify(
-                          S.of(context).screenDiarySuccessUploadingYourShots,
-                          SnackbarNotificationType.info);
-                } catch (e) {
-                  getIt<SnackbarService>().notify(
-                      S.of(context).screenDiaryErrorUploadingShots +
-                          e.toString(),
-                      SnackbarNotificationType.severe);
+                  try {
+                    setState(() {
+                      _busy = true;
+                      _busyProgress = 1;
+                    });
+                    shot =
+                        await visualizerService.syncShotFromVisualizer(shot!);
+                    shotBox.put(shot);
+                    setState(() {});
+                    setState(() {
+                      _busy = false;
+                      _busyProgress = 0;
+                    });
+                  } catch (e) {
+                    getIt<SnackbarService>().notify(
+                        S.of(context).screenDiaryErrorUploadingShots +
+                            e.toString(),
+                        SnackbarNotificationType.severe);
 
-                  log.severe("Error uploading shots $e");
-                }
+                    log.severe("Error syncing shots $e");
+                  }
+                },
+                child: Text("he")),
+          TextButton.icon(
+            icon: const Icon(Icons.cloud_upload),
+            label: const Text("Visualizer"),
+            onPressed: () async {
+              if (selectedShot == 0) {
+                getIt<SnackbarService>().notify(
+                    S.of(context).screenDiaryNoShotsToUploadSelected,
+                    SnackbarNotificationType.info);
+
+                return;
+              }
+              try {
                 setState(() {
-                  _busy = false;
-                  _busyProgress = 0;
+                  _busy = true;
                 });
-              },
-            ),
+                setState(() {
+                  _busyProgress = 1;
+                });
+                var shot = shotBox.get(selectedShot);
+                var id = await visualizerService.sendShotToVisualizer(shot!);
+                shot.visualizerId = id;
+                shotBox.put(shot);
+                getIt<SnackbarService>()
+                    // ignore: use_build_context_synchronously
+                    .notify(S.of(context).screenDiarySuccessUploadingYourShots,
+                        SnackbarNotificationType.info);
+              } catch (e) {
+                getIt<SnackbarService>().notify(
+                    S.of(context).screenDiaryErrorUploadingShots + e.toString(),
+                    SnackbarNotificationType.severe);
+
+                log.severe("Error uploading shots $e");
+              }
+              setState(() {
+                _busy = false;
+                _busyProgress = 0;
+              });
+            },
+          ),
         ],
       ),
       body: ModalProgressOverlay(
