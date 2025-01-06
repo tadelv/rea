@@ -378,7 +378,12 @@ class CoffeeService extends ChangeNotifier {
   void updateShot(Shot shot) {
     shot.grinderData.targetId = grinderDataBox.put(shot.grinderData.target!);
     shot.doseData.targetId = doseDataBox.put(shot.doseData.target!);
-
+    final coffee = coffeeBox.get(shot.coffee.targetId);
+    if (coffee != null) {
+      coffee.name = shot.coffee.target!.name;
+			coffee.roastDate = shot.coffee.target!.roastDate;
+      coffeeBox.put(coffee);
+    }
     shotBox.put(shot);
     notifyListeners();
   }

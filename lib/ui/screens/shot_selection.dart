@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import 'package:despresso/generated/l10n.dart';
+import 'package:despresso/model/services/state/coffee_service.dart';
 import 'package:despresso/model/services/state/notification_service.dart';
 import 'package:despresso/model/services/state/profile_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
@@ -96,8 +97,7 @@ class ShotSelectionTabState extends State<ShotSelectionTab> {
                     });
                     shot =
                         await visualizerService.syncShotFromVisualizer(shot!);
-                    shotBox.put(shot);
-                    setState(() {});
+                    getIt<CoffeeService>().updateShot(shot);
                     setState(() {
                       _busy = false;
                       _busyProgress = 0;

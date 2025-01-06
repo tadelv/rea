@@ -264,17 +264,21 @@ class VisualizerService extends ChangeNotifier {
           '${shot.grinderData.target?.feedRate.isEmpty == false ? ", feed:${shot.grinderData.target!.feedRate}" : ""}',
       "bean_brand": shot.coffee.target?.roaster.target?.name ?? "unknown",
       "bean_type": shot.coffee.target?.name ?? "unknown",
-      "roast_date": null,
       "espresso_notes": shot.description,
       "roast_level": shot.coffee.target?.roastLevel ?? 0,
       "bean_notes": shot.coffee.target?.description ?? "",
       "start_time": shot.date.toIso8601String(),
       "duration": shot.shotstates.last.sampleTimeCorrected,
     };
+
     data["app"] = <String, dynamic>{
       "app_name": "REA",
       "data": <String, dynamic>{"settings": settings}
     };
+    var roastDate = shot.coffee.target?.roastDate;
+    if (roastDate != null) {
+      data["app"]["data"]["settings"]["roast_date"] = DateFormat('dd.MM.yyyy').format(roastDate);
+    }
 
     var times = shot.shotstates
         .map((e) => e.sampleTimeCorrected.abs().toStringAsFixed(4))
@@ -324,11 +328,14 @@ class VisualizerService extends ChangeNotifier {
     }
 
     String url = 'https://visualizer.coffee/api/shots/${shot.visualizerId}';
-
-    final response = await http.get(Uri.parse(url));
+    final request = http.Request("GET", Uri.parse(url));
+    request.headers.putIfAbsent("authorization", () {
+      return "Bearer $_accessToken";
+    });
+    final response = await request.send();
     throwIf(response.statusCode != 200, response);
 
-    final json = jsonDecode(response.body);
+    final json = jsonDecode(await response.stream.bytesToString());
 
     final enjoyment = json["espresso_enjoyment"] as int?;
     if (enjoyment != null) {
@@ -339,7 +346,14 @@ class VisualizerService extends ChangeNotifier {
 
     final coffee = shot.coffee.target;
     if (coffee != null) {
+      log.fine('replacing: ${coffee.name} with ${json["bean_type"]}');
       coffee.name = json["bean_type"] ?? coffee.name;
+      try {
+        coffee.roastDate = DateFormat('dd.MM.yyyy').parse(json["roast_date"]);
+				log.fine('roast date is: ${coffee.roastDate}');
+      } catch (e) {
+        log.warning('failed to get date from ${json["roast_date"]}, $e');
+      }
     }
 
     return shot;
