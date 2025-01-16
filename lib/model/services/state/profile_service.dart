@@ -563,7 +563,7 @@ class ProfileService extends ChangeNotifier {
         return json;
       }
       File f = File(file.path);
-      json[file.uri.toString()] = f.readAsStringSync();
+      json[file.uri.toString()] = jsonEncode(f.readAsStringSync());
       return json;
     });
     final jsonData = jsonEncode(jsonMap);
