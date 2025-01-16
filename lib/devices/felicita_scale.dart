@@ -84,7 +84,7 @@ class FelicitaScale extends ChangeNotifier implements AbstractScale {
     log.info("Sending to Felicita");
     final characteristic =
         QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: DataUUID, deviceId: device.id);
-    return await connection.writeCharacteristicWithoutResponse(characteristic, value: Uint8List.fromList(payload));
+    return await connection.writeCharacteristicWithResponse(characteristic, value: Uint8List.fromList(payload));
   }
 
   void _onStateChange(DeviceConnectionState state) async {
@@ -159,4 +159,9 @@ class FelicitaScale extends ChangeNotifier implements AbstractScale {
   Future<void> power(PowerMode start) {
     return Future(() => null);
   }
+
+	@override
+	  double sensorLag() {
+	    return 0.50;
+	  }
 }

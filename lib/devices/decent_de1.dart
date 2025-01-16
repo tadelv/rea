@@ -787,7 +787,7 @@ class DE1 extends ChangeNotifier implements IDe1 {
     var data = (double.parse(newFlow.toStringAsFixed(2)) * 1000).toInt();
     bytes.setUint32(0, data, Endian.little);
 
-    steamFlow = newFlow;
+    flowEstimation = newFlow;
     return _mmrWrite(
         mmrAddrLookup[MMRAddrEnum.CalFlowEst]!, bytes.buffer.asUint8List());
   }

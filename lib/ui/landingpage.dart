@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:despresso/devices/decent_de1.dart';
 import 'package:despresso/model/services/state/coffee_service.dart';
 import 'package:despresso/model/services/state/notification_service.dart';
 import 'package:despresso/model/services/state/profile_service.dart';
@@ -289,7 +290,9 @@ class LandingPageState extends State<LandingPage>
                         log.fine("focus: $val");
                         //log.fine(
                         //    "mnt: $mounted, vis: $currentlyVisible, foc: ${hwKbdFocus.hasPrimaryFocus}, rcp:${recipesFocus.hasPrimaryFocus}, rcpf: ${recipesFocus.hasFocus}");
-                        _focusDebouncer.run(() {_processFocus(val);});
+                        _focusDebouncer.run(() {
+                          _processFocus(val);
+                        });
                       },
                       child: TabBarView(
                         controller: _tabController,
@@ -351,8 +354,8 @@ class LandingPageState extends State<LandingPage>
                   MaterialPageRoute(
                       //builder: (context) => const ProfilesScreen(
                       //      saveToRecipe: false,
-											builder: (context) => const ProfilesList(
-											isBrowsingOnly: true,
+                      builder: (context) => const ProfilesList(
+                            isBrowsingOnly: true,
                           )),
                 );
               },
@@ -744,30 +747,30 @@ class LandingPageState extends State<LandingPage>
     switch (event.logicalKey) {
       case LogicalKeyboardKey.keyE:
         log.info("Brewing");
-        machineService.setState(EspressoMachineState.espresso);
+        machineService.de1?.requestState(De1StateEnum.espresso);
         break;
       case LogicalKeyboardKey.keyW:
         log.info("Water");
-        machineService.setState(EspressoMachineState.water);
+        machineService.de1?.requestState(De1StateEnum.hotWater);
         break;
       case LogicalKeyboardKey.keyS:
         log.info("Steam");
-        machineService.setState(EspressoMachineState.steam);
+        machineService.de1?.requestState(De1StateEnum.steam);
         break;
       case LogicalKeyboardKey.keyF:
         log.info("Flush");
-        machineService.setState(EspressoMachineState.flush);
+        machineService.de1?.requestState(De1StateEnum.hotWaterRinse);
         break;
       case LogicalKeyboardKey.keyP:
         final machineState = machineService.lastState;
         if (machineState == EspressoMachineState.sleep) {
-          machineService.setState(EspressoMachineState.idle);
+          machineService.de1?.requestState(De1StateEnum.idle);
         } else if (machineState == EspressoMachineState.idle) {
-          machineService.setState(EspressoMachineState.sleep);
+          machineService.de1?.requestState(De1StateEnum.sleep);
         }
         break;
       case LogicalKeyboardKey.space:
-        machineService.setState(EspressoMachineState.idle);
+        machineService.de1?.requestState(De1StateEnum.idle);
         log.info("stop");
         break;
       default:

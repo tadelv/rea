@@ -22,6 +22,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_archive/flutter_archive.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart' as ble;
 import 'package:flutter_settings_screens/flutter_settings_screens.dart';
+import 'package:flutter_spinbox/flutter_spinbox.dart';
 import 'package:logging/logging.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:network_info_plus/network_info_plus.dart';
@@ -545,7 +546,7 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                     defaultValue:
                         settingsService.targetEspressoWeightTimeAdjust,
                     min: 0.05,
-                    max: 0.95,
+                    max: 2.00,
                     step: 0.05,
                     leading: const Icon(Icons.timer),
                     onChange: (value) {},
@@ -1184,47 +1185,102 @@ class SettingsScreenState extends State<AppSettingsScreen> {
         //    ),
         //  ],
         //),
-        //SettingsGroup(
-        //  title: "Experimental",
-        //  children: [
-        //    SimpleSettingsTile(
-        //      title: "Experimental",
-        //      leading: const Icon(Icons.privacy_tip),
-        //      child: SettingsScreen(
-        //        title: "Experimental",
-        //        children: <Widget>[
-        //          SwitchSettingsTile(
-        //            leading: const Icon(Icons.settings_remote),
-        //            settingKey: SettingKeys.useCafeHub.name,
-        //            defaultValue: settingsService.useCafeHub,
-        //            title: "Use CafeHub instead of BlueTooth",
-        //            onChange: (value) {
-        //              settingsService.notifyDelayed();
-        //            },
-        //          ),
-        //          TextInputSettingsTile(
-        //            title:
-        //                "CafeHub Websocket Endpoint (Usually: ws://IP_OF_YOUR_TABLET_RUNNING_CAFEHUB:8765)",
-        //            settingKey: SettingKeys.chUrl.name,
-        //            initialValue: settingsService.chUrl,
-        //            onChange: (value) {
-        //              settingsService.notifyDelayed();
-        //            },
-        //          ),
-        //          SwitchSettingsTile(
-        //            leading: const Icon(Icons.settings_remote),
-        //            settingKey: SettingKeys.useLongUUID.name,
-        //            defaultValue: settingsService.useLongUUID,
-        //            title: "Use Long UUID (usually if Android)",
-        //            onChange: (value) {
-        //              settingsService.notifyDelayed();
-        //            },
-        //          ),
-        //        ],
-        //      ),
-        //    ),
-        //  ],
-        //),
+        SettingsGroup(
+          title: "Experimental",
+          children: [
+            SimpleSettingsTile(
+              title: "Experimental",
+              leading: const Icon(Icons.privacy_tip),
+              child: SettingsScreen(
+                title: "Experimental",
+                children: <Widget>[
+                  SwitchSettingsTile(
+                    leading: const Icon(Icons.settings_remote),
+                    settingKey: SettingKeys.experimentalSAW.name,
+                    defaultValue: settingsService.experimentalSAW,
+                    title: "Use experimental Stop At Weight",
+                    onChange: (value) {
+                      settingsService.notifyDelayed();
+                    },
+                  ),
+                  Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        Expanded(
+                          child: SpinBox(
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            step: 0.01,
+                            decimals: 2,
+                            decoration: InputDecoration(
+                                label: Text("Kalman Error measure")),
+                            value: settingsService.weightKalmanErrorMeasure,
+                            onSubmitted: (val) {
+                              settingsService.weightKalmanErrorMeasure = val;
+                              settingsService.notifyDelayed();
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: SpinBox(
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            step: 0.01,
+                            decimals: 2,
+                            decoration: InputDecoration(
+                                label: Text("Kalman Error estimate")),
+                            value: settingsService.weightKalmanErrorEstimate,
+                            onSubmitted: (val) {
+                              settingsService.weightKalmanErrorEstimate = val;
+                              settingsService.notifyDelayed();
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: SpinBox(
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            step: 0.001,
+                            decimals: 3,
+                            decoration:
+                                InputDecoration(label: Text("Kalman Q")),
+                            value: settingsService.weightKalmanQ,
+                            onSubmitted: (val) {
+                              settingsService.weightKalmanQ = val;
+                              settingsService.notifyDelayed();
+                            },
+                          ),
+                        ),
+                      ])),
+                  //TextInputSettingsTile(
+                  //  title:
+                  //      "CafeHub Websocket Endpoint (Usually: ws://IP_OF_YOUR_TABLET_RUNNING_CAFEHUB:8765)",
+                  //  settingKey: SettingKeys.chUrl.name,
+                  //  initialValue: settingsService.chUrl,
+                  //  onChange: (value) {
+                  //    settingsService.notifyDelayed();
+                  //  },
+                  //),
+                  //SwitchSettingsTile(
+                  //  leading: const Icon(Icons.settings_remote),
+                  //  settingKey: SettingKeys.useLongUUID.name,
+                  //  defaultValue: settingsService.useLongUUID,
+                  //  title: "Use Long UUID (usually if Android)",
+                  //  onChange: (value) {
+                  //    settingsService.notifyDelayed();
+                  //  },
+                  //),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

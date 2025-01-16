@@ -16,11 +16,13 @@ class DifluidScale extends ChangeNotifier implements AbstractScale {
   final log = l.Logger('DifluidScale');
 
   // ignore: non_constant_identifier_names
-  static Uuid ServiceUUID =
-      useLongCharacteristics() ? Uuid.parse('000000ee-0000-1000-8000-00805f9b34fb') : Uuid.parse('00ee');
+  static Uuid ServiceUUID = useLongCharacteristics()
+      ? Uuid.parse('000000ee-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('00ee');
   // ignore: non_constant_identifier_names
-  static Uuid DataUUID =
-      useLongCharacteristics() ? Uuid.parse('0000aa01-0000-1000-8000-00805f9b34fb') : Uuid.parse('aa01');
+  static Uuid DataUUID = useLongCharacteristics()
+      ? Uuid.parse('0000aa01-0000-1000-8000-00805f9b34fb')
+      : Uuid.parse('aa01');
 
   late ScaleService scaleService;
 
@@ -38,7 +40,8 @@ class DifluidScale extends ChangeNotifier implements AbstractScale {
     scaleService = getIt<ScaleService>();
     index = getScaleIndex(device.id);
     scaleService.setScaleInstance(this, index);
-    _deviceListener = connection.connectToDevice(id: device.id).listen((connectionState) {
+    _deviceListener =
+        connection.connectToDevice(id: device.id).listen((connectionState) {
       _onStateChange(connectionState.connectionState);
     }, onError: (Object error) {
       // Handle a possible error
@@ -95,9 +98,12 @@ class DifluidScale extends ChangeNotifier implements AbstractScale {
 
   Future<void> writeToDifluidScale(List<int> payload) async {
     log.info("Sending to Difluid Scale");
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: DataUUID, deviceId: device.id);
-    return await connection.writeCharacteristicWithResponse(characteristic, value: Uint8List.fromList(payload));
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: DataUUID,
+        deviceId: device.id);
+    return await connection.writeCharacteristicWithResponse(characteristic,
+        value: Uint8List.fromList(payload));
   }
 
   void _onStateChange(DeviceConnectionState state) async {
@@ -114,10 +120,13 @@ class DifluidScale extends ChangeNotifier implements AbstractScale {
         scaleService.setState(ScaleState.connected, index);
         // await device.discoverAllServicesAndCharacteristics();
 
-        final characteristic =
-            QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: DataUUID, deviceId: device.id);
+        final characteristic = QualifiedCharacteristic(
+            serviceId: ServiceUUID,
+            characteristicId: DataUUID,
+            deviceId: device.id);
 
-        _characteristicsSubscription = connection.subscribeToCharacteristic(characteristic).listen((data) {
+        _characteristicsSubscription =
+            connection.subscribeToCharacteristic(characteristic).listen((data) {
           _notificationCallback(data);
         }, onError: (dynamic error) {
           log.severe("Subscribe to $characteristic failed: $error");
@@ -173,5 +182,10 @@ class DifluidScale extends ChangeNotifier implements AbstractScale {
   @override
   Future<void> power(PowerMode start) {
     return Future(() => null);
+  }
+
+  @override
+  double sensorLag() {
+    return 0.50;
   }
 }

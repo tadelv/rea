@@ -332,9 +332,24 @@ class CoffeeService extends ChangeNotifier {
     return id;
   }
 
-  int addRecipeFromRecipe(Recipe r) {
-    var id = recipeBox.put(r);
-    return id;
+  Future<Recipe> addRecipeFromRecipe(Recipe r) async {
+    var cloned = await compute((e) => e, r);
+    cloned.id = 0;
+    recipeBox.put(cloned, mode: PutMode.insert);
+    if (r.grinderData.target != null) {
+      var gData = await compute((e) => e, cloned.grinderData.target!);
+      gData.id = 0;
+      cloned.grinderData.target = gData;
+      grinderDataBox.put(cloned.grinderData.target!, mode: PutMode.insert);
+    }
+    if (r.doseData.target != null) {
+      var dData = await compute((e) => e, cloned.doseData.target!);
+      dData.id = 0;
+      cloned.doseData.target = dData;
+      doseDataBox.put(cloned.doseData.target!, mode: PutMode.insert);
+    }
+    recipeBox.put(cloned);
+    return cloned;
   }
 
   List<Recipe> getRecipes() {
@@ -362,8 +377,13 @@ class CoffeeService extends ChangeNotifier {
 
   void updateShot(Shot shot) {
     shot.grinderData.targetId = grinderDataBox.put(shot.grinderData.target!);
-		shot.doseData.targetId = doseDataBox.put(shot.doseData.target!);
-
+    shot.doseData.targetId = doseDataBox.put(shot.doseData.target!);
+    final coffee = coffeeBox.get(shot.coffee.targetId);
+    if (coffee != null) {
+      coffee.name = shot.coffee.target!.name;
+			coffee.roastDate = shot.coffee.target!.roastDate;
+      coffeeBox.put(coffee);
+    }
     shotBox.put(shot);
     notifyListeners();
   }
@@ -386,11 +406,13 @@ class CoffeeService extends ChangeNotifier {
     var r = recipeBox.get(id);
     if (r != null) {
       r.isDeleted = true;
-      updateRecipe(r);
+      recipeBox.put(r);
     }
+    var remaining = getRecipes();
 
     notifyListeners();
     _controllerRecipe.add(getRecipes());
+    setSelectedRecipe(remaining.first.id);
   }
 
   getBackupData() {
@@ -429,10 +451,8 @@ class CoffeeService extends ChangeNotifier {
   /// Shot is added to database and
   /// to visualizer if enabled in settings
   Future<int> addNewShot(Shot currentShot) async {
-    currentShot.doseData.targetId =
-        doseDataBox.put(currentRecipe!.doseData.target!);
-    currentShot.grinderData.targetId =
-        grinderDataBox.put(currentRecipe!.grinderData.target!);
+    doseDataBox.put(currentShot.doseData.target!);
+    grinderDataBox.put(currentShot.grinderData.target!);
     var id = shotBox.put(currentShot);
     await setLastShotId(id);
     if (settings.visualizerUpload) {
@@ -470,7 +490,7 @@ class CoffeeService extends ChangeNotifier {
     });
   }
 
-	List<String> availableBasketInfos() {
+  List<String> availableBasketInfos() {
     final dataBox = objectBox.store.box<DoseData>();
 
     return dataBox.getAll().map((e) => e.basket).fold([], (c, e) {
@@ -480,5 +500,5 @@ class CoffeeService extends ChangeNotifier {
       c.add(e);
       return c;
     });
-	}
+  }
 }

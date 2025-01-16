@@ -1,0 +1,4 @@
+keyAlias=android
+keyPassword=android
+storeFile=../../release.keystore
+storePassword=android

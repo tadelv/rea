@@ -1,6 +1,9 @@
 import 'package:despresso/generated/l10n.dart';
+import 'package:despresso/model/dose_data.dart';
+import 'package:despresso/model/grinder_data.dart';
 import 'package:despresso/model/recipe.dart';
 import 'package:despresso/model/services/state/coffee_service.dart';
+import 'package:despresso/objectbox.g.dart';
 import 'package:despresso/service_locator.dart';
 import 'package:despresso/ui/screens/coffee_edit.dart';
 import 'package:despresso/ui/widgets/bean_select.dart';
@@ -56,9 +59,14 @@ class RecipeEditState extends State<RecipeEdit> {
     coffeeService.addListener(updateCoffee);
 
     if (_selectedRecipeId > 0) {
-      _editedRecipe = coffeeService.recipeBox.get(_selectedRecipeId)!;
+      _editedRecipe =
+          coffeeService.recipeBox.get(_selectedRecipeId) ?? Recipe();
     } else {
       _editedRecipe = Recipe();
+      _editedRecipe.grinderData.target =
+          GrinderData(rpm: "", feedRate: "", model: "", grindSizeSetting: 0.0);
+      _editedRecipe.doseData.target = DoseData(basket: "");
+      log.shout("${_editedRecipe.grinderData.target?.grindSizeSetting}");
     }
 
     theForm = fb.group(<String, Object>{
@@ -80,12 +88,12 @@ class RecipeEditState extends State<RecipeEdit> {
         Validators.min(0.0),
         Validators.max(5000.0),
       ],
-      'grinderSettings': [_editedRecipe.grinderData.target!.grindSizeSetting],
-      'grinderModel': [_editedRecipe.grinderData.target!.model],
+      'grinderSettings': [_editedRecipe.grinderData.target?.grindSizeSetting],
+      'grinderModel': [_editedRecipe.grinderData.target?.model],
       'useAdvancedMetaData': [_editedRecipe.showAdvancedMetaData],
-      'grinderRPM': [_editedRecipe.grinderData.target!.rpm],
-      'grinderFeedRate': [_editedRecipe.grinderData.target!.feedRate],
-      'basketInfo': [_editedRecipe.doseData.target!.basket],
+      'grinderRPM': [_editedRecipe.grinderData.target?.rpm],
+      'grinderFeedRate': [_editedRecipe.grinderData.target?.feedRate],
+      'basketInfo': [_editedRecipe.doseData.target?.basket],
       'ratio1': [
         _editedRecipe.ratio1,
         Validators.min(0.0),

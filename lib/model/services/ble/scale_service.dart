@@ -7,6 +7,7 @@ import 'package:despresso/model/services/cafehub/ch_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:simple_kalman/simple_kalman.dart';
 
 import '../../../devices/abstract_scale.dart';
 import '../../../service_locator.dart';
@@ -38,6 +39,14 @@ class BatteryLevel {
   int level = 0;
   int index = 0;
   BatteryLevel(this.level, this.index);
+}
+
+SimpleKalman initKalman() {
+  final settings = getIt<SettingsService>();
+  return SimpleKalman(
+      errorMeasure: settings.weightKalmanErrorMeasure,
+      errorEstimate: settings.weightKalmanErrorEstimate,
+      q: settings.weightKalmanQ);
 }
 
 class ScaleService extends ChangeNotifier {
@@ -92,7 +101,7 @@ class ScaleService extends ChangeNotifier {
   late StreamController<BatteryLevel> _controllerBattery1;
   late Stream<BatteryLevel> _streamBattery1;
 
-  List<List<double>> averaging = [[], []];
+  List<SimpleKalman> kalmans = [initKalman(), initKalman()];
 
   ScaleService() {
     _controller0 = StreamController<WeightMeassurement>();
@@ -113,6 +122,7 @@ class ScaleService extends ChangeNotifier {
       setWeight(0, index);
       tareInProgress = true;
       await _scale[index]?.writeTare();
+      kalmans[index] = initKalman();
       Future.delayed(const Duration(milliseconds: 500), () {
         tareInProgress = false;
         // setWeight(0);
@@ -162,7 +172,7 @@ class ScaleService extends ChangeNotifier {
 
   void setTara(int index) {
     log.info("Tara done");
-    averaging[index].clear();
+    kalmans[index] = initKalman();
   }
 
   void setWeight(double weight, index) {
@@ -179,13 +189,8 @@ class ScaleService extends ChangeNotifier {
     if (timeDiff == 0) return;
     var n = math.min(10.0, (weight - _weight[index]).abs() / (timeDiff / 1000));
 
-    averaging[index].add(n);
+    flow = kalmans[index].filtered(n);
 
-    flow = averaging[index].average;
-
-    if (averaging[index].length > 10) {
-      averaging[index].removeAt(0);
-    }
     _weight[index] = weight;
     _flow[index] = flow;
     last = now;

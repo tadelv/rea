@@ -106,13 +106,10 @@ enum SettingKeys {
   visualizerRefreshToken,
   visualizerExpiring,
   currentVersion,
-  uploadTailMethod,
-}
-
-enum UploadTailMethod {
-  none,
-  targetVolume,
-  empty,
+  experimentalSAW,
+  weightKalmanErrorMeasure,
+  weightKalmanErrorEstimate,
+  weightKalmanQ
 }
 
 class SettingsService extends ChangeNotifier {
@@ -566,25 +563,27 @@ class SettingsService extends ChangeNotifier {
   set scaleSecondary(String value) =>
       Settings.setValue<String>(SettingKeys.scaleSecondary.name, value);
 
-  UploadTailMethod get uploadTailMethod {
-    String? stringRep =
-        Settings.getValue<String>(SettingKeys.uploadTailMethod.name);
-    switch (stringRep) {
-      case "targetVolume":
-        return UploadTailMethod.targetVolume;
-      case "empty":
-        return UploadTailMethod.empty;
-      case "none":
-        return UploadTailMethod.none;
-      default:
-        return UploadTailMethod.targetVolume;
-    }
-  }
+  bool get experimentalSAW =>
+      Settings.getValue(SettingKeys.experimentalSAW.name) ?? false;
+  set experimentalSAW(bool value) =>
+      Settings.setValue(SettingKeys.experimentalSAW.name, value);
 
-  set uploadTailMethod(UploadTailMethod value) {
-    log.shout("Setting uploadTailMethod to ${value.name}");
-    Settings.setValue<String>(SettingKeys.uploadTailMethod.name, value.name);
-  }
+  double get weightKalmanErrorMeasure =>
+      Settings.getValue<double>(SettingKeys.weightKalmanErrorMeasure.name) ??
+      0.1;
+  set weightKalmanErrorMeasure(double value) => Settings.setValue<double>(
+      SettingKeys.weightKalmanErrorMeasure.name, value);
+
+  double get weightKalmanErrorEstimate =>
+      Settings.getValue<double>(SettingKeys.weightKalmanErrorEstimate.name) ??
+      0.1;
+  set weightKalmanErrorEstimate(double value) => Settings.setValue<double>(
+      SettingKeys.weightKalmanErrorEstimate.name, value);
+
+  double get weightKalmanQ =>
+      Settings.getValue<double>(SettingKeys.weightKalmanQ.name) ?? 0.1;
+  set weightKalmanQ(double value) =>
+      Settings.setValue<double>(SettingKeys.weightKalmanQ.name, value);
 
   void notifyDelayed() {
     Future.delayed(

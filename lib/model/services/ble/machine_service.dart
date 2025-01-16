@@ -333,11 +333,11 @@ class EspressoMachineService extends ChangeNotifier {
     // rate to drop off before canceling
     weightSubscriptionShouldCancel = true;
 
-    // wait up to 2 seconds for flow rate to drop to near-zero, so our weight data
+    // wait up to 4 seconds for flow rate to drop to near-zero, so our weight data
     // captures any additional weight flow after the machine goes into the idle
     // state.
-    final fallback = Future.delayed(const Duration(seconds: 2));
-    await Future.any([weightCompleter.future, fallback]);
+    final fallback = Future.delayed(const Duration(seconds: 4));
+		await Future.any([fallback]);
 
     // resolve a new list holding the shot's weights
     final measurementsToResolve = [...weightMeasurementsDuringShot];
@@ -885,7 +885,8 @@ class EspressoMachineService extends ChangeNotifier {
                       timeToWeight > 0 && timeToWeight < 100 ? timeToWeight : 0;
                   log.info(
                       "Time to weight: $timeToWeight ${shot.weight} ${shot.flowWeight}");
-                  if (timeToWeight > 0 &&
+                  if (settingsService.experimentalSAW == false &&
+                      timeToWeight > 0 &&
                       timeToWeight < 2.5 &&
                       (settingsService.targetEspressoWeight - shot.weight <
                           5)) {
@@ -904,14 +905,34 @@ class EspressoMachineService extends ChangeNotifier {
                       },
                     );
                   }
-                }
-                // if (weight > 1 && shot.weight + 1 > weight) {
-                //   log.info("Shot Weight reached ${shot.weight} > $weight Portime: $lastPourTime");
+                  if (settingsService.experimentalSAW) {
+                    // Calculate predicted weight based on current shot data
+                    final weightPrediction = shot.weight;
 
-                //   if (settingsService.shotStopOnWeight) {
-                //     triggerEndOfShot();
-                //   }
-                // }
+                    // Calculate a dynamic threshold based on target weight adjustment and current flow weight
+                    final stopThreshold =
+                        settingsService.targetEspressoWeightTimeAdjust *
+                            shot.flowWeight;
+
+                    // If predicted weight exceeds target minus the stop threshold, proceed with stopping logic
+                    if (weightPrediction >=
+                        (settingsService.targetEspressoWeight -
+                            stopThreshold)) {
+                      log.info(
+                          "Predicted weight: ${settingsService.targetEspressoWeight}g at current weight: ${shot.weight}g");
+                      log.info(
+                          "Flow weight: ${shot.flowWeight}g/s, Stop threshold: ${stopThreshold}g");
+
+                      // Add delayedStop just in case, to not trigger this again.
+                      _delayedStop = Timer(Duration(seconds: 1), () {});
+
+                      // Directly stop the shot with a log message
+                      log.info(
+                          "Stopping shot before reaching target to account for water already in the system.");
+                      triggerEndOfShot();
+                    }
+                  }
+                }
               }
             }
           }
@@ -1233,7 +1254,7 @@ class EspressoMachineService extends ChangeNotifier {
       currentRecipe.id = 0;
       currentRecipe.isShot = true;
 
-      cs.recipe.targetId = coffeeService.addRecipeFromRecipe(currentRecipe);
+      cs.recipe.target = await coffeeService.addRecipeFromRecipe(currentRecipe);
       var currentCoffee = coffeeService.currentCoffee!;
       currentCoffee.id = 0;
       currentCoffee.isShot = true;
@@ -1294,6 +1315,11 @@ class EspressoMachineService extends ChangeNotifier {
       cs.pourWeight = weightMeasurements.last.weight.weight;
       cs.ratio1 = coffeeService.currentRecipe?.ratio1 ?? 1;
       cs.ratio2 = coffeeService.currentRecipe?.ratio2 ?? 1;
+
+			cs.doseData.target = currentRecipe.doseData.target;
+			cs.doseData.target?.id = 0;
+			cs.grinderData.target = currentRecipe.grinderData.target;
+			cs.grinderData.target?.id = 0;
 
       //cs.grinderName = coffeeService.currentRecipe?.grinderModel ?? "";
       //cs.grinderSettings = coffeeService.currentRecipe?.grinderSettings ?? 0;

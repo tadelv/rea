@@ -331,105 +331,47 @@ class ProfileService extends ChangeNotifier {
   }
 
   String createProfileDefaultJson(De1ShotProfile prof) {
-    var buffer = StringBuffer();
-    buffer.writeln("{");
-
-    buffer.writeln('"title": "${prof.title}",');
-    buffer.writeln('"author": "${prof.shotHeader.author}",');
-    buffer.writeln('"notes": "${prof.shotHeader.notes}",');
-    buffer.writeln('"beverage_type": "${prof.shotHeader.beverageType}",');
-    buffer.writeln('"id": "${prof.id}",');
-    buffer.writeln('"tank_temperature": "${prof.shotHeader.tankTemperature}",');
-    buffer.writeln('"target_weight": "${prof.shotHeader.targetWeight}",');
-    buffer.writeln('"target_volume": "${prof.shotHeader.targetVolume}",');
-    buffer.writeln(
-        '"target_volume_count_start": "${prof.shotHeader.targetVolumeCountStart}",');
-    buffer.writeln(
-        '"legacy_profile_type": "${prof.shotHeader.legacyProfileType}",');
-    buffer.writeln('"type": "${prof.shotHeader.type}",');
-    buffer.writeln('"lang": "${prof.shotHeader.lang}",');
-    buffer.writeln('"hidden": "${prof.shotHeader.hidden}",');
-    buffer.writeln('"version": "${prof.shotHeader.version}",');
-    buffer.writeln('"steps": [');
-
-    var frameNum = 0;
-    for (var step in prof.shotFrames) {
-      buffer.writeln("{");
-      buffer.writeln('"name": "${step.name}",');
-      buffer.writeln('"temperature": "${step.temp}",');
-      buffer.writeln('"weight": "${step.maxWeight}",');
-
-      var sensor = (step.flag & TMixTemp == TMixTemp) ? "water" : "coffee";
-      buffer.writeln('"sensor": "$sensor",');
-
-      buffer.writeln('"pump": "${step.pump.name}",');
-      buffer.writeln('"transition": "${step.transition.name}",');
-
-      if (step.pump == De1PumpMode.flow) {
-        buffer.writeln('"flow": "${step.setVal}",');
-      } else {
-        buffer.writeln('"pressure": "${step.setVal}",');
+    var map = <String, dynamic>{};
+    map["title"] = prof.title;
+    map["author"] = prof.shotHeader.author;
+    map["notes"] = prof.shotHeader.notes;
+    map["beverage_type"] = prof.shotHeader.beverageType;
+    map["id"] = prof.id;
+    map["tank_temperature"] = prof.shotHeader.tankTemperature;
+    map["target_weight"] = prof.shotHeader.targetWeight;
+    map["target_volume"] = prof.shotHeader.targetVolume;
+    map["target_volume_count_start"] = prof.shotHeader.targetVolumeCountStart;
+    map["legacy_profile_type"] = prof.shotHeader.legacyProfileType;
+    map["type"] = prof.shotHeader.type;
+    map["lang"] = prof.shotHeader.lang;
+    map["steps"] = prof.shotFrames.map((element) {
+      var elementMap = <String, dynamic>{};
+      elementMap["name"] = element.name;
+      elementMap["temperature"] = element.temp.toString();
+      elementMap["weight"] = element.maxWeight.toString();
+      elementMap["sensor"] =
+          element.sensor == De1SensorType.water ? "water" : "coffee";
+      elementMap["pump"] = element.pump.name;
+      elementMap["transition"] = element.transition.name;
+      elementMap["seconds"] = element.frameLen.toString();
+      elementMap["volume"] = element.maxVol.toString();
+			elementMap[element.pump == De1PumpMode.pressure ? "pressure" : "flow"] = element.setVal.toString();
+      if (element.limiter != null) {
+        elementMap["limiter"] = element.limiter;
       }
 
-      buffer.writeln('"seconds": "${step.frameLen}",');
+      if (element.flag & DoCompare == DoCompare) {
+        var exitMap = <String, dynamic>{};
+        exitMap["condition"] = element.flag & DC_GT == DC_GT ? "over" : "under";
+        exitMap["type"] =
+            element.flag & DC_CompF == DC_CompF ? "flow" : "pressure";
+        exitMap["value"] = element.triggerVal.toString();
+				elementMap["exit"] = exitMap;
+      }
+			return elementMap;
+    }).toList();
 
-      buffer.writeln('"volume": "${step.maxVol}"');
-      // buffer.writeln('"weight": "${step.}",');
-
-      var exitValue = "0";
-      var exitCondition = "";
-      var exitType = "";
-
-      if (step.flag & (DoCompare) == DoCompare) {
-        exitType = "pressure";
-        exitCondition = "under";
-        exitValue = step.triggerVal.toString();
-      }
-      if (step.flag & (DoCompare | DC_GT) == DoCompare | DC_GT) {
-        exitType = "pressure";
-        exitCondition = "over";
-        exitValue = step.triggerVal.toString();
-      }
-      if (step.flag & (DoCompare | DC_CompF) == DoCompare | DC_CompF) {
-        exitType = "flow";
-        exitCondition = "under";
-        exitValue = step.triggerVal.toString();
-      }
-      if (step.flag & (DoCompare | DC_CompF | DC_GT) ==
-          DoCompare | DC_CompF | DC_GT) {
-        exitType = "flow";
-        exitCondition = "over";
-        exitValue = step.triggerVal.toString();
-      }
-
-      if (exitType.isNotEmpty) {
-        buffer.writeln(',');
-        buffer.writeln('"exit": {');
-        buffer.writeln('  "type": "$exitType",');
-        buffer.writeln('  "condition": "$exitCondition",');
-        buffer.writeln('  "value": "$exitValue"');
-        buffer.writeln("}");
-      }
-
-      if (step.limiter != null) {
-        buffer.writeln(',');
-        buffer.writeln('"limiter": {');
-        buffer.writeln('  "value": "${step.limiterValue}",');
-        buffer.writeln('  "range": "${step.limiterRange}"');
-        buffer.writeln("  }");
-      }
-
-      if (frameNum < prof.shotFrames.length - 1) {
-        buffer.writeln("},");
-      } else {
-        buffer.writeln("}");
-      }
-      frameNum++;
-    }
-    buffer.writeln(']'); // ending steps
-    buffer.writeln("}"); // Ending profile
-    var ret = buffer.toString();
-    return ret;
+		return jsonEncode(map);
   }
 
   static bool shotJsonParserAdvanced(
@@ -621,7 +563,7 @@ class ProfileService extends ChangeNotifier {
         return json;
       }
       File f = File(file.path);
-      json[file.uri.toString()] = f.readAsStringSync();
+      json[file.uri.toString()] = jsonEncode(f.readAsStringSync());
       return json;
     });
     final jsonData = jsonEncode(jsonMap);
@@ -631,7 +573,7 @@ class ProfileService extends ChangeNotifier {
   Future<void> setProfilesFromBackup(Uint8List dataList) async {
     String profileList = String.fromCharCodes(dataList.toList());
     Map<String, dynamic> jsonMap = jsonDecode(profileList);
-		log.fine("got list: $jsonMap");
+    log.fine("got list: $jsonMap");
 
     final directory = await getApplicationDocumentsDirectory();
     log.info("Storing to path:${directory.path}");

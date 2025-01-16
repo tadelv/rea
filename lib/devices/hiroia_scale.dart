@@ -14,14 +14,17 @@ class HiroiaScale extends ChangeNotifier implements AbstractScale {
   final log = l.Logger('HiroiaScale');
 
   // ignore: non_constant_identifier_names
-  static Uuid ServiceUUID =
-      useLongCharacteristics() ? Uuid.parse('06c31822-8682-4744-9211-febc93e3bece') : Uuid.parse('1822');
+  static Uuid ServiceUUID = useLongCharacteristics()
+      ? Uuid.parse('06c31822-8682-4744-9211-febc93e3bece')
+      : Uuid.parse('1822');
   // ignore: non_constant_identifier_names
-  static Uuid DataUUID =
-      useLongCharacteristics() ? Uuid.parse('06c31823-8682-4744-9211-febc93e3bece') : Uuid.parse('1823');
+  static Uuid DataUUID = useLongCharacteristics()
+      ? Uuid.parse('06c31823-8682-4744-9211-febc93e3bece')
+      : Uuid.parse('1823');
   // ignore: non_constant_identifier_names
-  static Uuid WriteUUID =
-      useLongCharacteristics() ? Uuid.parse('06c31824-8682-4744-9211-febc93e3bece') : Uuid.parse('1824');
+  static Uuid WriteUUID = useLongCharacteristics()
+      ? Uuid.parse('06c31824-8682-4744-9211-febc93e3bece')
+      : Uuid.parse('1824');
 
   late ScaleService scaleService;
 
@@ -41,7 +44,8 @@ class HiroiaScale extends ChangeNotifier implements AbstractScale {
     scaleService = getIt<ScaleService>();
     index = getScaleIndex(device.id);
     scaleService.setScaleInstance(this, index);
-    _deviceListener = connection.connectToDevice(id: device.id).listen((connectionState) {
+    _deviceListener =
+        connection.connectToDevice(id: device.id).listen((connectionState) {
       _onStateChange(connectionState.connectionState);
     }, onError: (Object error) {
       // Handle a possible error
@@ -84,9 +88,12 @@ class HiroiaScale extends ChangeNotifier implements AbstractScale {
 
   Future<void> writeToHiroia(List<int> payload) async {
     log.info("Sending to Hiroia");
-    final characteristic =
-        QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: WriteUUID, deviceId: device.id);
-    return await connection.writeCharacteristicWithoutResponse(characteristic, value: Uint8List.fromList(payload));
+    final characteristic = QualifiedCharacteristic(
+        serviceId: ServiceUUID,
+        characteristicId: WriteUUID,
+        deviceId: device.id);
+    return await connection.writeCharacteristicWithoutResponse(characteristic,
+        value: Uint8List.fromList(payload));
   }
 
   void _onStateChange(DeviceConnectionState state) async {
@@ -102,10 +109,13 @@ class HiroiaScale extends ChangeNotifier implements AbstractScale {
         log.info('Connected');
         scaleService.setState(ScaleState.connected, index);
 
-        final characteristic =
-            QualifiedCharacteristic(serviceId: ServiceUUID, characteristicId: DataUUID, deviceId: device.id);
+        final characteristic = QualifiedCharacteristic(
+            serviceId: ServiceUUID,
+            characteristicId: DataUUID,
+            deviceId: device.id);
 
-        _characteristicsSubscription = connection.subscribeToCharacteristic(characteristic).listen((data) {
+        _characteristicsSubscription =
+            connection.subscribeToCharacteristic(characteristic).listen((data) {
           // code to handle incoming data
           _notificationCallback(data);
         }, onError: (dynamic error) {
@@ -145,5 +155,10 @@ class HiroiaScale extends ChangeNotifier implements AbstractScale {
   @override
   Future<void> power(PowerMode start) {
     return Future(() => null);
+  }
+
+  @override
+  double sensorLag() {
+    return 0.25;
   }
 }
