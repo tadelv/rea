@@ -1,17 +1,37 @@
 import 'dart:async';
 
 import 'dart:math' as math;
-import 'package:collection/collection.dart';
 import 'package:despresso/model/services/ble/machine_service.dart';
 import 'package:despresso/model/services/cafehub/ch_service.dart';
 import 'package:despresso/model/services/state/settings_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:simple_kalman/simple_kalman.dart';
-
 import '../../../devices/abstract_scale.dart';
 import '../../../service_locator.dart';
 import 'ble_service.dart';
+
+class MovingAverage {
+  final int windowSize;
+  final List<double> _values = [];
+
+  MovingAverage(this.windowSize) {
+    if (windowSize <= 0) {
+      throw ArgumentError('Window size must be greater than 0');
+    }
+  }
+
+  void add(double value) {
+    _values.add(value);
+    if (_values.length > windowSize) {
+      _values.removeAt(0);
+    }
+  }
+
+  double get average {
+    if (_values.isEmpty) return 0.0;
+    return _values.reduce((a, b) => a + b) / _values.length;
+  }
+}
 
 enum ScaleState {
   /// Currently establishing a connection.
@@ -41,12 +61,8 @@ class BatteryLevel {
   BatteryLevel(this.level, this.index);
 }
 
-SimpleKalman initKalman() {
-  final settings = getIt<SettingsService>();
-  return SimpleKalman(
-      errorMeasure: settings.weightKalmanErrorMeasure,
-      errorEstimate: settings.weightKalmanErrorEstimate,
-      q: settings.weightKalmanQ);
+MovingAverage initFilter() {
+  return MovingAverage(getIt<SettingsService>().weightAverageWindow);
 }
 
 class ScaleService extends ChangeNotifier {
@@ -101,7 +117,7 @@ class ScaleService extends ChangeNotifier {
   late StreamController<BatteryLevel> _controllerBattery1;
   late Stream<BatteryLevel> _streamBattery1;
 
-  List<SimpleKalman> kalmans = [initKalman(), initKalman()];
+  List<MovingAverage> averages = [initFilter(), initFilter()];
 
   ScaleService() {
     _controller0 = StreamController<WeightMeassurement>();
@@ -122,7 +138,7 @@ class ScaleService extends ChangeNotifier {
       setWeight(0, index);
       tareInProgress = true;
       await _scale[index]?.writeTare();
-      kalmans[index] = initKalman();
+      averages[index] = initFilter();
       Future.delayed(const Duration(milliseconds: 500), () {
         tareInProgress = false;
         // setWeight(0);
@@ -172,7 +188,7 @@ class ScaleService extends ChangeNotifier {
 
   void setTara(int index) {
     log.info("Tara done");
-    kalmans[index] = initKalman();
+    averages[index] = initFilter();
   }
 
   void setWeight(double weight, index) {
@@ -189,7 +205,8 @@ class ScaleService extends ChangeNotifier {
     if (timeDiff == 0) return;
     var n = math.min(10.0, (weight - _weight[index]).abs() / (timeDiff / 1000));
 
-    flow = kalmans[index].filtered(n);
+    averages[index].add(n);
+    flow = averages[index].average;
 
     _weight[index] = weight;
     _flow[index] = flow;
