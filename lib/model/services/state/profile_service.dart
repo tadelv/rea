@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ffi';
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:despresso/model/de1shotclasses.dart';
@@ -563,15 +564,16 @@ class ProfileService extends ChangeNotifier {
         return json;
       }
       File f = File(file.path);
-      json[file.uri.toString()] = jsonEncode(f.readAsStringSync());
+      json[file.uri.toString()] = f.readAsStringSync();
       return json;
     });
     final jsonData = jsonEncode(jsonMap);
-    return Uint8List.fromList(jsonData.runes.toList());
+    return Uint8List.fromList(utf8.encode(jsonData));
   }
 
   Future<void> setProfilesFromBackup(Uint8List dataList) async {
-    String profileList = String.fromCharCodes(dataList.toList());
+
+    String profileList = utf8.decode(dataList, allowMalformed: true);
     Map<String, dynamic> jsonMap = jsonDecode(profileList);
     log.fine("got list: $jsonMap");
 
@@ -585,7 +587,7 @@ class ProfileService extends ChangeNotifier {
     for (var key in jsonMap.keys) {
       String filename = key.substring(key.lastIndexOf("/"));
       File f = File("${appDocDirFolder.path}/$filename");
-      await f.writeAsString(jsonMap[key]!);
+      await f.writeAsString(jsonMap[key]!, encoding: utf8);
     }
   }
 }

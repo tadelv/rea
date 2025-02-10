@@ -1,6 +1,5 @@
 // ------------------ shot header/frame encoding / decoding ------------------------------
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:json_annotation/json_annotation.dart';
@@ -207,19 +206,10 @@ class De1ShotHeaderClass // proc spec_shotdescheader
 
   double tankTemperature = 0;
 
-	@JsonKey(
-	toJson: _jsonString,
-	)
   String title = "";
 
-	@JsonKey(
-	toJson: _jsonString,
-	)
   String author = "";
 
-	@JsonKey(
-	toJson: _jsonString,
-	)
   String notes = "";
 
   String beverageType = "";
@@ -229,8 +219,6 @@ class De1ShotHeaderClass // proc spec_shotdescheader
   String version = "2";
 
   De1ShotHeaderClass();
-
-	static String _jsonString(String value) => jsonEncode(value);
 
   factory De1ShotHeaderClass.fromJson(Map<String, dynamic> json) =>
       _$De1ShotHeaderClassFromJson(json);

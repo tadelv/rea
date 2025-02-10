@@ -1210,49 +1210,16 @@ class SettingsScreenState extends State<AppSettingsScreen> {
                           child: SpinBox(
                             keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.done,
-                            step: 0.01,
-                            decimals: 2,
+                            min: 1,
+                            step: 1,
+                            max: 100,
+                            decimals: 0,
                             decoration: InputDecoration(
-                                label: Text("Kalman Error measure")),
-                            value: settingsService.weightKalmanErrorMeasure,
+                                label: Text("weight flow moving average window size")),
+                            value:
+                                settingsService.weightAverageWindow.toDouble(),
                             onSubmitted: (val) {
-                              settingsService.weightKalmanErrorMeasure = val;
-                              settingsService.notifyDelayed();
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Expanded(
-                          child: SpinBox(
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.done,
-                            step: 0.01,
-                            decimals: 2,
-                            decoration: InputDecoration(
-                                label: Text("Kalman Error estimate")),
-                            value: settingsService.weightKalmanErrorEstimate,
-                            onSubmitted: (val) {
-                              settingsService.weightKalmanErrorEstimate = val;
-                              settingsService.notifyDelayed();
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Expanded(
-                          child: SpinBox(
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.done,
-                            step: 0.001,
-                            decimals: 3,
-                            decoration:
-                                InputDecoration(label: Text("Kalman Q")),
-                            value: settingsService.weightKalmanQ,
-                            onSubmitted: (val) {
-                              settingsService.weightKalmanQ = val;
+                              settingsService.weightAverageWindow = val.toInt();
                               settingsService.notifyDelayed();
                             },
                           ),
